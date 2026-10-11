@@ -14,6 +14,7 @@
   <view class="card" bindtap="grammar"><view class="row"><view class="list-title">今日语法练习</view><view>→</view></view><view class="body muted">阅读讲解与例句，再完成 4 道题。正确率达 75% 即计入今日目标。</view><view class="pill body">单元 {{unit.number}} · {{unit.topic}}</view></view>
   <view class="card" bindtap="expression"><view class="row"><view class="list-title">把今天的词串起来</view><view>→</view></view><view class="body muted">结合本单元和旧词写句子，逐步练习情景短文、连贯叙述与观点表达。</view></view>
   <view class="card"><view class="list-title">发音小贴士</view><view class="body">{{unit.pronunciation}}</view></view>
+<view class="card" bindtap="bank"><view class="row"><view class="list-title">6500 词的长期训练</view><view>→</view></view><view class="body muted">A1 800 → A2 累计 2300 → B1 累计 4300 → B2 累计 6500。分阶段复习、测验，再练组词表达。</view></view>
   <view class="card" bindtap="roadmap"><view class="row"><view class="list-title">你的 A1 → B2 学习路线</view><view>→</view></view><view class="body muted">每单元学习至少 6 个词并通过语法练习，解锁下一站。共 32 单元，每单元都有词汇串联任务。</view></view>
   <view class="small">完成当日词汇目标 + 1 次达标语法练习，自动打卡。按设备本地日期记录。</view>
 </view>

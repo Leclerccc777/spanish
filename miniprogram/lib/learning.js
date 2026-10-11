@@ -2,6 +2,15 @@ const course = require('../data/course');
 const SCHEMA = 1;
 const PASS_SCORE = 75;
 const RATINGS = ['again', 'remember', 'easy'];
+const wordIndex = new Map(course.words.map(w=>[w.id,w]));
+const unitWords = new Map(course.units.map(u=>[u.id,course.curriculumWords.filter(w=>w.unitId===u.id)]));
+const lessonIndex = new Map(course.lessons.map(l=>[l.unitId,l]));
+const packIndex = new Map(course.lexicon.packs.map(p=>[p.id,p]));
+const canonicalMembers = new Map();
+course.words.forEach(w=>{if(!canonicalMembers.has(w.canonicalId))canonicalMembers.set(w.canonicalId,[]);canonicalMembers.get(w.canonicalId).push(w.id);});
+const findWord = id => wordIndex.get(id);
+const confirmed = review => !!review && (review.confirmed || review.interval > 0);
+
 
 function dateKey(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -10,10 +19,11 @@ function addDays(key, days) {
   const [y, m, d] = key.split('-').map(Number);
   return dateKey(new Date(y, m - 1, d + days, 12));
 }
-function emptyState() { return { version: SCHEMA, goal: 5, reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
+function emptyState() { return { version: SCHEMA, goal: 5, track: 'course', reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
 function restore(raw) {
   const clean = emptyState();
   if (!raw || raw.version !== SCHEMA) return clean;
+  if(raw.track==='bank')clean.track='bank';
   if ([3, 5, 10].includes(raw.goal)) clean.goal = raw.goal;
   for (const word of course.words) {
     const r = raw.reviews && raw.reviews[word.id];
@@ -29,7 +39,7 @@ function restore(raw) {
   }
   for (const [key, day] of Object.entries(raw.days || {})) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !day || ![3, 5, 10].includes(day.goal)) continue;
-    clean.days[key] = { goal: day.goal, words: [...new Set((Array.isArray(day.words) ? day.words : []).filter(id => wordIds.has(id)))], grammar: [...new Set((Array.isArray(day.grammar) ? day.grammar : []).filter(id => lessonIds.has(id)))] };
+    clean.days[key] = { goal: day.goal, words: [...new Set((Array.isArray(day.words) ? day.words : []).filter(id => wordIds.has(id)).map(id=>findWord(id).canonicalId))], grammar: [...new Set((Array.isArray(day.grammar) ? day.grammar : []).filter(id => lessonIds.has(id)))] };
   }
   const questions = new Set(course.lessons.flatMap(l => l.questions.map(q => q.id)));
   for (const [id, entry] of Object.entries(raw.mistakes || {})) {
@@ -55,35 +65,68 @@ function dayRecord(state, today) {
   return state.days[today];
 }
 function unitProgress(state, unitId) {
-  const words = course.words.filter(w => w.unitId === unitId);
-  const learned = words.filter(w => state.reviews[w.id]).length;
-  const lesson = course.lessons.find(l => l.unitId === unitId);
-  const passed = !!(state.lessons[lesson.id] && state.lessons[lesson.id].bestScore >= PASS_SCORE);
-  const ready = words.filter(w => state.reviews[w.id] && (state.reviews[w.id].confirmed || state.reviews[w.id].interval > 0)).length;
-  return { learned, ready, total: words.length, passed, complete: passed && ready >= Math.ceil(words.length * 0.6) };
+  const words=unitWords.get(unitId)||[], lesson=lessonIndex.get(unitId);
+  const learned=words.filter(w=>state.reviews[w.id]).length;
+  const passed=!!(lesson&&state.lessons[lesson.id]&&state.lessons[lesson.id].bestScore>=PASS_SCORE);
+  const ready=words.filter(w=>confirmed(state.reviews[w.id])).length;
+  return {learned,ready,total:words.length,passed,complete:words.length>0&&passed&&ready>=Math.ceil(words.length*0.6)};
 }
-function isUnlocked(state, unitId) {
-  const index = course.units.findIndex(u => u.id === unitId);
-  return index >= 0 && course.units.slice(0, index).every(u => unitProgress(state, u.id).complete);
+function unlockedUnitIds(state) {
+  const ids=new Set();
+  for(const unit of course.units){ids.add(unit.id);if(!unitProgress(state,unit.id).complete)break;}
+  return ids;
 }
-function currentUnit(state) {
-  return course.units.find(u => isUnlocked(state, u.id) && !unitProgress(state, u.id).complete) || course.units[course.units.length - 1];
+function isUnlocked(state, unitId) { return unlockedUnitIds(state).has(unitId); }
+function currentUnit(state) { return course.units.find(u=>!unitProgress(state,u.id).complete)||course.units[course.units.length-1]; }
+function bankProgress(state) {
+  const counts=new Map(course.levels.map(l=>[l.id,{learned:0,confirmed:0,total:0}]));
+  for(const word of course.lexicon.catalogue){
+    const c=counts.get(word.level),ids=canonicalMembers.get(word.id);
+    c.total++;
+    if(ids.some(id=>state.reviews[id]))c.learned++;
+    if(ids.some(id=>confirmed(state.reviews[id])))c.confirmed++;
+  }
+  let available=true,cumulative=0;
+  return course.levels.map((level,i)=>{
+    const previous=course.levels[i-1],prev=previous&&counts.get(previous.id);
+    const required=previous?Math.ceil(prev.total*0.8):0;
+    const previousUnits=previous?course.units.filter(u=>u.levelCode===previous.id):[];
+    if(previous)available=available&&prev.confirmed>=required&&previousUnits.every(u=>unitProgress(state,u.id).complete);
+    const count=counts.get(level.id);cumulative+=count.total;
+    return {...level,...count,cumulative,unlocked:available,required,previousLevel:previous&&previous.id,unlockReason:previous?`先在 ${previous.id} 确认至少 ${required} 个词，并完成该阶段 8 个课程单元`:'零基础可以开始'};
+  });
 }
-function queue(state, today = dateKey(), limit) {
-  const day = state.days[today];
-  const count = limit || (day && day.goal) || state.goal;
-  const eligible = course.words.filter(w => isUnlocked(state, w.unitId));
-  const due = eligible.filter(w => state.reviews[w.id] && state.reviews[w.id].due <= today).sort((a, b) => state.reviews[a.id].due.localeCompare(state.reviews[b.id].due));
-  const fresh = eligible.filter(w => !state.reviews[w.id]);
-  const practice = eligible.filter(w => state.reviews[w.id] && state.reviews[w.id].due > today).sort((a, b) => state.reviews[a.id].lastReviewed.localeCompare(state.reviews[b.id].lastReviewed));
-  // 未完成每日目标时，优先选今天尚未计数的词；到期但答错的词仍保留在前面。
-  const counted = new Set(day ? day.words : []);
-  const prioritized = [...due, ...fresh, ...practice.filter(w => !counted.has(w.id)), ...practice.filter(w => counted.has(w.id))];
-  return prioritized.slice(0, count);
+function isWordUnlocked(state, wordId) {
+  const word=findWord(wordId);
+  return !!word && (word.bank?bankProgress(state).some(l=>l.id===word.level&&l.unlocked):isUnlocked(state,word.unitId));
 }
+function prioritizedQueue(state,eligible,today,limit) {
+  const day=state.days[today], count=limit||(day&&day.goal)||state.goal;
+  const due=eligible.filter(w=>state.reviews[w.id]&&state.reviews[w.id].due<=today).sort((a,b)=>state.reviews[a.id].due.localeCompare(state.reviews[b.id].due));
+  const fresh=eligible.filter(w=>!state.reviews[w.id]);
+  const practice=eligible.filter(w=>state.reviews[w.id]&&state.reviews[w.id].due>today).sort((a,b)=>state.reviews[a.id].lastReviewed.localeCompare(state.reviews[b.id].lastReviewed));
+  const counted=new Set(day?day.words:[]), seen=new Set(), result=[];
+  for(const w of [...due,...fresh,...practice.filter(w=>!counted.has(w.canonicalId)),...practice.filter(w=>counted.has(w.canonicalId))]){
+    if(seen.has(w.canonicalId))continue;seen.add(w.canonicalId);result.push(w);if(result.length>=count)break;
+  }
+  return result;
+}
+function queue(state,today=dateKey(),limit) {
+  const unlocked=unlockedUnitIds(state);
+  const curriculum=course.curriculumWords.filter(w=>unlocked.has(w.unitId));
+  if(state.track!=='bank')return prioritizedQueue(state,curriculum,today,limit);
+  const levels=new Set(bankProgress(state).filter(l=>l.unlocked).map(l=>l.id));
+  return prioritizedQueue(state,[...curriculum,...course.lexicon.imported.filter(w=>levels.has(w.level))],today,limit);
+}
+function packQueue(state,packId,today=dateKey(),limit) {
+  const pack=packIndex.get(packId);
+  if(!pack||!bankProgress(state).some(l=>l.id===pack.level&&l.unlocked))return [];
+  return prioritizedQueue(state,pack.wordIds.map(findWord),today,limit);
+}
+function setTrack(state,track) {if(!['course','bank'].includes(track))throw new Error('无效的词汇训练范围');state.track=track;return state;}
 function review(state, wordId, rating, today = dateKey(), credit = true) {
-  const word = course.words.find(w => w.id === wordId);
-  if (!word || !RATINGS.includes(rating) || !isUnlocked(state, word.unitId)) throw new Error('无效的词汇复习');
+  const word = findWord(wordId);
+  if (!word || !RATINGS.includes(rating) || !isWordUnlocked(state, wordId)) throw new Error('无效的词汇复习');
   const previous = state.reviews[wordId] || { interval: 0, repetitions: 0 };
   // 当天重复练习可订正遗忘，但不会靠反复点击拉长间隔。
   const sameDay = previous.lastReviewed === today && previous.interval > 0;
@@ -92,25 +135,26 @@ function review(state, wordId, rating, today = dateKey(), credit = true) {
   interval = Math.min(365, interval);
   state.reviews[wordId] = { interval, due: addDays(today, interval), lastReviewed: today, repetitions: previous.repetitions + 1, confirmed:!!previous.confirmed||previous.interval>0||rating!=='again' };
   const day = dayRecord(state, today);
-  if (credit && !day.words.includes(wordId)) day.words.push(wordId);
+  if (credit && !day.words.includes(word.canonicalId)) day.words.push(word.canonicalId);
   return state;
 }
 function normalizeWord(text) { return text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' '); }
 function acceptedSpellings(word) { return word.spanish.split('/').map(normalizeWord); }
 function wordQuestion(wordId, mode = 'meaning', random = Math.random) {
-  const word = course.words.find(w => w.id === wordId);
+  const word = findWord(wordId);
   if (!word || !['meaning', 'spelling'].includes(mode)) throw new Error('无效的词汇题');
   if (mode === 'spelling') return { wordId, mode, prompt: word.meaning, hint: `本词卡首字母 ${acceptedSpellings(word)[0][0]} · ${word.pos}`, options: [] };
   const choices = [word.meaning];
   // 优先取同单元干扰项；去除重复释义，以免两项都正确。
-  const candidates = [...course.words.filter(w => w.unitId === word.unitId), ...course.words.filter(w => w.unitId !== word.unitId)].filter(w => w.meaning !== word.meaning);
+  const group=word.bank?packIndex.get(word.packId).wordIds.map(findWord):unitWords.get(word.unitId);
+  const candidates=[...group,...course.curriculumWords].filter(w=>w.meaning!==word.meaning);
   for (const candidate of candidates) { if (!choices.includes(candidate.meaning)) choices.push(candidate.meaning); if (choices.length === 4) break; }
   for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
   return { wordId, mode, prompt: word.spanish, options: choices };
 }
 function practiceWord(state, wordId, answer, mode, today = dateKey()) {
-  const word = course.words.find(w => w.id === wordId);
-  if (!word || !isUnlocked(state, word.unitId) || !['meaning', 'spelling'].includes(mode) || typeof answer !== 'string' || !answer.trim() || answer.length > 200) throw new Error('请作答已解锁的词汇');
+  const word = findWord(wordId);
+  if (!word || !isWordUnlocked(state, wordId) || !['meaning', 'spelling'].includes(mode) || typeof answer !== 'string' || !answer.trim() || answer.length > 200) throw new Error('请作答已解锁的词汇');
   const normalized = normalizeWord(answer);
   const forms = acceptedSpellings(word);
   const correct = mode === 'meaning' ? normalized === normalizeWord(word.meaning) : forms.includes(normalized);
@@ -121,7 +165,7 @@ function practiceWord(state, wordId, answer, mode, today = dateKey()) {
   review(state, wordId, correct ? 'remember' : 'again', today, correct);
   if (correct) delete state.wordMistakes[wordId];
   else state.wordMistakes[wordId] = { mode, answer: answer.trim(), date: today };
-  return { correct, accentHint, answer: mode === 'meaning' ? word.meaning : word.spanish, explanation: `${word.example} — ${word.translation}` };
+  return { correct, accentHint, answer: mode === 'meaning' ? word.meaning : word.spanish, explanation: word.example?`${word.example} — ${word.translation}`:`英文原义：${word.definition}。中文为待复核辅助释义。` };
 }
 function wrongWords(state) { return course.words.filter(w => state.wordMistakes[w.id]).map(w => ({ ...w, ...state.wordMistakes[w.id] })); }
 function gradeLesson(state, lessonId, answers, today = dateKey()) {
@@ -150,12 +194,13 @@ function streak(state, today = dateKey()) {
 }
 function levelProgress(state) {
   return course.levels.map(level => {
-    const units = course.units.filter(u=>u.levelCode===level.id), words=course.words.filter(w=>w.level===level.id);
+    const units = course.units.filter(u=>u.levelCode===level.id), words=course.curriculumWords.filter(w=>w.level===level.id);
     return {...level, learned:words.filter(w=>state.reviews[w.id]).length,total:words.length, completed:units.filter(u=>unitProgress(state,u.id).complete).length, unitTotal:units.length, expressions:course.tasks.filter(t=>t.level===level.id&&!t.final&&state.expressions[t.id]&&typeof state.expressions[t.id].submittedText==='string'&&evaluateExpression(t.id,state.expressions[t.id].submittedText).complete).length};
   });
 }
 function expressionUnlocked(state, taskId) {
   const task=course.tasks.find(t=>t.id===taskId);
+  if(task&&task.bank)return bankProgress(state).some(l=>l.id===task.level&&l.unlocked);
   return !!task && (task.final ? course.units.every(u=>unitProgress(state,u.id).complete) : isUnlocked(state,task.unitId));
 }
 function evaluateExpression(taskId,text) {
@@ -187,11 +232,12 @@ function saveExpression(state,taskId,text,submit=false,today=dateKey()) {
 function summary(state, today = dateKey()) {
   const day = state.days[today] || { goal: state.goal, words: [], grammar: [] };
   const unit = currentUnit(state);
-  const learned = Object.keys(state.reviews).length;
-  const due = course.words.filter(w => isUnlocked(state, w.unitId) && state.reviews[w.id] && state.reviews[w.id].due <= today).length;
+  const learned = new Set(Object.keys(state.reviews).filter(id=>wordIndex.has(id)).map(id=>findWord(id).canonicalId)).size;
+  const unlocked=unlockedUnitIds(state),levels=new Set(bankProgress(state).filter(l=>l.unlocked).map(l=>l.id));
+  const due = new Set(course.words.filter(w => (w.bank?state.track==='bank'&&levels.has(w.level):unlocked.has(w.unitId)) && state.reviews[w.id] && state.reviews[w.id].due <= today).map(w=>w.canonicalId)).size;
   const grammarPassed = course.lessons.filter(l => state.lessons[l.id] && state.lessons[l.id].bestScore >= PASS_SCORE).length;
   const checkins = Object.values(state.days).filter(isCheckedIn).length;
-  return { today, day, unit, learned, due, grammarPassed, checkins, streak: streak(state, today), checkedIn: isCheckedIn(day), wordPercent: Math.min(100, Math.round(day.words.length / day.goal * 100)), wordTotal: course.words.length, lessonTotal: course.lessons.length };
+  return { today, day, unit, learned, due, grammarPassed, checkins, streak: streak(state, today), checkedIn: isCheckedIn(day), wordPercent: Math.min(100, Math.round(day.words.length / day.goal * 100)), wordTotal: course.lexicon.catalogue.length, track:state.track, curriculumTotal:course.curriculumWords.length, lessonTotal: course.lessons.length };
 }
 function setGoal(state, goal) {
   if (![3, 5, 10].includes(goal)) throw new Error('不支持的每日目标');
@@ -201,4 +247,4 @@ function setGoal(state, goal) {
 function mistakes(state) {
   return course.lessons.flatMap(l => l.questions.filter(q => state.mistakes[q.id]).map(q => ({ ...q, lessonId: l.id, lessonTitle: l.title, selected: state.mistakes[q.id].selected })));
 }
-module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression };
+module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression, bankProgress, isWordUnlocked, packQueue, setTrack, findWord };

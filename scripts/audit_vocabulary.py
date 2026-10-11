@@ -14,7 +14,7 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = Path('/tmp/hola-vocabulary-review')
-WORDS = json.loads(subprocess.check_output(['node', '-e', "process.stdout.write(JSON.stringify(require('./miniprogram/data/course').words))"], cwd=ROOT, text=True))
+WORDS = json.loads(subprocess.check_output(['node', '-e', "process.stdout.write(JSON.stringify(require('./miniprogram/data/course').curriculumWords))"], cwd=ROOT, text=True))
 
 class Extract(HTMLParser):
     def __init__(self):

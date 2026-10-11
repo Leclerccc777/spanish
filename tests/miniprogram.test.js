@@ -62,3 +62,20 @@ test('原生分级导航显示后续主题并提供输出题目预览',()=>{
  p.select({currentTarget:{dataset:{level:'B2'}}});assert.ok(p.data.units.every(u=>u.levelCode==='B2'&&u.locked));
  p.expression({currentTarget:{dataset:{id:'e25'}}});assert.equal(r.routes.at(-1),'/pages/expression/index?id=e25');
 });
+test('原生扩展词库分页、阶段预览、训练范围持久化与词包学习',()=>{
+ const r=runtime(),p=r.loadPage('bank');p.onShow();assert.equal(p.data.count,800);assert.equal(p.data.words.length,30);assert.equal(p.data.packs.length,6);
+ p.select({currentTarget:{dataset:{level:''}}});assert.equal(p.data.count,6500);p.paginate({currentTarget:{dataset:{step:1}}});assert.equal(p.data.page,1);
+ p.search({detail:{value:'不会出现的中文'}});assert.equal(p.data.count,0);assert.equal(p.data.page,0);
+ p.search({detail:{value:''}});p.select({currentTarget:{dataset:{level:'B2'}}});assert.ok(p.data.packs.every(pack=>pack.locked));
+ const locked=p.data.packs[0];p.study({currentTarget:{dataset:{id:locked.id,locked:true}}});assert.equal(r.routes.length,0);
+ p.select({currentTarget:{dataset:{level:'A1'}}});p.activate();assert.equal(r.state.track,'bank');
+ const reload=r.loadPage('bank');reload.onShow();assert.equal(reload.data.track,'bank');
+ const pack=L.course.lexicon.packs[0],session=r.loadPage('session');session.onLoad({pack:pack.id});assert.equal(session.data.word.id,pack.wordIds[0]);assert.ok(session.data.word.definition);
+ session.reveal();session.rate({currentTarget:{dataset:{rating:'remember'}}});assert.equal(r.state.reviews[pack.wordIds[0]].confirmed,true);
+ const quiz=r.loadPage('wordquiz');quiz.onLoad({pack:pack.id});quiz.begin();assert.ok(quiz.words.every(w=>w.packId===pack.id));
+ const expression=r.loadPage('expression');expression.onLoad({id:pack.id});assert.equal(expression.data.siblings.length,4);
+ expression.input({detail:{value:'Mi casa es bonita. Soy una persona.'}});expression.save();expression.group({currentTarget:{dataset:{id:pack.id+'-2'}}});assert.equal(expression.data.task.groupNumber,2);
+ expression.group({currentTarget:{dataset:{id:pack.id}}});assert.equal(expression.data.text,'Mi casa es bonita. Soy una persona.');
+ const blockedSession=r.loadPage('session');blockedSession.onLoad({pack:locked.id});assert.equal(blockedSession.data.unavailable,true);
+ r.wx.setStorageSync=()=>{throw new Error('quota');};p.course();assert.equal(r.state.track,'bank');
+});

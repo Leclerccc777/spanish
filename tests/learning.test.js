@@ -5,7 +5,7 @@ const TODAY = '2026-10-11';
 const pass = (state, id = 'g1', day = TODAY) => L.gradeLesson(state, id, L.course.lessons.find(l => l.id === id).questions.map(q => q.answer), day);
 
 test('320 词、32 课、128 题的 ID、来源和单元引用完整', () => {
-  const { words, lessons, units, sources } = L.course;
+  const { curriculumWords:words, lessons, units, sources } = L.course;
   assert.equal(words.length, 320); assert.equal(lessons.length, 32); assert.equal(lessons.flatMap(l=>l.questions).length, 128);
   for (const collection of [words, lessons, units, sources]) assert.equal(new Set(collection.map(x=>x.id)).size, collection.length);
   const sourceIds = new Set(sources.map(s=>s.id));
@@ -13,7 +13,7 @@ test('320 词、32 课、128 题的 ID、来源和单元引用完整', () => {
   for (const word of words) assert.equal(new URL(word.dictionaryUrl).protocol,'https:');
   for (const unit of units) { assert.equal(words.filter(w=>w.unitId===unit.id).length,10); assert.equal(lessons.filter(l=>l.unitId===unit.id).length,1); }
   for (const lesson of lessons) for (const q of lesson.questions) { assert.ok(q.explanation); assert.ok(q.answer>=0&&q.answer<q.options.length); assert.equal(new Set(q.options).size,q.options.length); }
-  for (const source of sources) { assert.equal(new URL(source.url).protocol,'https:'); assert.equal(source.status,'verified'); assert.ok(source.verifiedAt); }
+  for (const source of sources) { assert.equal(new URL(source.url).protocol,'https:'); assert.ok(['verified','dataset'].includes(source.status)); assert.ok(source.verifiedAt); }
 });
 test('入门只解锁第一个单元，直接访问后续复习和练习被拒绝', () => {
   const s=L.emptyState(); assert.equal(L.isUnlocked(s,'u1'),true); assert.equal(L.isUnlocked(s,'u2'),false);
@@ -105,8 +105,8 @@ test('拼写保留重音、ñ，支持 NFC 和性别词形，不能用去重音�
  assert.equal(L.wordQuestion('w17','spelling').hint.includes('首字母 e'),true);
 });
 test('表达任务具备各阶段目标与复习词，参考范文满足公开的形式要求',()=>{
- assert.equal(L.course.tasks.length,33);
- for(const task of L.course.tasks){
+ const tasks=L.course.tasks.filter(t=>!t.bank); assert.equal(tasks.length,33);
+ for(const task of tasks){
    assert.ok(task.prompt&&task.outline.length&&task.model);
    for(const t of [...task.targets,...(task.recycled?[task.recycled]:[])])assert.ok(L.course.words.some(w=>w.id===t.wordId));
    assert.equal(L.evaluateExpression(task.id,task.model).complete,true,task.id);

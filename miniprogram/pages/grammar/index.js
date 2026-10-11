@@ -2,6 +2,7 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   data:{level:'A1'},
+  bank(){wx.navigateTo({url:'/pages/bank/index'});},
   onShow(){this.refresh();},
   refresh(){
     const state=S.load();

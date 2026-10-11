@@ -14,10 +14,11 @@ A1 在 `data/course.js`，后续阶段在 `data/course-extension.js` 添加单�
 
 `version: 1` 下包含：
 
+- `track`：`course`（默认）或 `bank`；旧备份缺省保持课内范围。
 - `goal`：后续学习日的词汇数量目标。
 - `reviews[wordId]`：间隔、到期日期、最后复习日期、复习次数。
 - `lessons[lessonId]`：历史最佳分与练习次数。
-- `days[YYYY-MM-DD]`：固定的当日目标、不同词汇 ID、达标课程 ID。
+- `days[YYYY-MM-DD]`：固定的当日目标、不同词元 canonicalId、达标课程 ID；恢复旧备份时合并重复语境。
 - `mistakes[questionId]`：待订正答案、课程和日期。
 - `wordPractice[wordId]` / `wordMistakes[wordId]`：词汇测验次数、答对次数与待订正答案。
 - `expressions[taskId]`：当前草稿 `text`、最后提交 `submittedText`、更新时间、提交次数。保存草稿不会替换最后提交记录。
@@ -34,3 +35,13 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 ## 云环境
 
 使用 `/workspace/spanish` 现有检出。每个云任务已隔离，除非用户明确要求，不创建额外 Git worktree。`dist/`、依赖与 npm 缓存可重建；开发服务器进程在新任务中需要重新启动。运行命令见 README。
+
+## 扩展库重建与兼容
+
+`scripts/build_lexicon.py` 只下载 `docs/lexicon-sources.json` 固定提交的三个文件，验证大小和 SHA-256 后再处理。输入在 `/tmp/hola-lexicon-sources`，不提交几十 MB 的原始词典。生成 `data/lexicon/entries.js` 紧凑行数组与 `docs/lexicon-build.json`；`check_lexicon.py` 检查去重计数、生成哈希、表达覆盖和小程序源码包预检。
+
+新词 ID 为词元 NFC 字符串的 SHA-256 前 12 位，排序变化不重编号；原 `w1`–`w320` ID 保留。`course.curriculumWords` 是课内 320 词卡，`course.words` 包含全部可学习卡片（6503 张，含 3 张复用卡），统计使用 `course.lexicon.catalogue`（6500 个词元），不可用卡片总数充当词汇量。
+
+`data/lexicon/index.js` 构造阶段与词包；`tasks.js` 每 5 个新词生成一组表达任务。首组用词包 ID，后续组追加 `-2` 等后缀，每组草稿独立保存。扩展 `modelKind: scaffold` 只能标为待填写框架，不能当作完成范文；检查所有新增词有目标任务，框架不能通过完整输出条件。
+
+词库页面每次仅渲染 30 词及 6 个词包，微信 `setData` 不一次传入全部词库。扩展词义采用英文原义和英中提示，来源文件校验与内容人工校对状态分开；不要自动将新词标成 `reviewed`。许可证保留在仓库 `LICENSES/`，应用资料库提供署名说明链接。

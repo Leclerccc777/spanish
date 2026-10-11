@@ -141,4 +141,8 @@ const levels = [
   {id:'B2',title:'观点与论证',goal:'观点、证据、让步、方案与结论',target:'65 词以上观点短文'}
 ];
 const tasks = require('./expression-tasks')({units,words,levels});
-module.exports = { units, words, lessons, sources, levels, tasks };
+const curriculumWords = words.slice();
+const lexicon = require('./lexicon/index')(curriculumWords);
+words.push(...lexicon.imported);
+tasks.push(...require('./lexicon/tasks')({...lexicon,levels}));
+module.exports = { units, words, curriculumWords, lessons, sources, levels, tasks, lexicon };

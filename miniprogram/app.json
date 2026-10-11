@@ -8,7 +8,8 @@
     "pages/session/index",
     "pages/lesson/index",
     "pages/wordquiz/index",
-    "pages/expression/index"
+    "pages/expression/index",
+    "pages/bank/index"
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",

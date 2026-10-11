@@ -2,10 +2,10 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   data: { phase: 'setup', mode: 'meaning', input: '', result: null, accents: ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ'] },
-  onLoad(options = {}) { this.wrongOnly = options.wrong === '1'; this.setData({ wrongOnly: this.wrongOnly }); },
+  onLoad(options = {}) { this.wrongOnly = options.wrong === '1'; this.packId=options.pack; this.setData({ wrongOnly: this.wrongOnly }); },
   mode(e) { this.setData({ mode: e.currentTarget.dataset.mode }); },
   begin() {
-    const state = S.load(); this.words = this.wrongOnly ? L.wrongWords(state).filter(w => L.isUnlocked(state, w.unitId)) : L.queue(state);
+    const state = S.load(); this.words = this.wrongOnly ? L.wrongWords(state).filter(w => L.isWordUnlocked(state, w.id)) : this.packId ? L.packQueue(state,this.packId) : L.queue(state);
     this.index = 0; this.firstCorrect = 0; this.answered = new Set(); this.retries = new Set(); this.day = L.dateKey();
     this.setData({ phase: this.words.length ? 'quiz' : 'empty', originalCount: this.words.length }); if (this.words.length) this.showQuestion();
   },

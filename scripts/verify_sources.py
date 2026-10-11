@@ -29,6 +29,7 @@ class Title(HTMLParser):
 def main():
     results = []
     for source in SOURCES:
+        if source.get('status') == 'dataset': continue
         source_id, url = source['id'], source['url']
         entry = {'id': source_id, 'url': url, 'checked_at': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'review_scope': source['verification'], 'editorial_review_date': source['verifiedAt']}
         try:

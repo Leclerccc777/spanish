@@ -8,7 +8,7 @@ Page({
     const task=L.course.tasks.find(t=>t.id===id);
     if(!task)return this.setData({unavailable:true});
     const entry=state.expressions[id];
-    this.setData({task,locked:!L.expressionUnlocked(state,id),text:entry?entry.text:'',result:entry&&entry.submittedText===entry.text?L.evaluateExpression(id,entry.text):null});
+    this.setData({unavailable:false,showModel:false,siblings:task.bank?L.course.tasks.filter(t=>t.packId===task.packId).map(t=>({id:t.id,number:t.groupNumber})):[],task,locked:!L.expressionUnlocked(state,id),text:entry?entry.text:'',result:entry&&entry.submittedText===entry.text?L.evaluateExpression(id,entry.text):null});
   },
   input(e){this.setData({text:e.detail.value,result:null,showModel:false});},
   accent(e){if(this.data.locked)return;this.setData({text:(this.data.text+e.currentTarget.dataset.char).slice(0,6000),result:null,showModel:false});},
@@ -24,5 +24,6 @@ Page({
     wx.showToast({title:submit?'已保存表达与反馈':'草稿已保存',icon:'none'});
   },
   model(){if(this.data.result)this.setData({showModel:!this.data.showModel});},
-  back(){wx.switchTab({url:'/pages/grammar/index'});}
+  group(e){this.onLoad({id:e.currentTarget.dataset.id});},
+  back(){if(this.data.task&&this.data.task.bank)return wx.redirectTo({url:'/pages/bank/index'});wx.switchTab({url:'/pages/grammar/index'});}
 });
