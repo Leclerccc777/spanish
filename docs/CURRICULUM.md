@@ -1,0 +1,96 @@
+# A1–B2 课程与资料依据
+
+面向中文零基础、通用西语学习者。默认每天 5 词条 + 1 次达标语法练习，约 15 分钟；较长输出任务可分次存草稿。
+
+## 分级路线
+
+| 阶段 | 单元 | 词条 | 输出目标 |
+| --- | --- | --- | --- |
+| A1 · 日常短句 | 8 | 80 | 2–3 句 |
+| A2 · 情景交流 | 8 | 80 | 25 词以上情景短文 |
+| B1 · 连贯叙述 | 8 | 80 | 45 词以上连贯段落 |
+| B2 · 观点与论证 | 8 | 80 | 65 词以上观点短文 |
+
+合计 32 单元、320 词条、32 课、128 道语法题、32 项单元表达任务及 1 项综合提案。词卡写法去重为 317 种；mañana、desayuno、billete 在新的情景中复用。阶段等级是本站按交际任务编排的教学顺序，不是官方逐词难度表。320 词只是种子库，不能构成完整 B2 词汇量，完成课程也不能证明达到 CEFR 等级。
+
+## 官方资料库
+
+| 资料 | 用途与核对范围 |
+| --- | --- |
+| [Plan curricular del Instituto Cervantes](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/) | 依据欧洲委员会框架制定西语参考等级，提供语法、交际功能、文化及学习过程等教学清单。本站按交际目标编排 A1–B2 原创分级练习。 |
+| [PCIC · Gramática · Inventario A1–A2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/02_gramatica_inventario_a1-a2.htm) | 已核对名词性数、冠词、疑问词、现在时及动词用法。el agua、estar + 形容词、ir a + 不定式等在本站标为 A2 提前接触。 |
+| [PCIC · Funciones · Inventario A1–A2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_a1-a2.htm) | 课程对应问候（5.1）、个人信息（1.3）、表达喜好（3.2）与计划（3.10）。ir a 表计划属于 A2 范围，作为最后单元的拓展。 |
+| [Common European Framework of Reference for Languages](https://www.coe.int/en/web/common-european-framework-reference-languages) | 以行动和交际能力组织课程。官网介绍 2020 Companion Volume 的描述语扩展。词卡与选择题只是学习的一部分，不能替代综合评价。 |
+| [The CEFR Levels](https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions) | A1–C2 由 can-do 能力描述界定，不是打卡天数。当前 A1–B2 分级练习采用部分主题与结构；词条数和完成单元数不能证明达到相应等级。 |
+| [Diccionario de la lengua española](https://dle.rae.es/) | 查西班牙和其他西语地区的词义、词性及用法。80 个教学词条的基础词义与词性已逐条对照 DLE 或 DPD，保留对应义项。 |
+| [Diccionario panhispánico de dudas](https://www.rae.es/dpd/) | 第二版就发音、拼写、词形、句法与词义疑难提供泛西语用法参考，尊重地区变体。 |
+| [DPD · el · 阴性名词前的 el](https://www.rae.es/dpd/el) | 第 2 节：紧接重读 /a/ 开头阴性名词前使用形式 el，名词仍是阴性。第 3 课据此讲解 el agua fría。 |
+| [DPD · gustar · 喜好的语法主语](https://www.rae.es/dpd/gustar) | 第 1a 节：引起喜好的事物作主语，感受喜好的人用间接宾语表达。第 7 课据此讲解 me gusta / me gustan。 |
+| [DPD · 问号与感叹号](https://www.rae.es/dpd/signos%20de%20interrogaci%C3%B3n%20y%20exclamaci%C3%B3n) | 第 1、2.1 节：问号和感叹号为成对标点，普通直接疑问和感叹不可省略开头符号。第 1 课讲解 ¿…? 与 ¡…!。 |
+| [PCIC · 9. Nociones específicas · A1–A2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/09_nociones_especificas_inventario_a1-a2.htm) | 已阅读住房、教育、工作、购物、健康、旅行、休闲和天气主题。用于选题，不把每个词条标为官方独立定级。 |
+| [PCIC · 9. Nociones específicas · B1–B2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/09_nociones_especificas_inventario_b1-b2.htm) | 已阅读教育、工作、媒体、科技、社会、经济与自然环境主题；两列清单作为主题参考，本站按交际任务组织词汇。 |
+| [PCIC · 2. Gramática · B1–B2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/02_gramatica_inventario_b1-b2.htm) | 已核对过去叙述、条件式、虚拟式、关系从句、目的、条件与让步从句等结构。课程保留 B1–B2 的综合复用，不声称官方逐课对应。 |
+| [PCIC · 5. Funciones · B1–B2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_b1-b2.htm) | 已核对表达意见、赞同反对、建议、感受等功能；作为叙述与观点任务的参考。 |
+
+14 个官方资料入口均已比对网页标题并阅读相关正文。访问证据见 [source-verification.json](source-verification.json)。320 词条的词典链接已访问核验，证据见 [vocabulary-verification.json](vocabulary-verification.json)。原有 w1–w80 的基础词义、词性已逐条核对并保留义项说明；新增 w81–w320 仍为待逐条内容复核。HTTP 成功和正文哈希不代表语义审核、官方授权或教师审稿。原创例句、中文释义与题目均待专业教师审稿；不打包官方词典或教材正文。
+
+## 单元与表达能力
+
+| 单元 | 阶段 | 主题 | 语法 | 交际目标 |
+| --- | --- | --- | --- | --- |
+| 01 | A1 | 第一声 Hola | 从问候开始：标点与礼貌 | 能打招呼、道谢并做简单告别。 |
+| 02 | A1 | 介绍你自己 | 用 ser 介绍身份 | 能说自己的名字、国籍和职业。 |
+| 03 | A1 | 身边的小世界 | 名词、冠词与复数 | 能用冠词指称日常物品，区分单复数。 |
+| 04 | A1 | 你在哪里 | ser 与 estar：身份、状态、位置 | 能描述位置、状态与基本特征。 |
+| 05 | A1 | 我的每一天 | 规则动词的现在时 | 能用规则动词描述自己的日常活动。 |
+| 06 | A1 | 多问一句 | 提问与否定 | 能提问时间、地点和人物，并作否定回答。 |
+| 07 | A1 | 说说你的喜欢 | 用 gustar 表达喜好 | 能表达对食物和活动的喜好。 |
+| 08 | A1 | 下一站，出发 | hay 与 ir a：地点和计划 | 能询问附近设施，并表达简单计划。 |
+| 09 | A2 | 住进新街区 | 比较：más / menos / tan | 能描述住所、比较生活条件。 |
+| 10 | A2 | 说说日常作息 | 代词式动词与时间顺序 | 能依时间顺序描述一天。 |
+| 11 | A2 | 身体与求助 | doler 与 tener que | 能描述不适、表达需要。 |
+| 12 | A2 | 预订与出行 | 复合过去时：he + participio | 能预订住宿、说明已有经历。 |
+| 13 | A2 | 去市场买东西 | 指示词与宾语代词 | 能询问数量、价格并指称物品。 |
+| 14 | A2 | 周末做了什么 | 简单过去时：结束的活动 | 能用简单过去时叙述已结束的活动。 |
+| 15 | A2 | 天气与假期计划 | hacer 天气与 poder 建议 | 能根据天气商量下一步安排。 |
+| 16 | A2 | 邀约与学习安排 | 请求与不定式后的代词 | 能礼貌提出请求并商定安排。 |
+| 17 | B1 | 讲一段成长经历 | 未完成过去时与简单过去时 | 能用背景和事件串起过去的故事。 |
+| 18 | B1 | 学习遇到困难 | 建议与现在虚拟式 | 能解释学习困难、给出建议。 |
+| 19 | B1 | 工作与求职 | 条件式的礼貌与建议 | 能描述能力、写简单求职信息。 |
+| 20 | B1 | 读懂一条新闻 | 肯定、否定与意见 | 能区分信息、来源和自己的看法。 |
+| 21 | B1 | 把生活变得绿色 | 目的：para 与 para que | 能提出环保行动并解释目的。 |
+| 22 | B1 | 技术改变生活 | 关系从句：que 与 donde | 能比较便利与风险，说明使用习惯。 |
+| 23 | B1 | 朋友之间的沟通 | 感受与愿望从句 | 能表达感受、愿望与原因。 |
+| 24 | B1 | 解决旅行中的问题 | 过去完成时：此前已发生 | 能说明先后事件并提出解决办法。 |
+| 25 | B2 | 讨论教育机会 | 非特指关系从句 | 能从个人经验转向社会问题。 |
+| 26 | B2 | 就业与经济选择 | 假设：si + imperfecto de subjuntivo | 能比较方案、讨论假设情形。 |
+| 27 | B2 | 环境政策与取舍 | 让步：aunque 与语气 | 能提出措施并权衡成本与效果。 |
+| 28 | B2 | 科技、证据与判断 | 被动与无人称表达 | 能解释研究结果及其局限。 |
+| 29 | B2 | 媒体与信息辨析 | 间接引语与时间参照 | 能引用观点、辨别信息可信度。 |
+| 30 | B2 | 文化与身份 | 强调与评价：lo que / lo + adjetivo | 能讨论文化体验，尊重不同视角。 |
+| 31 | B2 | 表达赞同与反对 | 论证连接语 | 能提出立场、理由、反方观点和回应。 |
+| 32 | B2 | 把计划变成提案 | 让步结构与总结提案 | 能写出问题、目标、措施和评估标准。 |
+
+A1 原有课保留具体章节：g1 功能 5.1/5.2/5.12/5.13 与 DPD 标点；g2 语法 9.1.1/12.1、功能 1.3；g3 性数与冠词 1.2/1.3/3.1/3.2、DPD el；g4 系动词 12.1/12.2；g5 现在时 9.1.1；g6 疑问词与否定 7.3/8.2/8.8/8.9；g7 代词与 gustar、DPD gustar；g8 hay/ir、功能 3.10。el agua、部分 ser/estar 形容词、cuándo、ir a 计划在原 A1 单元中注明 A2 提前接触。
+
+新增主题参照 PCIC 词汇清单的住房 10、教育 6、工作 7、媒体 9、服务 11、购物 12、健康 13、旅行 14、经济 15、科技 16、社会 17、地理自然 20。语法参照 A1–A2 和 B1–B2 清单的时态、虚拟式、关系从句、条件、目的和让步等结构。B2 会复用前阶段结构并增加论证难度；不是每个知识点都首次在 B2 出现。
+
+PCIC 并非逐日课程，本站的主题顺序与词条选择属于原创编排。通用西语不等于唯一变体：保留 vosotros/ustedes、coche/carro/auto、piso/apartamento/departamento、billete/boleto/pasaje 以及复合过去时的地区差异说明。
+
+## 从词汇到完整表达
+
+每项单元任务要求三个目标词和一个前单元复习词（第 1 单元无旧词），提供情景、表达框架和自查提示。A1 从 8 词、2 句起步；A2 25 词、3 句；B1 45 词、4 句；B2 65 词、5 句。后续阶段要求使用至少一个列出的连接语。提交后可对照原创范文再改写。
+
+综合任务“给城市写一份学习提案”要求跨 A1–B2 的 ciudad、curso、objetivo、medio ambiente、propuesta、evaluación；至少 100 词、6 句、2 段，建议写 120–180 词，组织背景、方案、理由、局限和评估。全部单元完成后可提交，此前可预览题目。
+
+**检查的实际含义**：只匹配公开列出的完整词形/短语并统计词数、句数、段数、连接语。每个被计数句子至少 3 个西语词。支持列出的动词变位和复数，保留重音；未列出的正确变位可能不命中。系统不判断词语是否恰当、语法是否正确、论证是否成立或真实语言能力。指标完成不应视为作文评分。输出记录不自动授予词汇掌握或每日打卡。
+
+## 学习与记录规则
+
+词卡支持自评；词义与拼写测验支持客观核对。测验答对才计入当日词数，答错保留在错词本，本轮最多重排一次；首答正确率不因重练提高。每天只统计不同词 ID。目标在当日首次学习时固定，调低设置不回溯改变今天。
+
+间隔规则：忘记/答错为 0 天；想起首次 1 天，再乘 2；熟悉首次至少 3 天，再乘 3；上限 365 天。同日重复成功不不断拉长间隔。队列先到期，再新词，再巩固。这是简化算法，不是 FSRS 或个性化记忆模型。
+
+前一单元至少 6 个词曾确认记住或测验答对，且 4 道语法题至少答对 3 道，解锁下一单元。复习时再忘记不会撤销历史解锁，但会安排重新复习。当天完成不同词汇目标 + 1 次达标语法练习后自动打卡。
+
+草稿与最后提交分别保存；草稿不会替换已提交的形式完成记录。数据仅存在设备本地，可导出备份；微信和浏览器不自动同步。日期按本地日历记录，没有服务端校时、防作弊或等级考试。

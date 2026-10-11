@@ -1,0 +1,9 @@
+{
+  "description": "Hola 西班牙语学习",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "appid": "touristappid",
+  "projectname": "hola-spanish",
+  "setting": { "es6": true, "enhance": true, "postcss": true, "minified": true },
+  "libVersion": "3.7.0"
+}

@@ -1,0 +1,6 @@
+<view class="page"><view class="eyebrow">BIBLIOTECA</view><view class="title">学习，有据可循。</view><view class="subtitle">语言能力框架 → 课程范围 → 词义与用法参考</view>
+<view class="note">已阅读并核对官方参考页面与主要语法章节。讲解、中文释义和题目为本站原创，不代表官方教材或认证；原有 80 词已核对基础词义与词性，新增 240 词待逐条复核；例句尚未经专业教师审稿。</view>
+<picker range="{{categories}}" bindchange="filter"><view class="pill">{{selected}} ▾</view></picker>
+<view wx:for="{{sources}}" wx:key="id" class="card body"><view class="row source-header"><view class="pill">{{item.kind}}</view><view class="small">已核验 {{item.verifiedAt}}</view></view><view class="list-title">{{item.title}}</view><view class="small body">{{item.institution}}</view><view class="body">{{item.scope}}</view><view class="small body">{{item.verification}}</view><button class="secondary" data-url="{{item.url}}" bindtap="copy">复制官网链接 ↗</button></view>
+<view class="card"><view class="list-title">本站学习体系</view><view class="body">先能打招呼，再能介绍自己、描述生活、提问、表达喜好与计划。词汇和语法按交际目标共同编排。</view><view class="body muted">已扩充分级词汇、语法与表达任务至 B2；接下来需扩充完整词表与听说读写训练。当前版本没有等级考试、真人发音或云同步。</view></view>
+</view>

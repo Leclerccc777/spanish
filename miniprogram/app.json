@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/today/index",
+    "pages/vocabulary/index",
+    "pages/grammar/index",
+    "pages/library/index",
+    "pages/progress/index",
+    "pages/session/index",
+    "pages/lesson/index",
+    "pages/wordquiz/index",
+    "pages/expression/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "Hola · 每天一点西语",
+    "navigationBarBackgroundColor": "#f8f6f0",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8f6f0"
+  },
+  "tabBar": {
+    "color": "#7c837c",
+    "selectedColor": "#244c3b",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/today/index",
+        "text": "今日"
+      },
+      {
+        "pagePath": "pages/vocabulary/index",
+        "text": "词汇"
+      },
+      {
+        "pagePath": "pages/grammar/index",
+        "text": "语法"
+      },
+      {
+        "pagePath": "pages/library/index",
+        "text": "资料库"
+      },
+      {
+        "pagePath": "pages/progress/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

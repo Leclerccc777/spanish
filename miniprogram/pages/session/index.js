@@ -1,0 +1,20 @@
+const L = require('../../lib/learning');
+const S = require('../../lib/storage');
+Page({
+  data: { revealed: false, done: false },
+  onLoad() { this.restart(); },
+  restart() { this.items = L.queue(S.load()); this.position = 0; this.retryIds = new Set(); this.day = L.dateKey(); this.setData({ done: false, original: this.items.length }); this.showCard(); },
+  showCard() { this.setData({ word: this.items[this.position] || null, position: this.position + 1, total: this.items.length, revealed: false, done: this.position >= this.items.length }); },
+  reveal() { this.setData({ revealed: true }); },
+  rate(e) {
+    if (!this.data.revealed || this.data.done) return;
+    if (this.day !== L.dateKey()) { wx.showToast({ title: '新的一天到了，已刷新学习计划', icon: 'none' }); return this.restart(); }
+    const rating = e.currentTarget.dataset.rating; const word = this.data.word;
+    if (!S.commit(state => L.review(state, word.id, rating, this.day))) return;
+    if (rating === 'again' && !this.retryIds.has(word.id)) { this.items.push(word); this.retryIds.add(word.id); }
+    this.position++; this.showCard();
+    if (this.data.done) this.setData({ summary: L.summary(S.load()) });
+  },
+  grammar() { const unit = L.currentUnit(S.load()); wx.redirectTo({ url: `/pages/lesson/index?id=${L.course.lessons.find(l => l.unitId === unit.id).id}` }); },
+  home() { wx.switchTab({ url: '/pages/today/index' }); }
+});

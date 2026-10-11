@@ -1,0 +1,19 @@
+<view class="page">
+  <view class="row"><view class="eyebrow">HOLA · 每天一点西语</view><view class="pill warm">{{unit.levelCode}} · 分级学习</view></view>
+  <view class="title">把西语，变成日常。</view><view class="subtitle">每天约 15 分钟，向更大的世界说 Hola。</view>
+  <view class="section-title">今天的小目标</view>
+  <view class="card hero">
+    <view class="row"><view>每日学习计划</view><view>{{checkedIn ? '✓ 已完成打卡' : '慢慢来，也会到达'}}</view></view>
+    <view class="title">{{unit.title}}</view><view class="subtitle">{{unit.goal}}</view>
+    <view class="progress-track"><view class="progress-fill" style="width:{{wordPercent}}%"></view></view>
+    <view class="row"><view>词汇 {{day.words.length}} / {{day.goal}}</view><view>语法 {{day.grammar.length ? '✓ 已达标' : '待练习'}}</view></view>
+    <button class="primary" bindtap="study">{{checkedIn ? '再巩固一轮 →' : '开始今日词汇 →'}}</button>
+  </view>
+  <view class="stats"><view class="stat"><view class="number">{{streak}}</view><view class="label">连续打卡天</view></view><view class="stat"><view class="number">{{learned}}</view><view class="label">已学习词汇</view></view><view class="stat"><view class="number">{{due}}</view><view class="label">到期复习</view></view></view>
+  <view class="section-title">学一点，练一点</view>
+  <view class="card" bindtap="grammar"><view class="row"><view class="list-title">今日语法练习</view><view>→</view></view><view class="body muted">阅读讲解与例句，再完成 4 道题。正确率达 75% 即计入今日目标。</view><view class="pill body">单元 {{unit.number}} · {{unit.topic}}</view></view>
+  <view class="card" bindtap="expression"><view class="row"><view class="list-title">把今天的词串起来</view><view>→</view></view><view class="body muted">结合本单元和旧词写句子，逐步练习情景短文、连贯叙述与观点表达。</view></view>
+  <view class="card"><view class="list-title">发音小贴士</view><view class="body">{{unit.pronunciation}}</view></view>
+  <view class="card" bindtap="roadmap"><view class="row"><view class="list-title">你的 A1 → B2 学习路线</view><view>→</view></view><view class="body muted">每单元学习至少 6 个词并通过语法练习，解锁下一站。共 32 单元，每单元都有词汇串联任务。</view></view>
+  <view class="small">完成当日词汇目标 + 1 次达标语法练习，自动打卡。按设备本地日期记录。</view>
+</view>
