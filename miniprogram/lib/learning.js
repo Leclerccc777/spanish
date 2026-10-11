@@ -1,4 +1,5 @@
 const course = require('../data/course');
+const journey = require('./journey');
 const SCHEMA = 1;
 const PASS_SCORE = 75;
 const RATINGS = ['again', 'remember', 'easy'];
@@ -19,7 +20,7 @@ function addDays(key, days) {
   const [y, m, d] = key.split('-').map(Number);
   return dateKey(new Date(y, m - 1, d + days, 12));
 }
-function emptyState() { return { version: SCHEMA, goal: 5, track: 'course', reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
+function emptyState() { return { version: SCHEMA, goal: 5, track: 'course', foundations:{}, journey:journey.emptyJourney(), reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
 function restore(raw) {
   const clean = emptyState();
   if (!raw || raw.version !== SCHEMA) return clean;
@@ -58,6 +59,8 @@ function restore(raw) {
       if(entry.attempts>0&&typeof entry.submittedText==='string'&&entry.submittedText.length<=6000)clean.expressions[task.id].submittedText=entry.submittedText;
     }
   }
+  clean.foundations=journey.restoreFoundations(raw.foundations);
+  clean.journey=journey.restoreJourney(raw.journey);
   return clean;
 }
 function dayRecord(state, today) {
@@ -248,3 +251,5 @@ function mistakes(state) {
   return course.lessons.flatMap(l => l.questions.filter(q => state.mistakes[q.id]).map(q => ({ ...q, lessonId: l.id, lessonTitle: l.title, selected: state.mistakes[q.id].selected })));
 }
 module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression, bankProgress, isWordUnlocked, packQueue, setTrack, findWord };
+
+Object.assign(module.exports,journey);

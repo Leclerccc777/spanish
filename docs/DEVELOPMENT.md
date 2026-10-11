@@ -15,6 +15,8 @@ A1 在 `data/course.js`，后续阶段在 `data/course-extension.js` 添加单�
 `version: 1` 下包含：
 
 - `track`：`course`（默认）或 `bank`；旧备份缺省保持课内范围。
+- `foundations[id]`：四步入门规则测验最佳分与次数；与每日打卡独立。
+- `journey`：本地开始日期、`weekChecks[weekNumber]` 的日期和五项手工自检；未来周不允许记录。
 - `goal`：后续学习日的词汇数量目标。
 - `reviews[wordId]`：间隔、到期日期、最后复习日期、复习次数。
 - `lessons[lessonId]`：历史最佳分与练习次数。
@@ -45,3 +47,11 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 `data/lexicon/index.js` 构造阶段与词包；`tasks.js` 每 5 个新词生成一组表达任务。首组用词包 ID，后续组追加 `-2` 等后缀，每组草稿独立保存。扩展 `modelKind: scaffold` 只能标为待填写框架，不能当作完成范文；检查所有新增词有目标任务，框架不能通过完整输出条件。
 
 词库页面每次仅渲染 30 词及 6 个词包，微信 `setData` 不一次传入全部词库。扩展词义采用英文原义和英中提示，来源文件校验与内容人工校对状态分开；不要自动将新词标成 `reviewed`。许可证保留在仓库 `LICENSES/`，应用资料库提供署名说明链接。
+
+## 新手与年度路线
+
+`data/foundations.js` 提供 4 个原创微课和 16 题，内容参考 PCIC 发音/语法与 DPD tilde/el。`data/year-plan.js` 将已有 A1–B1 24 个单元分配到前 48 周，再安排 4 周复盘；第 365 天单独作学习档案与外部评价建议。`lib/journey.js` 处理基础评分、合法日历日期、开始日期、周自检、旧备份恢复。避免用日历直接解锁单元或把周自检认定为等级达标。
+
+两个入口分别是 `pages/foundations/index` / `pages/year/index` 和浏览器 `#foundations` / `#year`。基础练习最佳分不回退；存储失败必须留在可再次提交的位置。年度周次是预览与建议，实际课程仍使用 `isUnlocked`；五项自检可反选且不改变日打卡。
+
+更新课程或模块后同步 `scripts/build-web.js` 的模块表；独立新增内容不应改变原词元稳定 ID 或旧备份 version。原生发音练习没有播放与自动评分，浏览器使用设备合成语音并处理缺少音色的情况。

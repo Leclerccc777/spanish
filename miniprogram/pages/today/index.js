@@ -2,7 +2,9 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   data: {},
-  onShow() { const state = S.load(); const summary = L.summary(state); this.setData({ ...summary, unitProgress: L.unitProgress(state, summary.unit.id) }); },
+  onShow() { const state = S.load(); const summary = L.summary(state); this.setData({ ...summary, foundationPassed:L.foundationProgress(state).filter(f=>f.passed).length, year:L.yearSummary(state,L.dateKey()), unitProgress: L.unitProgress(state, summary.unit.id) }); },
+  foundations(){wx.navigateTo({url:'/pages/foundations/index'});},
+  year(){wx.navigateTo({url:'/pages/year/index'});},
   bank() {wx.navigateTo({url:'/pages/bank/index'});},
   study() { wx.navigateTo({ url: '/pages/session/index' }); },
   grammar() { wx.navigateTo({ url: `/pages/lesson/index?id=${L.course.lessons.find(l => l.unitId === this.data.unit.id).id}` }); },

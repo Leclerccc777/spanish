@@ -21,3 +21,8 @@ module.exports.push(
   {id:'ecdict',title:'ECDICT 英中词典（中文辅助释义）',institution:'ECDICT contributors',kind:'开源词库',url:'https://github.com/skywind3000/ECDICT',status:'dataset',verifiedAt:'2026-10-11',scope:'依英文原义中的对应词与词性抽取中文提示，保留英语中转词；多义词不可把提示直接视作已审定的西中释义。',verification:'来源文件哈希与 MIT 许可已核对；中文提示仍需结合西语语境核对。'},
   {id:'frequency-words',title:'FrequencyWords · 西语字幕词频',institution:'Hermit Dave / OpenSubtitles',kind:'开源词库',url:'https://github.com/hermitdave/FrequencyWords',status:'dataset',verifiedAt:'2026-10-11',scope:'使用固定版本 es_50k 的实际词元出现次数排序；教学阶段配额 A1 800、A2 1500、B1 2000、B2 2200。词频阶段是本站编排，不是官方 CEFR 逐词定级。',verification:'来源文件哈希与 CC BY-SA 4.0 数据许可已核对。'}
 );
+
+module.exports.push(
+ {id:'pcic-pronunciation',title:'PCIC · Pronunciación y prosodia · A1–A2',institution:'Instituto Cervantes',kind:'语法参考',url:'https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/03_pronunciacion_inventario_a1-a2.htm',status:'verified',verifiedAt:'2026-10-11',expectedTitle:'Pronunciación y prosodia',scope:'已阅读元音清晰度、辅音、重音位置、节奏和语调条目，供四步入门原创讲解参考。',verification:'已核对官方标题并阅读相关正文；选择题检查规则知识，不评价学习者发音。'},
+ {id:'dpd-tilde',title:'DPD · tilde · 重音符号',institution:'RAE / ASALE',kind:'用法参考',url:'https://www.rae.es/dpd/tilde',status:'verified',verifiedAt:'2026-10-11',expectedTitle:'tilde',scope:'已阅读第 1 节一般规则及 1.2 多音节词的规则；初学课使用常见词，未覆盖全部特殊规则。',verification:'已核对标题及一般规则正文；课内中文说明与练习为原创。'}
+);

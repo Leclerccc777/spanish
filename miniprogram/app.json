@@ -9,7 +9,9 @@
     "pages/lesson/index",
     "pages/wordquiz/index",
     "pages/expression/index",
-    "pages/bank/index"
+    "pages/bank/index",
+    "pages/foundations/index",
+    "pages/year/index"
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",

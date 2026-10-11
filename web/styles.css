@@ -16,3 +16,5 @@
 .expression-input:disabled {opacity:.6;}
 .expression-model {white-space:pre-wrap;line-height:1.9;}
 @media(max-width:700px){.toolbar select{max-width:100%;}.level-tabs .btn{flex:1;min-width:50px;padding:10px;}.unit-card .actions{flex-wrap:wrap;}}
+
+.beginner-start{margin-bottom:24px}.week-check{display:flex;gap:12px;align-items:flex-start;padding:14px 0;line-height:1.6}.week-check input{margin-top:5px;flex:none;accent-color:#244c3b}.toolbar select{max-width:100%}

@@ -32,7 +32,7 @@
 | [PCIC · 2. Gramática · B1–B2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/02_gramatica_inventario_b1-b2.htm) | 已核对过去叙述、条件式、虚拟式、关系从句、目的、条件与让步从句等结构。课程保留 B1–B2 的综合复用，不声称官方逐课对应。 |
 | [PCIC · 5. Funciones · B1–B2](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_b1-b2.htm) | 已核对表达意见、赞同反对、建议、感受等功能；作为叙述与观点任务的参考。 |
 
-14 个官方资料入口均已比对网页标题并阅读相关正文。访问证据见 [source-verification.json](source-verification.json)。320 词条的词典链接已访问核验，证据见 [vocabulary-verification.json](vocabulary-verification.json)。原有 w1–w80 的基础词义、词性已逐条核对并保留义项说明；新增 w81–w320 仍为待逐条内容复核。HTTP 成功和正文哈希不代表语义审核、官方授权或教师审稿。原创例句、中文释义与题目均待专业教师审稿；不打包官方词典或教材正文。
+16 个官方资料入口（含文末新增的发音和重音依据）均已比对网页标题并阅读相关正文。访问证据见 [source-verification.json](source-verification.json)。320 词条的词典链接已访问核验，证据见 [vocabulary-verification.json](vocabulary-verification.json)。原有 w1–w80 的基础词义、词性已逐条核对并保留义项说明；新增 w81–w320 仍为待逐条内容复核。HTTP 成功和正文哈希不代表语义审核、官方授权或教师审稿。原创例句、中文释义与题目均待专业教师审稿；不打包官方词典或教材正文。
 
 ## 单元与表达能力
 
@@ -111,3 +111,11 @@ PCIC 并非逐日课程，本站的主题顺序与词条选择属于原创编排
 A1 扩展训练开放。其余阶段要求所有前置阶段开放、前阶段 80% 词汇曾确认记住或测验答对，以及该阶段 8 个课内单元全部完成。课程单元继续以 6/10 词确认 + 75% 语法为条件。自评或测验确认不等于长期掌握；遗忘会加入复习但不会重新锁回已完成阶段。
 
 Wiktionary 是社区词典，ECDICT 提供英中辅助提示；官方 PCIC / CEFR / RAE 用于课程方向和核对入口，不把开源来源包装成官方审核结果。源文件、许可证和改编说明见 [词库署名与许可](../THIRD_PARTY_NOTICES.md)。新增词元未逐条 RAE 审核或直接西中人工校对，名词性别、地区用法和语境需查原词典；无例句时显示英文原义。
+
+## 零基础四步与一年 A1–B1 安排
+
+四步入门：五元音与 h / ñ / b-v；重音与重音符号；名词连冠词记忆及 el día / la mano / el agua fría；冠词、名词、形容词的性数配合。每微课 5–6 分钟，配 4 道原创规则练习与自主开口任务。依据新增的 [PCIC《Pronunciación y prosodia · A1–A2》](https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/03_pronunciacion_inventario_a1-a2.htm)和 [DPD《tilde》](https://www.rae.es/dpd/tilde)及既有语法/冠词参考，已阅读相关正文；发音需要模仿与外部反馈，选择题只证明本次规则作答表现。
+
+一年路线以前 12 周 A1、13–28 周 A2、29–48 周 B1、49–52 周复盘安排现有 A1–B1 的 24 个语法与表达单元。每周提供七天练习节奏，并通过词汇、语法、听力、口头表达、书面修订五项自行记录。复盘日为第 365 天。A1 建议每日 20 分钟、A2 25 分钟、B1/复盘 30 分钟，可依据个人实际调整；没有保证一年达到 B1，尤其听力和口语需额外材料与反馈。
+
+周次不改动原单元解锁条件，不按日期认定水平。前两周推荐四步入门；以后结合单元短句、语法解释、旧词复用逐步增加表达长度。本轮先完成路线与基础微课，后续内容建设与校对优先级见 [ROADMAP.md](ROADMAP.md)。

@@ -79,3 +79,22 @@ test('原生扩展词库分页、阶段预览、训练范围持久化与词包�
  const blockedSession=r.loadPage('session');blockedSession.onLoad({pack:locked.id});assert.equal(blockedSession.data.unavailable,true);
  r.wx.setStorageSync=()=>{throw new Error('quota');};p.course();assert.equal(r.state.track,'bank');
 });
+test('原生四步入门达标保存并能复习，不生成打卡，写入失败停留提交入口',()=>{
+ const r=runtime(),p=r.loadPage('foundations');p.onLoad();assert.equal(p.data.lessons.length,4);
+ p.open({currentTarget:{dataset:{id:'gender'}}});assert.equal(p.data.phase,'read');assert.ok(p.data.references.some(x=>x.id==='dpd-el'));
+ p.begin();for(const q of L.foundations.find(f=>f.id==='gender').questions){p.choose({currentTarget:{dataset:{index:q.answer}}});p.next();}
+ assert.equal(p.data.result.score,100);assert.equal(r.state.foundations.gender.bestScore,100);assert.equal(L.summary(r.state).checkedIn,false);
+ const reload=r.loadPage('foundations');reload.onLoad();assert.equal(reload.data.lessons.find(f=>f.id==='gender').passed,true);
+ p.begin();const questions=L.foundations.find(f=>f.id==='gender').questions;
+ for(const q of questions.slice(0,3)){p.choose({currentTarget:{dataset:{index:q.answer}}});p.next();}p.choose({currentTarget:{dataset:{index:questions[3].answer}}});
+ r.wx.setStorageSync=()=>{throw new Error('quota');};p.next();assert.equal(p.data.phase,'quiz');assert.equal(p.data.result,null);assert.equal(r.state.foundations.gender.attempts,1);
+});
+test('原生一年计划开始、周自检、未来周预览与跨页重载',()=>{
+ const r=runtime(),p=r.loadPage('year');p.onShow();assert.equal(p.data.summary.started,false);assert.equal(p.data.canCheck,false);
+ p.start();assert.equal(p.data.summary.day,1);assert.equal(p.data.canCheck,true);p.check({currentTarget:{dataset:{id:'words'}}});assert.equal(r.state.journey.weekChecks[1].skills[0],'words');
+ p.move({currentTarget:{dataset:{step:12}}});assert.equal(p.data.week.level,'A2');assert.equal(p.data.canCheck,false);p.check({currentTarget:{dataset:{id:'grammar'}}});assert.equal(r.state.journey.weekChecks[13],undefined);
+ p.lesson();assert.equal(r.routes.length,0);assert.ok(r.messages.some(m=>m.includes('实际进度')));
+ const reload=r.loadPage('year');reload.onShow();assert.equal(reload.data.summary.day,1);assert.equal(reload.data.skills.find(s=>s.id==='words').checked,true);
+ reload.check({currentTarget:{dataset:{id:'words'}}});assert.equal(r.state.journey.weekChecks[1].skills.length,0);
+ r.wx.setStorageSync=()=>{throw new Error('quota');};reload.check({currentTarget:{dataset:{id:'write'}}});assert.equal(reload.data.skills.find(s=>s.id==='write').checked,false);
+});

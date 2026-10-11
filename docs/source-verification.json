@@ -2,7 +2,7 @@
   {
     "id": "pcic",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/",
-    "checked_at": "2026-10-11T15:13:24.002626+00:00",
+    "checked_at": "2026-10-11T16:31:54.378291+00:00",
     "review_scope": "已核对官方目录与课程定位；不代表官方认证。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -14,7 +14,7 @@
   {
     "id": "pcic-grammar",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/02_gramatica_inventario_a1-a2.htm",
-    "checked_at": "2026-10-11T15:13:26.308692+00:00",
+    "checked_at": "2026-10-11T16:31:56.784346+00:00",
     "review_scope": "已核对正文及 A1 / A2 两列；各课保留章节编号。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -26,7 +26,7 @@
   {
     "id": "pcic-functions",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_a1-a2.htm",
-    "checked_at": "2026-10-11T15:13:29.645186+00:00",
+    "checked_at": "2026-10-11T16:31:58.513852+00:00",
     "review_scope": "已核对官方交际功能清单与相关示例。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -38,43 +38,43 @@
   {
     "id": "cefr",
     "url": "https://www.coe.int/en/web/common-european-framework-reference-languages",
-    "checked_at": "2026-10-11T15:13:30.933391+00:00",
+    "checked_at": "2026-10-11T16:32:01.146245+00:00",
     "review_scope": "已核对官方框架首页与 Companion Volume 的定位。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
     "http_status": 200,
     "final_url": "https://www.coe.int/en/web/common-european-framework-reference-languages",
     "title": "Common European Framework of Reference for Languages: Learning, Teaching, Assessment (CEFR) - Common European Framework of Reference for Languages (CEFR)",
-    "sha256_of_download": "baba6aa8e905fa0710bdffe8cb0cce20c8ca0403457f2bd176bf5f42f00f10f5"
+    "sha256_of_download": "a3af858bdd8072c3593a8b8618d1cc303e9d0c28d1d3b767158088e15143b836"
   },
   {
     "id": "cefr-levels",
     "url": "https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions",
-    "checked_at": "2026-10-11T15:13:32.415000+00:00",
+    "checked_at": "2026-10-11T16:32:02.616024+00:00",
     "review_scope": "已核对官方六级尺度与能力描述说明。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
     "http_status": 200,
     "final_url": "https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions",
     "title": "The CEFR Levels - Common European Framework of Reference for Languages (CEFR)",
-    "sha256_of_download": "2ae8e7b104afb75841f652b9326f8dc120b41ac213135e920b64a2fcfabeedd9"
+    "sha256_of_download": "e45bbcda7a35d6743b5b7cb945b2eb73276a33792dfb944bf8282547a1835ec1"
   },
   {
     "id": "dle",
     "url": "https://dle.rae.es/",
-    "checked_at": "2026-10-11T15:13:33.357466+00:00",
+    "checked_at": "2026-10-11T16:32:04.633759+00:00",
     "review_scope": "已逐条核对所选基础义项；中文释义和例句为原创，尚未经专业教师审稿。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
     "http_status": 200,
     "final_url": "https://dle.rae.es/",
     "title": "Diccionario de la lengua española | Edición del Tricentenario | RAE - ASALE",
-    "sha256_of_download": "4a854210aec1f320175f29096943184a4f427eea6a221963e090f7694a1dfd9b"
+    "sha256_of_download": "334afc4a0dacbf9ef86f905d110600862549032f5c522c318de9c02244796291"
   },
   {
     "id": "dpd",
     "url": "https://www.rae.es/dpd/",
-    "checked_at": "2026-10-11T15:13:33.556621+00:00",
+    "checked_at": "2026-10-11T16:32:05.067663+00:00",
     "review_scope": "已核对官方第二版介绍及用途说明。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -86,7 +86,7 @@
   {
     "id": "dpd-el",
     "url": "https://www.rae.es/dpd/el",
-    "checked_at": "2026-10-11T15:13:33.706782+00:00",
+    "checked_at": "2026-10-11T16:32:05.318140+00:00",
     "review_scope": "已核对第 2.1 节，包含紧邻名词和形容词配合的条件。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -98,7 +98,7 @@
   {
     "id": "dpd-gustar",
     "url": "https://www.rae.es/dpd/gustar",
-    "checked_at": "2026-10-11T15:13:33.873884+00:00",
+    "checked_at": "2026-10-11T16:32:05.582373+00:00",
     "review_scope": "已核对第 1a 节；初学阶段只教这一常用结构。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -110,7 +110,7 @@
   {
     "id": "dpd-signs",
     "url": "https://www.rae.es/dpd/signos%20de%20interrogaci%C3%B3n%20y%20exclamaci%C3%B3n",
-    "checked_at": "2026-10-11T15:13:34.057886+00:00",
+    "checked_at": "2026-10-11T16:32:05.778541+00:00",
     "review_scope": "已核对成对符号及常规使用规则。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -122,7 +122,7 @@
   {
     "id": "pcic-vocabulary-a",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/09_nociones_especificas_inventario_a1-a2.htm",
-    "checked_at": "2026-10-11T15:13:34.222345+00:00",
+    "checked_at": "2026-10-11T16:32:05.832212+00:00",
     "review_scope": "已访问官方清单并阅读相关正文；原创内容尚待专业教师审稿。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -134,7 +134,7 @@
   {
     "id": "pcic-vocabulary-b",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/09_nociones_especificas_inventario_b1-b2.htm",
-    "checked_at": "2026-10-11T15:13:35.922726+00:00",
+    "checked_at": "2026-10-11T16:32:07.170921+00:00",
     "review_scope": "已访问官方清单并阅读相关正文；原创内容尚待专业教师审稿。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -146,7 +146,7 @@
   {
     "id": "pcic-grammar-b",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/02_gramatica_inventario_b1-b2.htm",
-    "checked_at": "2026-10-11T15:13:37.405451+00:00",
+    "checked_at": "2026-10-11T16:32:07.682373+00:00",
     "review_scope": "已访问官方清单并阅读相关正文；原创内容尚待专业教师审稿。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -158,7 +158,7 @@
   {
     "id": "pcic-functions-b",
     "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_b1-b2.htm",
-    "checked_at": "2026-10-11T15:13:38.375528+00:00",
+    "checked_at": "2026-10-11T16:32:08.459932+00:00",
     "review_scope": "已访问官方清单并阅读相关正文；原创内容尚待专业教师审稿。",
     "editorial_review_date": "2026-10-11",
     "status": "reachable",
@@ -166,5 +166,29 @@
     "final_url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/05_funciones_inventario_b1-b2.htm",
     "title": "CVC. Plan Curricular del Instituto Cervantes. 5. Funciones. Inventario. B1-B2.",
     "sha256_of_download": "f73235e72e91e97423b3f3f0abf6e4feebee880141224ad259a130bf290d103a"
+  },
+  {
+    "id": "pcic-pronunciation",
+    "url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/03_pronunciacion_inventario_a1-a2.htm",
+    "checked_at": "2026-10-11T16:32:09.248863+00:00",
+    "review_scope": "已核对官方标题并阅读相关正文；选择题检查规则知识，不评价学习者发音。",
+    "editorial_review_date": "2026-10-11",
+    "status": "reachable",
+    "http_status": 200,
+    "final_url": "https://cvc.cervantes.es/ensenanza/biblioteca_ele/plan_curricular/niveles/03_pronunciacion_inventario_a1-a2.htm",
+    "title": "CVC. Plan Curricular del Instituto Cervantes. 3. Pronunciación y prosodia. Inventario. A1-A2.",
+    "sha256_of_download": "432d7516fd974fd7eb8cdf5e71dd0746dedfc8190333ee0acddfe3ef146f84c4"
+  },
+  {
+    "id": "dpd-tilde",
+    "url": "https://www.rae.es/dpd/tilde",
+    "checked_at": "2026-10-11T16:32:10.210668+00:00",
+    "review_scope": "已核对标题及一般规则正文；课内中文说明与练习为原创。",
+    "editorial_review_date": "2026-10-11",
+    "status": "reachable",
+    "http_status": 200,
+    "final_url": "https://www.rae.es/dpd/tilde",
+    "title": "tilde | Diccionario panhispánico de dudas | RAE - ASALE",
+    "sha256_of_download": "38c9746e008e015e7101c5cd49b824cdd171c01489cf844c09a358a00f0881b8"
   }
 ]

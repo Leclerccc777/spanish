@@ -176,3 +176,40 @@ test('完整词库备份支持最后 B2 词的测验与表达',async({page})=>{
  await expect(page.locator('.expression-targets').first()).toContainText(last.spanish);
  const dimensions=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.width);
 });
+test('新手四步入门从首页到全部规则练习，75% 保存与旧进度独立',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
+ await page.getByRole('button',{name:'四步入门 · 0 / 4 达标',exact:true}).click();await expect(page.getByRole('heading',{name:'先学会第一句话。'})).toBeVisible();
+ for(const f of L.foundations){
+  await page.locator(`[data-action="foundation"][data-id="${f.id}"]`).click();
+  if(f.id==='gender'){await expect(page.locator('.rules')).toContainText('el día');await expect(page.locator('.rules')).toContainText('la mano');await expect(page.locator('.rules')).toContainText('el agua fría');}
+  if(f.id==='sounds'){await page.evaluate(()=>{speechSynthesis.getVoices=()=>[];});await page.getByRole('button',{name:'听设备合成语音'}).first().click();await expect(page.locator('#toast')).toContainText('暂无西班牙语音色');}
+  await page.getByRole('button',{name:'做 4 道小练习'}).click();
+  for(let i=0;i<f.questions.length;i++){
+   const q=f.questions[i],wrong=f.id==='gender'&&i===0;await page.locator('.choice').nth(wrong?(q.answer+1)%3:q.answer).click();await expect(page.locator('.feedback')).toContainText(q.explanation);
+   await page.getByRole('button',{name:i===3?'查看结果':'下一题'}).click();
+  }
+  await expect(page.locator('.result-score')).toHaveText(f.id==='gender'?'75%':'100%');await page.getByRole('button',{name:'继续下一微课'}).click();
+ }
+ await page.goto('/');await page.reload();await expect(page.getByRole('button',{name:'四步入门 · 4 / 4 达标',exact:true})).toBeVisible();
+ const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')));expect(s.foundations.gender.bestScore).toBe(75);expect(Object.keys(s.days)).toHaveLength(0);expect(Object.keys(s.lessons)).toHaveLength(0);expect(errors).toEqual([]);
+});
+test('一年计划周自检、未来周预览、写入失败及备份往返',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/#year');await expect(page.getByRole('heading',{name:'一年，慢慢走向 B1。'})).toBeVisible();
+ await expect(page.locator('[data-skill="words"]')).toBeDisabled();await page.getByRole('button',{name:'开始一年计划',exact:true}).click();
+ await expect(page.getByText('经过 1 天',{exact:false})).toBeVisible();await page.selectOption('#year-week','13');await expect(page.locator('[data-skill="words"]')).toBeDisabled();
+ await page.getByRole('button',{name:'查看课程前置要求',exact:true}).click();await expect(page.locator('#toast')).toContainText('至少 6 个词');
+ await page.getByRole('button',{name:'回到建议的本周'}).click();for(const skill of L.yearPlan.skills)await page.locator(`[data-skill="${skill.id}"]`).check();
+ await expect(page.getByText('周自检已勾选 1 / 52',{exact:false})).toBeVisible();await page.reload();await expect(page.locator('[data-skill="speak"]')).toBeChecked();
+ await page.locator('[data-skill="speak"]').uncheck();await expect(page.getByText('周自检已勾选 0 / 52',{exact:false})).toBeVisible();
+ const backup=await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')));expect(backup.journey.startDate).toBe(L.dateKey());expect(Object.keys(backup.days)).toHaveLength(0);
+ await page.evaluate(()=>{Storage.prototype.setItem=()=>{throw new Error('quota');};});await page.locator('[data-skill="speak"]').click();await expect(page.locator('#toast')).toContainText('未保存');await expect(page.locator('[data-skill="speak"]')).not.toBeChecked();
+ await page.reload();await page.goto('/#progress');page.on('dialog',d=>d.accept());
+ const chooserPromise=page.waitForEvent('filechooser');await page.getByRole('button',{name:'导入备份',exact:true}).click();const chooser=await chooserPromise;await chooser.setFiles({name:'journey.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+ await expect(page.locator('#toast')).toContainText('学习记录已导入');await page.goto('/#year');await expect(page.locator('[data-skill="words"]')).toBeChecked();expect(errors).toEqual([]);
+});
+test('新手与年度页面在手机和桌面上无横向溢出',async({page})=>{
+ for(const route of ['foundations','foundation/sounds','foundation/stress','foundation/gender','foundation/agreement','year']){
+  await page.goto('/#'+route);await expect(page.locator('.content')).toBeVisible();const d=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));expect(d.scroll).toBeLessThanOrEqual(d.width);
+ }
+ await page.selectOption('#year-week','52');await expect(page.locator('.content')).toContainText('复盘并安排下一阶段');await expect(page.locator('[data-skill="write"]')).toBeDisabled();
+});

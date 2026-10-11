@@ -1,0 +1,27 @@
+// Original beginner micro-lessons. References are external; no source text is bundled.
+module.exports = [
+ {id:'sounds',title:'先把五个元音读清楚',minutes:5,goal:'认识 a e i o u，以及 h、ñ、b/v 的基础读法。',
+ rules:['西语 a、e、i、o、u 的基本读法分别接近 /a e i o u/。先保持元音清楚，不套用英语单词的读法。','h 在一般本族词中不发音：hola 开头直接读元音。ñ 是一个字母，发 /ɲ/，不是普通 n。','b 和 v 通常表示同一个音位；具体发音随位置变化，不按英语 v 来读。先模仿整词，不必急着掌握颤音 r。'],
+ examples:[['hola','你好 · h 不发音'],['casa','家 · 注意两个清楚的 a'],['mañana','明天 · 注意 ñ'],['vivir','生活 · v 不按英语 /v/ 来读']],
+ practice:'慢读 hola、casa、mañana 各三遍，再说：Hola, me llamo Ana. 浏览器可用设备合成语音辅助；本练习不自动判断发音。',
+ references:[{sourceId:'pcic-pronunciation',section:'A1–A2：音素、元音与辅音的感知及产出'}],
+ questions:[{id:'fs1',prompt:'hola 中的 h 通常怎么读？',options:['读英语 h','不发音','读成 j'],answer:1,explanation:'一般西语本族词中的 h 不发音，hola 从 o 的元音开始。'},{id:'fs2',prompt:'mañana 中 ñ 的基本发音是？',options:['普通 n /n/','英语 ng /ŋ/','/ɲ/'],answer:2,explanation:'ñ 是独立字母，表示 /ɲ/；不要省掉上方符号。'},{id:'fs3',prompt:'西语 b 和 v 的基础关系是？',options:['通常表示同一个音位','v 必须读英语 /v/','b 总是不发音'],answer:0,explanation:'b 与 v 通常表示同一个音位，具体实现随语音环境变化。'},{id:'fs4',prompt:'初学五个元音时，哪种做法更合适？',options:['完全套用英语拼读','保持元音清楚并模仿整词','所有元音都读成 a'],answer:1,explanation:'先练清楚的 /a e i o u/，再结合整词和短句模仿。'}]},
+ {id:'stress',title:'重音在哪一拍？',minutes:5,goal:'区分口头重音与书写重音符号 á é í ó ú。',
+ rules:['先观察单独朗读的多音节词：读得更突出的一拍称为重音；书面的 á、é、í、ó、ú 是重音符号。两者并非每次都同时出现。','未写重音符号的常见多音节词：以元音、n 或 s 结尾，通常重读倒数第二音节；其他常见辅音结尾，通常重读最后音节。先练 casa、hotel，再学例外。','出现 á、é、í、ó、ú 时，对应音节重读：café、teléfono。重音符号也参与区分词义和元音组合，不能随意省掉。'],
+ examples:[['casa → CA-sa','倒数第二音节重读'],['hotel → ho-TEL','最后音节重读'],['café → ca-FÉ','书写符号标出重音'],['teléfono → te-LÉ-fo-no','不是默认的倒数第二音节']],
+ practice:'拍手分节读 casa、hotel、café，再问：¿Dónde está el café? 读完整句时保留问句语调；本地选择题只检查规则知识。',
+ references:[{sourceId:'dpd-tilde',section:'一般重音规则；重音符号与音节'},{sourceId:'pcic-pronunciation',section:'A1–A2：重音、节奏与语调'}],
+ questions:[{id:'ft1',prompt:'casa 应重读哪一音节？',options:['CA-sa','ca-SA','两节都完全一样'],answer:0,explanation:'casa 以元音结尾且没有书写重音符号，通常重读倒数第二节。'},{id:'ft2',prompt:'hotel 应怎样重读？',options:['HO-tel','ho-TEL','h-O-tel'],answer:1,explanation:'hotel 以 l 结尾，属于常见的末音节重读词。'},{id:'ft3',prompt:'café 的 é 提醒你什么？',options:['e 不发音','只装饰词形','最后一节重读'],answer:2,explanation:'café 的重音在 fé；拼写时保留 é。'},{id:'ft4',prompt:'“口头重音”和“书写重音符号”的关系是？',options:['所有词都必须写重音符号','有口头重音的词不一定写符号','重音符号可以随时省略'],answer:1,explanation:'casa 有口头重音，但无书写重音符号；café 则两者都有。'}]},
+ {id:'gender',title:'名词和 el / la 一起记',minutes:6,goal:'理解名词阴阳性，认识常见规则和三个例外。',
+ rules:['西语名词有语法性别，常用 el 标阳性、la 标阴性。物品也有语法性别；它不等于物品真的有性别。记词时连冠词一起记：el libro、la casa。','许多 -o 结尾词是阳性，许多 -a 结尾词是阴性，但这是线索而非保证：el día、la mano、el problema 都要单独记。','agua 是阴性名词；定冠词紧接以重读 /a/ 开头的阴性单数名词时，用 el agua，但形容词仍配阴性：el agua fría。复数是 las aguas。'],
+ examples:[['el libro','书 · 阳性名词'],['la casa','家 · 阴性名词'],['el día / la mano','一天 / 手 · 常见例外'],['el agua fría','凉水 · agua 仍是阴性']],
+ practice:'指着身边物品说：Es un libro. Es una mesa. 再分别写 el libro、la casa、el día、la mano；不要只背词尾。',
+ references:[{sourceId:'pcic-grammar',section:'1. 名词：性别与性别标记'},{sourceId:'dpd-el',section:'2.1：重读 a 开头的阴性名词与形容词配合'}],
+ questions:[{id:'fg1',prompt:'“书”应连冠词怎么记？',options:['la libro','el libro','lo libro'],answer:1,explanation:'libro 是阳性名词，基础形式记作 el libro。'},{id:'fg2',prompt:'哪一组都是正确的常见例外？',options:['la día / el mano','el día / la mano','la día / la mano'],answer:1,explanation:'día 是阳性，mano 是阴性；不能只根据末尾 a 来判断。'},{id:'fg3',prompt:'agua 的语法性别是？',options:['阳性，因为写 el agua','没有性别','阴性，形容词也配阴性'],answer:2,explanation:'el agua 使用特殊冠词形式，但 agua 仍是阴性：el agua fría。'},{id:'fg4',prompt:'初学名词时，哪种记法最可靠？',options:['只看词尾，不查例外','名词连冠词及短句一起记','所有物品都用 el'],answer:1,explanation:'连冠词和短句一起记，能减少性别和形容词配合错误。'}]},
+ {id:'agreement',title:'让冠词、名词、形容词配合',minutes:6,goal:'从一个物品到多个物品，写出简单描述。',
+ rules:['修饰同一个名词时，冠词和可变化的形容词要配合它的性别、单复数：el libro rojo → los libros rojos。','常见元音结尾名词加 -s，常见辅音结尾加 -es；词尾 -z 在复数中改 -ces。这里先练 libro/libros、papel/papeles、luz/luces。','许多 -o/-a 形容词随性别变化：bonito/bonita。不是所有形容词都改变阴阳形式：grande 可修饰阴性或阳性，但复数要配合：grandes。'],
+ examples:[['el libro rojo → los libros rojos','红色的书 · 阳性单数到复数'],['la casa bonita → las casas bonitas','漂亮的家 · 阴性单数到复数'],['un papel → unos papeles','纸 · 常见辅音结尾加 -es'],['una casa grande → unas casas grandes','grande 不区分阴阳形式，但配合复数']],
+ practice:'写三句：Tengo un libro rojo. Mi casa es bonita. Hay dos casas grandes. 换成你身边的物品，再核对性别和复数。',
+ references:[{sourceId:'pcic-grammar',section:'1. 名词的数；2. 形容词的性数配合；冠词'}],
+ questions:[{id:'fa1',prompt:'把 la casa bonita 变成复数：',options:['las casas bonita','los casas bonitos','las casas bonitas'],answer:2,explanation:'冠词、名词、形容词都配合阴性复数：las casas bonitas。'},{id:'fa2',prompt:'选出正确的阳性复数组合：',options:['los libros rojos','las libros rojas','los libro rojo'],answer:0,explanation:'libros 是阳性复数；用 los，形容词用 rojos。'},{id:'fa3',prompt:'papel 的常见复数是？',options:['papels','papeles','papelas'],answer:1,explanation:'papel 以辅音 l 结尾，复数是 papeles。'},{id:'fa4',prompt:'哪一项正确描述多个大房子？',options:['unas casas granda','unas casas grande','unas casas grandes'],answer:2,explanation:'grande 不按阴阳变成 granda，但复数要写 grandes。'}]}
+];
