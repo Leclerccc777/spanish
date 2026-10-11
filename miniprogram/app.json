@@ -15,13 +15,13 @@
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",
-    "navigationBarBackgroundColor": "#f8f6f0",
+    "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#f8f6f0"
+    "backgroundColor": "#f7fbff"
   },
   "tabBar": {
-    "color": "#7c837c",
-    "selectedColor": "#244c3b",
+    "color": "#65717b",
+    "selectedColor": "#286600",
     "backgroundColor": "#ffffff",
     "list": [
       {
