@@ -95,6 +95,12 @@ test('原生每日任务写入失败保持未勾选，锁定课程不会因任�
   r.wx.setStorageSync=save;p.check({currentTarget:{dataset:{id:'output'}}});assert.equal(p.data.tasks[2].checked,true);
   p.select({detail:{value:14}});p.target();assert.equal(r.routes.length,0);assert.ok(r.messages.some(m=>m.includes('课程的词汇')));
 });
+test('原生首页建议优先订正，进度页按等级显示并可进入指定等级',()=>{
+  const r=runtime(),s=L.emptyState(),pack=L.drillPacks[0],a=pack.questions.map(q=>q.answers[0]);a[1]='wrong';L.gradeDrill(s,pack.id,a);r.wx.setStorageSync('',s);
+  const today=r.loadPage('today');today.onShow();assert.equal(today.data.practice.wrong,1);today.continuePractice();assert.equal(r.routes.at(-1),'/pages/drillreview/index');
+  const progress=r.loadPage('progress');progress.onShow();assert.equal(progress.data.practice.levels[0].passed,1);assert.equal(progress.data.practice.passed,1);progress.drills({currentTarget:{dataset:{level:'B2'}}});assert.equal(r.routes.at(-1),'/pages/drills/index?level=B2');
+  const drills=r.loadPage('drills');drills.onLoad({level:'B2'});assert.equal(drills.data.level,'B2');assert.equal(drills.data.packs.length,6);
+});
 test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
   const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
   p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));

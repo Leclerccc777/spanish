@@ -2,7 +2,7 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   data: { phase: 'menu', level: 'A1', input: '', feedback: null, text: '', dirty: false, saved: false, showModel: false },
-  onLoad(options = {}) { this.refresh(); if (options.id) this.open({ currentTarget: { dataset: { id: options.id } } }); },
+  onLoad(options = {}) { if (['A1','A2','B1','B2'].includes(options.level)) this.setData({ level: options.level }); this.refresh(); if (options.id) this.open({ currentTarget: { dataset: { id: options.id } } }); },
   onShow() { this.refresh(); },
   refresh() { const state = S.load(); this.setData({ packs: L.drillProgress(state).filter(p => p.level === this.data.level), wrongCount: L.drillWrongQuestions(state).length }); },
   review() { wx.navigateTo({ url: '/pages/drillreview/index' }); },
