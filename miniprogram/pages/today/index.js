@@ -6,6 +6,7 @@ Page({
   foundations(){wx.navigateTo({url:'/pages/foundations/index'});},
   nouns(){wx.navigateTo({url:'/pages/nouns/index'});},
   drills(){wx.navigateTo({url:'/pages/drills/index'});},
+  month(){wx.navigateTo({url:'/pages/firstmonth/index'});},
   year(){wx.navigateTo({url:'/pages/year/index'});},
   bank() {wx.navigateTo({url:'/pages/bank/index'});},
   study() { wx.navigateTo({ url: '/pages/session/index' }); },

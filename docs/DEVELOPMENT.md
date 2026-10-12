@@ -16,6 +16,7 @@ A1 在 `data/course.js`，后续阶段在 `data/course-extension.js` 添加单�
 
 - `track`：`course`（默认）或 `bank`；旧备份缺省保持课内范围。
 - `foundations[id]`：四步入门规则测验最佳分与次数；与每日打卡独立。
+- `monthChecks[day]`：前四周任务的实际记录日期与 recall / focus / output 手工记录；沿用年度起点，未来天不能提前记录。
 - `journey`：本地开始日期、`weekChecks[weekNumber]` 的日期和五项手工自检；未来周不允许记录。
 - `nounPractice[wordId]`：三步名词练习的最佳正确率（0 / 33 / 67 / 100）和完整作答次数；不影响每日目标或词元确认。
 - `nounMistakes[questionId]`：最后一次完整作答中的错项答案；下次完整练习答对对应题后移除。页面逐题反馈不写入进度，最后保存三步结果；保存失败留在提交入口。
@@ -90,3 +91,9 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 `lib/drill-review.js` 只从已开放包抽取存在的错项，返回带原包、阅读和题型上下文的队列，最多 12 个初始错项。订正通过 `evaluateDrillAnswer` 复用指定答案与标点规则，只更新 `drillMistakes`，不更新 `drills`、复习、打卡或词量。已经移除的错项重复提交不会重新生成错项。
 
 原生 `pages/drillreview/index`、浏览器 `#drill-review` 保存成功后才显示反馈；错项每轮至多重排一次，首次统计仅计每个题 ID 的第一次作答。中途刷新重新开始本轮统计，已保存的订正仍保留。草稿修订和自查调用 `revertDrillDraft`、`setDrillChecks`，旧备份在 restore 时补充默认字段并过滤非法历史 / 自查索引。
+
+## 前四周每日任务
+
+`data/first-month.js` 提供 28 天 / 84 项固定 ID 提示及已存在的内容入口。`lib/first-month.js` 使用年度开始日，按设备本地日期计算建议任务日；超过第 28 天后可回顾任意前四周任务。记录只写 monthChecks，不能修改课程、词量、间隔复习或打卡。
+
+`pages/firstmonth/index` / `#first-month` 允许所有任务预览；开始年度计划后，任务日不晚于实际经过天数时才可勾选。过去任务记录实际勾选当天日期。restore 过滤非法日期、未知任务、重复任务、超过 28 的键及记录日期不足以支持的未来任务。没有引入音频或发音评价，手工任务不能自动填充年度听力自检。

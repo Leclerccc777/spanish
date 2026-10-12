@@ -9,6 +9,7 @@ Page({
  current(){this.setData({selectedWeek:0});this.refresh();},
  check(e){if(!this.data.canCheck)return;const item=this.data.skills.find(s=>s.id===e.currentTarget.dataset.id);if(item&&S.commit(s=>L.setWeekSkill(s,this.data.selectedWeek,item.id,!item.checked,L.dateKey())))this.refresh();},
  foundation(){wx.navigateTo({url:'/pages/foundations/index'});},
+ month(){wx.navigateTo({url:'/pages/firstmonth/index'});},
  lesson(){if(!this.data.canStudy)return wx.showToast({title:'先按实际进度完成前面的单元',icon:'none'});wx.navigateTo({url:`/pages/lesson/index?id=${this.data.week.lessonId}`});},
  expression(){wx.navigateTo({url:`/pages/expression/index?id=${this.data.week.taskId}`});},
  library(){wx.switchTab({url:'/pages/library/index'});},

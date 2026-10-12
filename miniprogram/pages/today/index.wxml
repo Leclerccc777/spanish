@@ -4,7 +4,7 @@
 <view class="card body beginner-start"><view class="list-title">{{foundationPassed !== 4 ? '零基础？从这里开始。' : '把基础练熟，再走远一点。'}}</view><view class="body muted">发音 → 重音 → 名词阴阳性 → 性数配合。每次一个小步骤。</view><button hover-class="button-press" class="primary" bindtap="foundations">四步入门 · {{foundationPassed}} / 4 达标</button><button hover-class="button-press" class="secondary" bindtap="year">一年 A1 → B1 计划</button></view>
   <view class="card beginner-start"><view class="list-title">让名词连着用</view><view class="body muted">选冠词 → 改形容词 → 补完整句，先练 8 个常用名词。</view><button hover-class="button-press" class="primary" bindtap="nouns">A1 名词三步练习 →</button></view>
   <view class="card"><view class="list-title">A1 → B2 递进练习</view><view class="body muted">辨析 → 填空 → 纠错 → 短阅读 → 自己表达，每次完成一小包。</view><button hover-class="button-press" class="primary" bindtap="drills">进入分级练习 →</button></view>
-  <view class="section-title">今天的小目标</view>
+  <button hover-class="button-press" class="secondary" bindtap="month">前四周每日小任务 →</button><view class="section-title">今天的小目标</view>
   <view class="card hero">
     <view class="row"><view>每日学习计划</view><view>{{checkedIn ? '✓ 已完成打卡' : '慢慢来，也会到达'}}</view></view>
     <view class="title">{{unit.title}}</view><view class="subtitle">{{unit.goal}}</view>

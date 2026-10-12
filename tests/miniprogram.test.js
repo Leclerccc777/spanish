@@ -82,6 +82,19 @@ test('原生表达自查、修订恢复和保存失败保留文字与旧版本',
   r.wx.setStorageSync=save;p.revertDraft();assert.equal(p.data.text,'Soy estudiante.');assert.equal(p.data.revisions,3);
   const reload=r.loadPage('drills');reload.onLoad({id:'a1-place'});assert.equal(reload.data.hasPrevious,true);assert.equal(reload.data.text,'Soy estudiante.');
 });
+test('原生前四周开始、每日勾选、未来预览与年度入口',()=>{
+  const r=runtime(),p=r.loadPage('firstmonth');p.onLoad();assert.equal(p.data.canCheck,false);p.start();assert.equal(p.data.canCheck,true);
+  p.check({currentTarget:{dataset:{id:'focus'}}});assert.equal(r.state.monthChecks[1].tasks[0],'focus');
+  p.select({detail:{value:10}});assert.equal(p.data.canCheck,false);p.check({currentTarget:{dataset:{id:'focus'}}});assert.equal(r.state.monthChecks[11],undefined);
+  p.current();assert.equal(p.data.selectedDay,1);p.target();assert.equal(r.routes.at(-1),'/pages/foundations/index?id=sounds');
+  const year=r.loadPage('year');year.month();assert.equal(r.routes.at(-1),'/pages/firstmonth/index');
+  const reload=r.loadPage('firstmonth');reload.onLoad();assert.equal(reload.data.tasks.find(t=>t.id==='focus').checked,true);assert.deepEqual(r.state.days,{});
+});
+test('原生每日任务写入失败保持未勾选，锁定课程不会因任务日开放',()=>{
+  const r=runtime(),p=r.loadPage('firstmonth');p.onLoad();p.start();const save=r.wx.setStorageSync;r.wx.setStorageSync=()=>{throw new Error('quota');};p.check({currentTarget:{dataset:{id:'output'}}});assert.equal(p.data.tasks[2].checked,false);
+  r.wx.setStorageSync=save;p.check({currentTarget:{dataset:{id:'output'}}});assert.equal(p.data.tasks[2].checked,true);
+  p.select({detail:{value:14}});p.target();assert.equal(r.routes.length,0);assert.ok(r.messages.some(m=>m.includes('课程的词汇')));
+});
 test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
   const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
   p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));

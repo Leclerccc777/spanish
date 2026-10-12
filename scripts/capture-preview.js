@@ -9,7 +9,7 @@ const L = require('../miniprogram/lib/learning');
   const output = path.resolve(__dirname, '../docs/screenshots');
   fs.mkdirSync(output, { recursive: true });
   const requested = new Set(process.argv.slice(2));
-  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844]]) {
+  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000]]) {
     if (requested.size && !requested.has(name)) continue;
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, timezoneId: 'Asia/Shanghai' });
     await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
@@ -17,6 +17,7 @@ const L = require('../miniprogram/lib/learning');
     if(name.startsWith('bank-')){await page.goto('http://127.0.0.1:4173/#bank');await page.getByRole('button',{name:'全部',exact:true}).click();}
     if(name==='foundations-mobile')await page.goto('http://127.0.0.1:4173/#foundations');
     if(name==='year-mobile')await page.goto('http://127.0.0.1:4173/#year');
+    if(name.startsWith('month-'))await page.goto('http://127.0.0.1:4173/#first-month');
     if(name.startsWith('nouns-'))await page.goto('http://127.0.0.1:4173/#nouns');
     if(name.startsWith('drills-')){
       await page.goto('http://127.0.0.1:4173/#drills');
