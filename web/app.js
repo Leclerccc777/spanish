@@ -14,7 +14,7 @@
   let bankLevel='A1', bankQuery='', bankPageIndex=0, packPageIndex=0;
   let foundationQuiz=null, yearWeek=0;
   let nounQuiz=null;
-  let drillLevel='A1', drillQuiz=null, drillEditor=null;
+  let drillLevel='A1', drillQuiz=null, drillEditor=null, drillReview=null;
   let toastTimer;
   const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const paths = {
@@ -53,7 +53,7 @@
   const heading = (overline, title, subtitle, trailing = '') => `<div class="page-head"><div><div class="eyebrow">${esc(overline)}</div><h1>${esc(title)}</h1><p class="subtitle">${esc(subtitle)}</p></div>${trailing}</div>`;
   function shell(body, active) {
     const items = [['today','home','今日学习'],['words','book','词汇练习'],['grammar','layers','语法路线'],['library','library','资料库'],['progress','chart','学习进度']];
-    const current = ['study', 'word-quiz', 'bank', 'nouns'].includes(active) || active.startsWith('noun/') ? 'words' : (active.startsWith('lesson/') || active.startsWith('expression/') || active.startsWith('foundation/') || active==='foundations' || active==='year' || active==='drills' || active.startsWith('drill/')) ? 'grammar' : active;
+    const current = ['study', 'word-quiz', 'bank', 'nouns'].includes(active) || active.startsWith('noun/') ? 'words' : (active.startsWith('lesson/') || active.startsWith('expression/') || active.startsWith('foundation/') || active==='foundations' || active==='year' || active==='drills' || active==='drill-review' || active.startsWith('drill/')) ? 'grammar' : active;
     const s = L.summary(state);
     return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc((items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><span class="avatar" aria-label="本地学习者">学</span></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本地保存 · A1–B2 分级练习 · 浏览器体验版</span></footer></div></main></div>`;
   }
@@ -96,16 +96,41 @@
   }
   function drillsPage() {
     const packs=L.drillProgress(state).filter(p=>p.level===drillLevel);
-    return heading('PASO A PASO · A1 → B2','一层一层，练到能用。','每级 3 个核心包 + 3 个巩固包：辨析 → 填空 → 纠错 → 短阅读 → 自己表达。')+`<div class="notice">从核心第 1 包开始，按前置关系继续；每包 4 题至少答对 3 题即可达标；后续内容可预览。补充路线单独保存，不计每日打卡、词汇确认或自动提升等级。</div><div class="level-tabs" role="group" aria-label="分级练习等级">${['A1','A2','B1','B2'].map(level=>btn(level,'drills-level',`data-level="${level}" aria-pressed="${level===drillLevel}"`,level===drillLevel?'':'secondary')).join('')}</div><div class="lesson-grid">${packs.map(p=>`<article class="card drill-card ${p.unlocked?'':'locked'}"><div class="card-head">${pill(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`)}<span class="tiny">${p.unlocked?'可练习':'可预览'}</span></div><h2>${esc(p.title)}</h2><p>${esc(p.goal)}</p><p class="tiny">${p.bestScore===null?'尚未练习':`最佳正确率 ${p.bestScore}%`} · 待订正 ${p.mistakes.length} 项</p>${p.mistakes.map(q=>`<p class="tiny">${esc(q.title)} · 上次：${esc(q.previousAnswer)}</p>`).join('')}${btn(p.unlocked?'进入学习包 →':'预览与查看前置 →','drill',`data-id="${p.id}"`,'secondary')}</article>`).join('')}</div>`;
+    return heading('PASO A PASO · A1 → B2','一层一层，练到能用。','每级 3 个核心包 + 3 个巩固包：辨析 → 填空 → 纠错 → 短阅读 → 自己表达。')+`<div class="notice">从核心第 1 包开始，按前置关系继续；每包 4 题至少答对 3 题即可达标；后续内容可预览。补充路线单独保存，不计每日打卡、词汇确认或自动提升等级。</div>${btn(`集中订正 · ${L.drillWrongQuestions(state).length} 项 →`,'drill-review','','secondary')}<div class="level-tabs" role="group" aria-label="分级练习等级">${['A1','A2','B1','B2'].map(level=>btn(level,'drills-level',`data-level="${level}" aria-pressed="${level===drillLevel}"`,level===drillLevel?'':'secondary')).join('')}</div><div class="lesson-grid">${packs.map(p=>`<article class="card drill-card ${p.unlocked?'':'locked'}"><div class="card-head">${pill(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`)}<span class="tiny">${p.unlocked?'可练习':'可预览'}</span></div><h2>${esc(p.title)}</h2><p>${esc(p.goal)}</p><p class="tiny">${p.bestScore===null?'尚未练习':`最佳正确率 ${p.bestScore}%`} · 待订正 ${p.mistakes.length} 项</p>${p.mistakes.map(q=>`<p class="tiny">${esc(q.title)} · 上次：${esc(q.previousAnswer)}</p>`).join('')}${btn(p.unlocked?'进入学习包 →':'预览与查看前置 →','drill',`data-id="${p.id}"`,'secondary')}</article>`).join('')}</div>`;
+  }
+  function drillReviewPage() {
+    if(!drillReview)drillReview={phase:'setup',level:''};
+    const back=btn(`${icon('back')} 返回分级练习`,'drills','','back');
+    const head=heading('REPASO · A1 → B2','把错项练明白。','只重练尚未订正的题，保留原学习包的完整作答成绩。');
+    const count=L.drillWrongQuestions(state,drillReview.level).length;
+    if(drillReview.phase==='setup')return `<section class="reading">${back}${head}<div class="level-tabs">${['','A1','A2','B1','B2'].map(level=>btn(level||'全部','review-level',`data-level="${level}"`,level===drillReview.level?'':'secondary')).join('')}</div><div class="card"><h2>待订正 ${count} 项</h2><p>每轮最多 12 项；答错本轮再出现一次，首次正确率不因订正而提高。</p><p class="tiny">订正仅移除错项，不提升原包最佳分，也不开放下一包。完整包未达标时请回去重练。</p>${btn('开始集中订正 →','review-begin',count?'':'disabled')}</div></section>`;
+    if(drillReview.phase==='empty')return `<section class="reading">${back}${head}<div class="card empty">当前范围没有待订正项。</div>${btn('查看其他等级','review-setup','','secondary')}</section>`;
+    if(drillReview.phase==='result')return `<section class="reading">${back}${head}<div class="card result-card"><div class="result-score">${Math.round(drillReview.firstCorrect/drillReview.original*100)}%</div><h2>本轮首次正确率</h2><p>首次答对 ${drillReview.firstCorrect} / ${drillReview.original} 项；还剩 ${count} 项待订正。</p><p class="tiny">重练后的正确答案不改变首次统计，原包分数与打卡保持原值。</p>${btn('再看待订正项','review-setup')}</div></section>`;
+    const q=drillReview.items[drillReview.index],f=drillReview.feedback;
+    return `<section class="reading">${back}${head}${pill(`${q.level} · ${drillReview.index+1} / ${drillReview.items.length}`)}<p class="tiny">${esc(q.packTitle)} · ${esc(q.title)}</p>${q.position===3?`<div class="card"><p class="example" lang="es">${esc(q.reading)}</p><p class="tiny">${esc(q.glossary)}</p></div>`:''}<h2 class="question-title">${esc(q.prompt)}</h2>${q.kind==='choice'?q.options.map(o=>`<button class="choice ${f&&q.answers.includes(o)?'correct':f&&o===drillReview.input?'wrong':''}" data-action="review-answer" data-answer="${esc(o)}" ${f?'disabled':''}>${esc(o)}</button>`).join(''):`<label for="review-answer">订正答案</label><input id="review-answer" class="search-input spelling-input" value="${esc(drillReview.input)}" maxlength="500" autocomplete="off" spellcheck="false" ${f?'disabled':''}/><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="review-accent" data-char="${c}" aria-label="添加 ${c}" ${f?'disabled':''}>${c}</button>`).join('')}</div>${f?'':btn('检查订正','review-submit')}`}${f?`<div class="feedback"><strong>${f.correct?'✓ 答对了，错项已移除':'再看一下规则，本轮稍后重练'}</strong><p lang="es">${esc(f.answer)}</p><p>${esc(f.explanation)}</p></div>${btn(drillReview.index+1===drillReview.items.length?'查看订正结果':'下一项 →','review-next')}`:''}</section>`;
+  }
+  function beginDrillReview() {
+    const items=L.drillReviewQueue(state,drillReview.level);
+    Object.assign(drillReview,{phase:items.length?'quiz':'empty',items,original:items.length,index:0,firstCorrect:0,answered:new Set(),retries:new Set(),input:'',feedback:null});render();
+  }
+  function submitDrillReview(answer) {
+    if(!drillReview||drillReview.phase!=='quiz'||drillReview.feedback)return;
+    if(typeof answer!=='string'||!answer.trim())return notify('请先填写答案。');
+    const q=drillReview.items[drillReview.index];
+    if(!L.drillUnlocked(state,q.packId))return notify('练习进度已变化，请重新开始。');
+    const result=commit(s=>L.reviewDrillMistake(s,q.id,answer));if(!result)return;
+    if(!drillReview.answered.has(q.id)){drillReview.answered.add(q.id);if(result.correct)drillReview.firstCorrect++;}
+    if(!result.correct&&!drillReview.retries.has(q.id)){drillReview.items.push(q);drillReview.retries.add(q.id);}
+    drillReview.input=answer;drillReview.feedback=result;render();
   }
   function drillOutput(p, unlocked) {
     const e=drillEditor;
-    return `<div class="card"><h2>5 · 写自己的表达</h2><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。此处不自动评分。</p><h3>自己检查，再修改</h3>${p.output.rubric.map(r=>`<p>○ ${esc(r)}</p>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
+    return `<div class="card"><h2>5 · 写自己的表达</h2><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。保存版本 ${e.revisions}，此处不自动评分。</p><div class="actions">${e.dirty?btn('撤销未保存修改','drill-reset','','secondary'):''}${!e.dirty&&e.hasPrevious?btn('恢复上一保存版本','drill-revert','','secondary'):''}</div><h3>自己检查，再修改</h3><p class="tiny">完成后自行勾选；修改文字并保存后重新自查，不是能力评分。</p>${p.output.rubric.map((r,i)=>`<label class="week-check"><input type="checkbox" data-drill-check="${i}" ${e.checks.includes(i)?'checked':''} ${!unlocked||e.dirty||!e.saved||!e.text.trim()?'disabled':''}/> ${esc(r)}</label>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
   }
   function drillPage(id) {
     const p=L.drillPacks.find(p=>p.id===id);
     if(!p)return '<div class="card empty">没有找到练习包。<a href="#drills">返回分级练习</a></div>';
-    if(!drillEditor||drillEditor.id!==id){const d=state.drillDrafts[id];drillEditor={id,text:d?d.text:'',saved:!!d,dirty:false,showModel:false};}
+    if(!drillEditor||drillEditor.id!==id){const d=state.drillDrafts[id];drillEditor={id,text:d?d.text:'',saved:!!d,revisions:d?d.revisions:0,checks:d?d.checks:[],hasPrevious:!!d&&typeof d.previousText==='string',dirty:false,showModel:false};}
     const unlocked=L.drillUnlocked(state,id),previous=L.drillPacks.find(d=>d.id===p.previousId);
     const head=`${btn(`${icon('back')} 返回分级练习`,'drills','','back')}${heading(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`,p.title,p.goal)}`;
     if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card"><h2>先理解规则</h2><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}<div class="card"><h2>先读一小段</h2><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p></div>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}${drillOutput(p,unlocked)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
@@ -223,7 +248,7 @@
     else if(page.startsWith('foundation/')) content=foundationPage(page.slice(11));
     else if(page.startsWith('expression/')) content=expressionPage(page.slice(11));
     else if(page.startsWith('lesson/')) content=lessonPage(page.slice(7));
-    else content=({today:todayPage,words:wordsPage,bank:bankPage,drills:drillsPage,nouns:nounsPage,foundations:foundationsPage,year:yearPage,grammar:grammarPage,library:libraryPage,progress:progressPage}[page] || todayPage)();
+    else content=({today:todayPage,words:wordsPage,bank:bankPage,drills:drillsPage,'drill-review':drillReviewPage,nouns:nounsPage,foundations:foundationsPage,year:yearPage,grammar:grammarPage,library:libraryPage,progress:progressPage}[page] || todayPage)();
     root.innerHTML=shell(content,page);
   }
   function openLesson(id) {
@@ -264,6 +289,14 @@
     const element=event.target.closest('[data-action]'); if(!element||element.disabled)return;
     const action=element.dataset.action;
     if(action==='study'){startSession(element.dataset.pack||'');navigate('study');}
+    else if(action==='drill-review'){drillReview={phase:'setup',level:''};navigate('drill-review');}
+    else if(action==='review-level'){drillReview.level=element.dataset.level;render();}
+    else if(action==='review-begin')beginDrillReview();
+    else if(action==='review-answer')submitDrillReview(element.dataset.answer);
+    else if(action==='review-submit')submitDrillReview(drillReview&&drillReview.input);
+    else if(action==='review-accent'){const input=document.getElementById('review-answer');if(!input||input.disabled)return;const start=input.selectionStart,end=input.selectionEnd;if(input.value.length-(end-start)>=500)return;drillReview.input=input.value.slice(0,start)+element.dataset.char+input.value.slice(end);render();const updated=document.getElementById('review-answer');updated.focus();updated.setSelectionRange(start+1,start+1);}
+    else if(action==='review-next'){if(!drillReview||drillReview.phase!=='quiz'||!drillReview.feedback)return;drillReview.index++;drillReview.feedback=null;drillReview.input='';if(drillReview.index===drillReview.items.length)drillReview.phase='result';render();}
+    else if(action==='review-setup'){drillReview.phase='setup';render();}
     else if(action==='drills'){if(drillEditor)drillLevel=L.drillPacks.find(p=>p.id===drillEditor.id).level;drillQuiz=null;drillEditor=null;navigate('drills');}
     else if(action==='drills-level'){drillLevel=element.dataset.level;render();}
     else if(action==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${element.dataset.id}`);}
@@ -291,8 +324,10 @@
     else if(action==='drill-output'){drillQuiz=null;render();document.getElementById('drill-draft').focus();}
     else if(action==='drill-save'){
       if(!drillEditor||!L.drillUnlocked(state,drillEditor.id))return;
-      if(commit(s=>L.saveDrillDraft(s,drillEditor.id,drillEditor.text))){drillEditor.saved=true;drillEditor.dirty=false;render();}
+      const d=commit(s=>L.saveDrillDraft(s,drillEditor.id,drillEditor.text));if(d){Object.assign(drillEditor,{saved:true,dirty:false,revisions:d.revisions,checks:d.checks,hasPrevious:typeof d.previousText==='string'});render();}
     }
+    else if(action==='drill-reset'){const d=state.drillDrafts[drillEditor.id];Object.assign(drillEditor,{text:d?d.text:'',dirty:false,showModel:false,checks:d?d.checks:[]});render();}
+    else if(action==='drill-revert'){if(!drillEditor||drillEditor.dirty)return;const d=commit(s=>L.revertDrillDraft(s,drillEditor.id));if(d){Object.assign(drillEditor,{text:d.text,revisions:d.revisions,checks:d.checks,hasPrevious:typeof d.previousText==='string',dirty:false,showModel:false});render();}}
     else if(action==='drill-model'){if(!drillEditor||drillEditor.dirty||!drillEditor.saved||!drillEditor.text.trim()||!L.drillUnlocked(state,drillEditor.id))return;drillEditor.showModel=!drillEditor.showModel;render();}
     else if(action==='nouns'){nounQuiz=null;navigate('nouns');}
     else if(action==='noun'){nounQuiz=null;navigate(`noun/${element.dataset.id}`);}
@@ -392,13 +427,15 @@
     else if(action==='export')exportBackup();
     else if(action==='import')importBackup();
   });
-  root.addEventListener('input',event=> {
+  root.addEventListener('input',event=> {if(event.target.id==='review-answer'&&drillReview&&!drillReview.feedback)drillReview.input=event.target.value;
     if(event.target.id==='drill-answer'&&drillQuiz&&!drillQuiz.feedback)drillQuiz.input=event.target.value;
-    if(event.target.id==='drill-draft'&&drillEditor){drillEditor.text=event.target.value;drillEditor.dirty=true;drillEditor.showModel=false;document.getElementById('drill-draft-status').textContent='修改尚未保存。此处不自动评分。';const model=root.querySelector('[data-action="drill-model"]');if(model)model.disabled=true;const text=root.querySelector('.expression-model');if(text)text.remove();}
+    if(event.target.id==='drill-draft'&&drillEditor){drillEditor.text=event.target.value;drillEditor.dirty=true;drillEditor.showModel=false;document.getElementById('drill-draft-status').textContent='修改尚未保存。此处不自动评分。';const model=root.querySelector('[data-action="drill-model"]');if(model)model.disabled=true;root.querySelectorAll('[data-drill-check]').forEach(c=>c.disabled=true);const actions=root.querySelector('#drill-draft-status + .actions');if(actions)actions.innerHTML=btn('撤销未保存修改','drill-reset','','secondary');const text=root.querySelector('.expression-model');if(text)text.remove();}
  if(event.target.id==='noun-answer'&&nounQuiz&&!nounQuiz.feedback)nounQuiz.input=event.target.value; if(event.target.id==='expression-text'&&expressionEditor){expressionEditor.text=event.target.value;expressionEditor.result=null;expressionEditor.showModel=false;const feedback=document.querySelector('.expression-feedback');if(feedback)feedback.remove();document.getElementById('expression-status').textContent='修改尚未保存。';} if(event.target.id==='spelling-answer' && wordQuiz) wordQuiz.input=event.target.value; if(event.target.id==='bank-search'){const position=event.target.selectionStart;bankQuery=event.target.value;bankPageIndex=0;render();const input=document.getElementById('bank-search');input.focus();input.setSelectionRange(position,position);} if(event.target.id==='word-search'){const position=event.target.selectionStart;query=event.target.value;render();const input=document.getElementById('word-search');input.focus();input.setSelectionRange(position,position);} });
-  root.addEventListener('keydown',event=>{if(event.target.id==='drill-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitDrillAnswer(drillQuiz&&drillQuiz.input);}if(event.target.id==='noun-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitNounAnswer(nounQuiz&&nounQuiz.input);}if(event.target.id==='spelling-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitWordAnswer(wordQuiz.input);}});
-  root.addEventListener('change',event=> { if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
-  window.addEventListener('hashchange',()=>{if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();window.scrollTo(0,0);});
+  root.addEventListener('keydown',event=>{if(event.target.id==='review-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitDrillReview(drillReview&&drillReview.input);}if(event.target.id==='drill-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitDrillAnswer(drillQuiz&&drillQuiz.input);}if(event.target.id==='noun-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitNounAnswer(nounQuiz&&nounQuiz.input);}if(event.target.id==='spelling-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitWordAnswer(wordQuiz.input);}});
+  root.addEventListener('change',event=> {
+    if(event.target.dataset.drillCheck!==undefined&&drillEditor){if(drillEditor.dirty)return;const checks=new Set(drillEditor.checks),i=Number(event.target.dataset.drillCheck);if(event.target.checked)checks.add(i);else checks.delete(i);const d=commit(s=>L.setDrillChecks(s,drillEditor.id,[...checks]));if(d){drillEditor.checks=d.checks;render();}else event.target.checked=!event.target.checked;}
+ if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
+  window.addEventListener('hashchange',()=>{if(route()!=='drill-review')drillReview=null;if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();window.scrollTo(0,0);});
   window.addEventListener('storage',event=>{if(event.key===KEY){try{state=L.restore(JSON.parse(event.newValue));render();}catch{notify('另一个窗口的学习记录无法读取。');}}});
   render();
   if(storageFailed)notify('原学习记录未能读取。旧记录尚未覆盖，请先检查浏览器存储。');

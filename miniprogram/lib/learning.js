@@ -2,6 +2,7 @@ const course = require('../data/course');
 const journey = require('./journey');
 const nouns = require('./nouns');
 const drills = require('./drills');
+const drillReview = require('./drill-review');
 const SCHEMA = 1;
 const PASS_SCORE = 75;
 const RATINGS = ['again', 'remember', 'easy'];
@@ -259,3 +260,4 @@ module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, un
 Object.assign(module.exports,journey);
 Object.assign(module.exports,nouns);
 Object.assign(module.exports,drills);
+Object.assign(module.exports,drillReview);

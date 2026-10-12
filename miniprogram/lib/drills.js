@@ -44,8 +44,23 @@ function gradeDrill(state, id, answers) {
 function saveDrillDraft(state, id, text) {
   if (!index.has(id) || !drillUnlocked(state, id)) throw new Error('请先完成前面的练习包');
   if (typeof text !== 'string' || text.length > 3000) throw new Error('表达草稿最多 3000 字符');
-  state.drillDrafts[id] = { text };
+  const previous = state.drillDrafts[id];
+  if (previous && previous.text === text) return previous;
+  state.drillDrafts[id] = { text, revisions: Math.min(Number.MAX_SAFE_INTEGER, (previous ? previous.revisions || 1 : 0) + 1), checks: [] };
+  if (previous) state.drillDrafts[id].previousText = previous.text;
   return state.drillDrafts[id];
+}
+function revertDrillDraft(state, id) {
+  const draft = state.drillDrafts[id];
+  if (!index.has(id) || !drillUnlocked(state, id) || !draft || typeof draft.previousText !== 'string') throw new Error('没有可恢复的上一保存版本');
+  return saveDrillDraft(state, id, draft.previousText);
+}
+function setDrillChecks(state, id, checks) {
+  const pack = index.get(id), draft = state.drillDrafts[id];
+  if (!pack || !drillUnlocked(state, id) || !draft || !draft.text.trim()) throw new Error('先写自己的表达并保存草稿');
+  if (!Array.isArray(checks) || checks.length > pack.output.rubric.length || Array.from(checks).some(i => !Number.isInteger(i) || i < 0 || i >= pack.output.rubric.length)) throw new Error('无效的表达自查项');
+  draft.checks = [...new Set(checks)].sort((a, b) => a - b);
+  return draft;
 }
 function restoreDrills(raw) {
   const drills = {}, drillMistakes = {}, drillDrafts = {};
@@ -53,7 +68,11 @@ function restoreDrills(raw) {
     const r = raw.drills && raw.drills[pack.id];
     if (r && [0, 25, 50, 75, 100].includes(r.bestScore) && Number.isSafeInteger(r.attempts) && r.attempts > 0) drills[pack.id] = { bestScore: r.bestScore, attempts: r.attempts };
     const d = raw.drillDrafts && raw.drillDrafts[pack.id];
-    if (d && typeof d.text === 'string' && d.text.length <= 3000) drillDrafts[pack.id] = { text: d.text };
+    if (d && typeof d.text === 'string' && d.text.length <= 3000) {
+      drillDrafts[pack.id] = { text: d.text, revisions: Number.isSafeInteger(d.revisions) && d.revisions > 0 ? d.revisions : 1,
+        checks: d.text.trim() && Array.isArray(d.checks) ? [...new Set(d.checks.filter(i => Number.isInteger(i) && i >= 0 && i < pack.output.rubric.length))].sort((a, b) => a - b) : [] };
+      if (typeof d.previousText === 'string' && d.previousText.length <= 3000 && d.previousText !== d.text) drillDrafts[pack.id].previousText = d.previousText;
+    }
     for (const q of pack.questions) {
       const m = raw.drillMistakes && raw.drillMistakes[q.id];
       if (m && typeof m.answer === 'string' && m.answer.trim() && m.answer.length <= 500) drillMistakes[q.id] = { answer: m.answer };
@@ -61,4 +80,4 @@ function restoreDrills(raw) {
   }
   return { drills, drillMistakes, drillDrafts };
 }
-module.exports = { drillPacks, drillUnlocked, nextDrillPack, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, restoreDrills };
+module.exports = { drillPacks, drillUnlocked, nextDrillPack, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, revertDrillDraft, setDrillChecks, restoreDrills };

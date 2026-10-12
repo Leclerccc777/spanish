@@ -63,6 +63,25 @@ test('原生递进预览不能保存草稿；首页与语法页入口可达', ()
   const today=r.loadPage('today');today.drills();assert.equal(r.routes.at(-1),'/pages/drills/index');
   const grammar=r.loadPage('grammar');grammar.drills();assert.equal(r.routes.at(-1),'/pages/drills/index');
 });
+test('原生集中订正限次重排，首次正确率保持原值，包成绩不变', () => {
+  const r=runtime(),s=L.emptyState(),pack=L.drillPacks[0],a=pack.questions.map(q=>q.answers[0]);a[1]='bad';L.gradeDrill(s,pack.id,a);r.wx.setStorageSync('',s);
+  const p=r.loadPage('drillreview');p.onLoad();assert.equal(p.data.count,1);p.begin();p.input({detail:{value:'esta'}});p.submit();p.next();assert.equal(p.items.length,2);
+  p.input({detail:{value:'está'}});p.submit();p.next();assert.equal(p.data.score,0);assert.equal(p.data.count,0);assert.equal(r.state.drills[pack.id].bestScore,75);assert.deepEqual(r.state.days,{});
+  p.next();assert.equal(p.data.score,0);p.setup();p.begin();assert.equal(p.data.phase,'empty');
+});
+test('原生集中订正写入失败不显示已订正，恢复后重试', () => {
+  const r=runtime(),s=L.emptyState(),pack=L.drillPacks[0],a=pack.questions.map(q=>q.answers[0]);a[1]='bad';L.gradeDrill(s,pack.id,a);r.wx.setStorageSync('',s);
+  const p=r.loadPage('drillreview');p.onLoad();p.begin();p.input({detail:{value:'está'}});const save=r.wx.setStorageSync;r.wx.setStorageSync=()=>{throw new Error('quota');};p.submit();
+  assert.equal(p.data.feedback,null);assert.equal(L.drillWrongQuestions(r.state).length,1);r.wx.setStorageSync=save;p.submit();assert.equal(p.data.feedback.correct,true);assert.equal(L.drillWrongQuestions(r.state).length,0);
+});
+test('原生表达自查、修订恢复和保存失败保留文字与旧版本', () => {
+  const r=runtime(),p=r.loadPage('drills');p.onLoad({id:'a1-place'});p.draft({detail:{value:'Soy estudiante.'}});p.save();p.checks({detail:{value:['0','2']}});assert.deepEqual(r.state.drillDrafts['a1-place'].checks,[0,2]);
+  p.draft({detail:{value:'Estoy en casa.'}});p.resetDraft();assert.equal(p.data.text,'Soy estudiante.');assert.equal(p.data.rubricRows[0].checked,true);
+  p.draft({detail:{value:'Estoy en casa.'}});p.save();assert.equal(p.data.revisions,2);assert.deepEqual(r.state.drillDrafts['a1-place'].checks,[]);
+  const save=r.wx.setStorageSync;r.wx.setStorageSync=()=>{throw new Error('quota');};p.revertDraft();assert.equal(p.data.text,'Estoy en casa.');assert.equal(r.state.drillDrafts['a1-place'].revisions,2);
+  r.wx.setStorageSync=save;p.revertDraft();assert.equal(p.data.text,'Soy estudiante.');assert.equal(p.data.revisions,3);
+  const reload=r.loadPage('drills');reload.onLoad({id:'a1-place'});assert.equal(reload.data.hasPrevious,true);assert.equal(reload.data.text,'Soy estudiante.');
+});
 test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
   const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
   p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));

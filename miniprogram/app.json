@@ -13,7 +13,8 @@
     "pages/foundations/index",
     "pages/year/index",
     "pages/nouns/index",
-    "pages/drills/index"
+    "pages/drills/index",
+    "pages/drillreview/index"
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",
