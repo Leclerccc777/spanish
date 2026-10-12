@@ -17,6 +17,29 @@ function runtime() {
   }
   return {loadPage,wx,messages,routes,get state(){return L.restore(saved);}};
 }
+test('原生名词选冠词、输入配合、完整句、错项重练与刷新保存', () => {
+  const r=runtime(), p=r.loadPage('nouns'); p.onLoad(); assert.equal(p.data.lessons.length,8);
+  p.open({currentTarget:{dataset:{id:'w24'}}}); assert.equal(p.data.lesson.gender,'阴性'); p.begin();
+  p.choose({currentTarget:{dataset:{answer:'la'}}}); assert.equal(p.data.feedback.correct,false); p.next();
+  p.input({detail:{value:'frío'}}); p.submit(); p.next();
+  p.input({detail:{value:'El agua está fría.'}}); p.submit(); p.next();
+  assert.equal(p.data.result.score,33); assert.equal(L.nounProgress(r.state).find(n=>n.id==='w24').mistakes.length,2);
+  const reload=r.loadPage('nouns'); reload.onLoad(); assert.equal(reload.data.lessons.find(n=>n.id==='w24').bestScore,33);
+  reload.open({currentTarget:{dataset:{id:'w24'}}});reload.begin();
+  for (const q of reload.lesson.questions) {reload.answer(q.answer); reload.next();}
+  assert.equal(reload.data.result.score,100); assert.deepEqual(r.state.nounMistakes,{}); assert.deepEqual(r.state.days,{});
+  assert.equal(L.summary(r.state).learned,0);
+  const today=r.loadPage('today'); today.nouns();assert.equal(r.routes.at(-1),'/pages/nouns/index');
+});
+test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
+  const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
+  p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));
+  for(const q of p.lesson.questions.slice(0,2)){p.answer(q.answer);p.next();}
+  p.answer(p.lesson.questions[2].answer);
+  const save=r.wx.setStorageSync;r.wx.setStorageSync=()=>{throw new Error('quota');};p.next();
+  assert.equal(p.data.phase,'quiz');assert.equal(p.data.input,'Los países son pequeños.');assert.deepEqual(r.state.nounPractice,{});
+  r.wx.setStorageSync=save;p.next();assert.equal(p.data.phase,'result');p.next();assert.equal(r.state.nounPractice.w18.attempts,1);
+});
 test('原生页面串联：翻词卡、失败重排、语法练习、自动打卡与页面重载',()=>{
   const r=runtime(); const session=r.loadPage('session'); session.onLoad(); assert.equal(session.data.word.id,'w1');
   session.reveal();session.rate({currentTarget:{dataset:{rating:'again'}}});assert.equal(session.items.length,6);

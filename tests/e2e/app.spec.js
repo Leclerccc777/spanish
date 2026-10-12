@@ -1,5 +1,52 @@
 const { test, expect } = require('@playwright/test');
 const L = require('../../miniprogram/lib/learning');
+test('名词三步练习：错误反馈、订正、备份往返与手机布局', async ({ page }) => {
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/');await page.getByRole('button',{name:'A1 名词三步练习'}).click();
+  await expect(page.locator('.noun-card')).toHaveCount(8);
+  const agua=page.locator('.noun-card').filter({has:page.getByRole('heading',{name:'el agua',exact:true})});
+  await agua.getByRole('button').click();await expect(page.getByText('el agua → las aguas',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'开始三步练习'}).click();await page.getByRole('button',{name:'la',exact:true}).click();
+  await expect(page.locator('.feedback')).toContainText('再看一下');await page.getByRole('button',{name:'下一步'}).click();
+  await page.getByRole('button',{name:'检查答案'}).click();await expect(page.locator('#toast')).toContainText('请先填写');
+  await page.fill('#noun-answer','frío');await page.locator('#noun-answer').press('Enter');
+  await expect(page.locator('.feedback')).toContainText('参考答案：fría');await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','EL agua está fría.');await page.getByRole('button',{name:'检查答案'}).click();
+  await expect(page.locator('.feedback')).toContainText('答对了');await page.getByRole('button',{name:'保存并查看结果'}).click();
+  await expect(page.locator('.result-score')).toHaveText('33%');
+  const backup=await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')));
+  expect(backup.nounPractice.w24.bestScore).toBe(33);expect(Object.keys(backup.nounMistakes)).toHaveLength(2);expect(Object.keys(backup.days)).toHaveLength(0);
+  await page.reload();await page.getByRole('button',{name:'返回名词列表'}).click();
+  await expect(agua).toContainText('待订正 2 项');await agua.getByRole('button').click();
+  await page.getByRole('button',{name:'开始三步练习'}).click();await page.getByRole('button',{name:'el',exact:true}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','fr');await page.getByRole('button',{name:'添加 í',exact:true}).click();
+  await expect(page.locator('#noun-answer')).toHaveValue('frí');await page.locator('#noun-answer').press('End');await page.locator('#noun-answer').press('a');
+  await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','El agua está fría.');await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'保存并查看结果'}).click();
+  await expect(page.locator('.result-score')).toHaveText('100%');
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')).nounMistakes)).toEqual({});
+  await page.goto('/#progress');page.once('dialog',d=>d.accept());
+  const chooserPromise=page.waitForEvent('filechooser');await page.getByRole('button',{name:'导入备份',exact:true}).click();
+  const chooser=await chooserPromise;await chooser.setFiles({name:'nouns.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await expect(page.locator('#toast')).toContainText('学习记录已导入');await page.goto('/#nouns');await expect(agua).toContainText('最佳正确率 33%');
+  if(test.info().project.name==='mobile')await page.setViewportSize({width:320,height:720});
+  for(const route of ['nouns','noun/w18','noun/w24']){await page.goto('/#'+route);await expect(page.getByRole('heading').first()).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+  expect(errors).toEqual([]);
+});
+test('名词浏览器保存失败保留答案，恢复存储后重试', async ({ page }) => {
+  await page.goto('/#noun/w18');await page.getByRole('button',{name:'开始三步练习'}).click();
+  await page.getByRole('button',{name:'el',exact:true}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','pequeños');await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','Los paises son pequeños.');await page.getByRole('button',{name:'检查答案'}).click();
+  await expect(page.locator('.feedback')).toContainText('再看一下');
+  await page.evaluate(()=>{window.originalStorageWrite=Storage.prototype.setItem;Storage.prototype.setItem=function(){throw new Error('quota');};});
+  await page.getByRole('button',{name:'保存并查看结果'}).click();await expect(page.locator('#toast')).toContainText('未保存');
+  await expect(page.locator('#noun-answer')).toHaveValue('Los paises son pequeños.');await expect(page.locator('.result-score')).toHaveCount(0);
+  expect(await page.evaluate(()=>localStorage.getItem('hola-learning-v1'))).toBeNull();
+  await page.evaluate(()=>{Storage.prototype.setItem=window.originalStorageWrite;});await page.getByRole('button',{name:'保存并查看结果'}).click();
+  await expect(page.locator('.result-score')).toHaveText('67%');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')));expect(saved.nounPractice.w18.attempts).toBe(1);expect(saved.nounMistakes['w18-sentence'].answer).toBe('Los paises son pequeños.');
+});
 test('完整日学习、自动打卡、刷新保存及资料筛选', async ({ page }) => {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');

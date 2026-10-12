@@ -2,6 +2,7 @@
   <view class="row"><view class="eyebrow">HOLA · 每天一点西语</view><view class="pill warm">{{unit.levelCode}} · 分级学习</view></view>
   <view class="title">把西语，变成日常。</view><view class="subtitle">每天约 15 分钟，向更大的世界说 Hola。</view>
 <view class="card body beginner-start"><view class="list-title">{{foundationPassed !== 4 ? '零基础？从这里开始。' : '把基础练熟，再走远一点。'}}</view><view class="body muted">发音 → 重音 → 名词阴阳性 → 性数配合。每次一个小步骤。</view><button hover-class="button-press" class="primary" bindtap="foundations">四步入门 · {{foundationPassed}} / 4 达标</button><button hover-class="button-press" class="secondary" bindtap="year">一年 A1 → B1 计划</button></view>
+  <view class="card beginner-start"><view class="list-title">让名词连着用</view><view class="body muted">选冠词 → 改形容词 → 补完整句，先练 8 个常用名词。</view><button hover-class="button-press" class="primary" bindtap="nouns">A1 名词三步练习 →</button></view>
   <view class="section-title">今天的小目标</view>
   <view class="card hero">
     <view class="row"><view>每日学习计划</view><view>{{checkedIn ? '✓ 已完成打卡' : '慢慢来，也会到达'}}</view></view>

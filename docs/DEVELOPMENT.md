@@ -17,6 +17,8 @@ A1 在 `data/course.js`，后续阶段在 `data/course-extension.js` 添加单�
 - `track`：`course`（默认）或 `bank`；旧备份缺省保持课内范围。
 - `foundations[id]`：四步入门规则测验最佳分与次数；与每日打卡独立。
 - `journey`：本地开始日期、`weekChecks[weekNumber]` 的日期和五项手工自检；未来周不允许记录。
+- `nounPractice[wordId]`：三步名词练习的最佳正确率（0 / 33 / 67 / 100）和完整作答次数；不影响每日目标或词元确认。
+- `nounMistakes[questionId]`：最后一次完整作答中的错项答案；下次完整练习答对对应题后移除。页面逐题反馈不写入进度，最后保存三步结果；保存失败留在提交入口。
 - `goal`：后续学习日的词汇数量目标。
 - `reviews[wordId]`：间隔、到期日期、最后复习日期、复习次数。
 - `lessons[lessonId]`：历史最佳分与练习次数。
@@ -55,6 +57,14 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 两个入口分别是 `pages/foundations/index` / `pages/year/index` 和浏览器 `#foundations` / `#year`。基础练习最佳分不回退；存储失败必须留在可再次提交的位置。年度周次是预览与建议，实际课程仍使用 `isUnlocked`；五项自检可反选且不改变日打卡。
 
 更新课程或模块后同步 `scripts/build-web.js` 的模块表；独立新增内容不应改变原词元稳定 ID 或旧备份 version。原生发音练习没有播放与自动评分，浏览器使用设备合成语音并处理缺少音色的情况。
+
+## A1 名词三步练习
+
+`data/noun-practice.js` 仅引用已有词 ID，为首批 8 个名词保留单复数冠词、语法性、短语、原词典链接与 PCIC / DPD 规则引用；不修改 `vocabulary-review.js` 或扩展词库。新增搭配与题目待教师审稿，详见 `docs/NOUN_PRACTICE.md`。
+
+`lib/nouns.js` 的指定答案检查支持 NFC、大小写、连续空格和句末标点，重音与 ñ 必须准确。它不做语法推断或开放文本评估。三题先完整验证再更新进度，完整练习的最佳分不回退；错项依据最后一次作答更新。`learning.restore` 为旧 version 1 备份补空字段，过滤未知 ID 与无效分数。
+
+原生入口为 `pages/nouns/index`（可用 `?id=w24` 直接查看一个词），浏览器为 `#nouns` / `#noun/w24`；无需课程解锁，可从性数微课继续练。未保存的中途答案只在当前页面内存中，离开后重开；末题保存成功才显示已保存结果。微信与浏览器词卡及课内词汇详情同步展示这批词的词形信息。
 
 ## 视觉主题
 

@@ -1,5 +1,6 @@
 const course = require('../data/course');
 const journey = require('./journey');
+const nouns = require('./nouns');
 const SCHEMA = 1;
 const PASS_SCORE = 75;
 const RATINGS = ['again', 'remember', 'easy'];
@@ -20,7 +21,7 @@ function addDays(key, days) {
   const [y, m, d] = key.split('-').map(Number);
   return dateKey(new Date(y, m - 1, d + days, 12));
 }
-function emptyState() { return { version: SCHEMA, goal: 5, track: 'course', foundations:{}, journey:journey.emptyJourney(), reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
+function emptyState() { return { version: SCHEMA, goal: 5, track: 'course', foundations:{}, journey:journey.emptyJourney(), nounPractice:{}, nounMistakes:{}, reviews: {}, lessons: {}, days: {}, mistakes: {}, wordPractice: {}, wordMistakes: {}, expressions: {} }; }
 function restore(raw) {
   const clean = emptyState();
   if (!raw || raw.version !== SCHEMA) return clean;
@@ -61,6 +62,7 @@ function restore(raw) {
   }
   clean.foundations=journey.restoreFoundations(raw.foundations);
   clean.journey=journey.restoreJourney(raw.journey);
+  Object.assign(clean, nouns.restoreNouns(raw));
   return clean;
 }
 function dayRecord(state, today) {
@@ -253,3 +255,4 @@ function mistakes(state) {
 module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression, bankProgress, isWordUnlocked, packQueue, setTrack, findWord };
 
 Object.assign(module.exports,journey);
+Object.assign(module.exports,nouns);

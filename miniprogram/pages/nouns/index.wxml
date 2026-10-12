@@ -1,0 +1,30 @@
+<view class="page">
+  <view class="eyebrow">PALABRAS EN ACCIÓN · A1</view><view class="title">让名词连着用。</view>
+  <block wx:if="{{phase === 'menu'}}">
+    <view class="subtitle">先把冠词和名词一起记，再改形容词，最后亲手补成一句话。每次约 3 分钟。</view>
+    <view class="note">首批 8 个名词，复用已有词条。基础词义与词性有核对记录；新增搭配与练习待教师审稿。练习单独保存，不计每日打卡或课程解锁。</view>
+    <button hover-class="button-press" class="secondary" bindtap="foundations">先复习性数配合</button>
+    <view wx:for="{{lessons}}" wx:key="id" class="card body">
+      <view class="row"><view class="list-title">{{item.singular}}</view><view class="pill">{{item.gender}}</view></view>
+      <view class="body">{{item.meaning}} · 复数 {{item.plural}}</view><view class="example">{{item.phrase}}</view>
+      <view class="small">{{item.bestScore === null ? '尚未练习' : '最佳正确率 ' + item.bestScore + '%'}} · 待订正 {{item.mistakes.length}} 项</view>
+      <view wx:for="{{item.mistakes}}" wx:for-item="mistake" wx:key="id" class="small body">{{mistake.title}} · 上次：{{mistake.previousAnswer}}</view>
+      <button hover-class="button-press" class="primary" data-id="{{item.id}}" bindtap="open">{{item.mistakes.length ? '订正这组练习' : '练这一个名词'}} →</button>
+    </view>
+  </block>
+  <block wx:elif="{{phase === 'read'}}">
+    <view class="card"><view class="spanish">{{lesson.singular}}</view><view>{{lesson.meaning}} · {{lesson.gender}}</view><view class="example">复数：{{lesson.plural}}</view><view class="example">{{lesson.phrase}}</view><view class="muted">{{lesson.phraseTranslation}}</view><view class="body">{{lesson.rule}}</view><view class="note">{{lesson.note}}</view><view class="example">{{lesson.sentence}}</view><view>{{lesson.translation}}</view></view>
+    <view class="small body">{{lesson.reviewScope}}</view>
+    <view class="card body"><view class="list-title">本组参考</view><button hover-class="button-press" class="secondary" data-url="{{dictionaryUrl}}" bindtap="copy">复制词典链接</button><view wx:for="{{references}}" wx:key="sourceId" class="small body">{{item.title}} · {{item.section}}<button hover-class="button-press" class="secondary" data-url="{{item.url}}" bindtap="copy">复制规则参考链接</button></view></view>
+    <button hover-class="button-press" class="primary" bindtap="begin">开始三步练习 →</button>
+  </block>
+  <block wx:elif="{{phase === 'quiz'}}">
+    <view class="pill">{{position}} / 3 · {{lesson.noun}}</view><view class="section-title">{{question.title}}</view><view class="body">{{question.prompt}}</view>
+    <block wx:if="{{question.kind === 'article'}}"><button hover-class="button-press" wx:for="{{question.options}}" wx:key="*this" class="choice {{feedback && item === question.answer ? 'correct' : feedback && item === input ? 'wrong' : ''}}" disabled="{{!!feedback}}" data-answer="{{item}}" bindtap="choose">{{item}}</button></block>
+    <block wx:else><view class="small body">大小写、空格和句末标点可灵活；重音与 ñ 要准确。</view><input class="search" aria-label="西语答案" value="{{input}}" maxlength="200" disabled="{{!!feedback}}" bindinput="input" bindconfirm="submit" placeholder="在这里写西语"/><view class="accent-row"><button hover-class="button-press" wx:for="{{['á','é','í','ó','ú','ü','ñ']}}" wx:key="*this" disabled="{{!!feedback}}" data-char="{{item}}" bindtap="accent">{{item}}</button></view><button hover-class="button-press" wx:if="{{!feedback}}" class="primary" bindtap="submit">检查答案</button></block>
+    <view wx:if="{{feedback}}" class="feedback body"><view>{{feedback.correct ? '✓ 答对了' : '再看一下配合与拼写'}}</view><view class="example">参考答案：{{feedback.answer}}</view><view>{{feedback.explanation}}</view></view>
+    <button hover-class="button-press" wx:if="{{feedback}}" class="primary" bindtap="next">{{position === 3 ? '保存并查看结果' : '下一步 →'}}</button>
+  </block>
+  <block wx:else><view class="card empty"><view class="spanish">{{result.score}}%</view><view class="section-title">三步练习已保存</view><view>答对 {{result.correct}} / {{result.total}} 题；错项保留在名词列表，下次答对即可移除。</view><view class="small body">仅检查本题指定答案，不判断自由表达能力；不计每日打卡或词汇掌握。</view><button hover-class="button-press" class="primary" bindtap="begin">再练这三步</button><button hover-class="button-press" class="secondary" bindtap="menu">换一个名词 →</button></view></block>
+  <button hover-class="button-press" wx:if="{{phase !== 'menu'}}" class="ghost" bindtap="menu">返回名词列表</button><button hover-class="button-press" class="ghost" bindtap="home">回到今日</button>
+</view>

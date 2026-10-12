@@ -11,7 +11,8 @@
     "pages/expression/index",
     "pages/bank/index",
     "pages/foundations/index",
-    "pages/year/index"
+    "pages/year/index",
+    "pages/nouns/index"
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",

@@ -13,5 +13,6 @@ Page({
  copy(e){wx.setClipboardData({data:e.currentTarget.dataset.url});},
  study(){wx.navigateTo({url:'/pages/session/index'});},
  year(){wx.navigateTo({url:'/pages/year/index'});},
+ nouns(){wx.navigateTo({url:'/pages/nouns/index'});},
  home(){wx.switchTab({url:'/pages/today/index'});}
 });

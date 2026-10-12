@@ -4,7 +4,7 @@ Page({
   data: { revealed: false, done: false },
   onLoad(options = {}) { this.packId=options.pack; this.restart(); },
   restart() { const state=S.load(); this.items = this.packId ? L.packQueue(state,this.packId) : L.queue(state); this.position = 0; this.retryIds = new Set(); this.day = L.dateKey(); this.setData({ done: false, unavailable:false, original: this.items.length }); this.showCard(); if(!this.items.length)this.setData({unavailable:true,summary:L.summary(state)}); },
-  showCard() { this.setData({ word: this.items[this.position] || null, position: this.position + 1, total: this.items.length, revealed: false, done: this.position >= this.items.length }); },
+  showCard() { this.setData({ word: this.items[this.position] || null, noun: L.nounLessons.find(n => this.items[this.position] && n.id === this.items[this.position].id) || null, position: this.position + 1, total: this.items.length, revealed: false, done: this.position >= this.items.length }); },
   reveal() { this.setData({ revealed: true }); },
   rate(e) {
     if (!this.data.revealed || this.data.done) return;
