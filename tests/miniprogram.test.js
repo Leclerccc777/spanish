@@ -32,7 +32,7 @@ test('原生名词选冠词、输入配合、完整句、错项重练与刷新�
   const today=r.loadPage('today'); today.nouns();assert.equal(r.routes.at(-1),'/pages/nouns/index');
 });
 test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不产生主课程进度', () => {
-  const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,3);
+  const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,6);
   p.select({currentTarget:{dataset:{level:'B2'}}});p.open({currentTarget:{dataset:{id:'b2-report'}}});assert.equal(p.data.unlocked,false);p.begin();assert.equal(p.data.phase,'read');
   for(const pack of L.drillPacks){
     p.open({currentTarget:{dataset:{id:pack.id}}});assert.equal(p.data.unlocked,true);p.begin();
@@ -44,7 +44,7 @@ test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不�
     assert.equal(p.data.result.score,75);assert.equal(p.data.phase,'result');p.next();assert.equal(r.state.drills[pack.id].attempts,1);
     p.output();p.draft({detail:{value:pack.output.model}});p.save();p.model();assert.equal(p.data.showModel,true);
   }
-  assert.equal(Object.keys(r.state.drills).length,12);assert.equal(Object.keys(r.state.drillMistakes).length,12);assert.deepEqual(r.state.days,{});assert.deepEqual(r.state.lessons,{});
+  assert.equal(Object.keys(r.state.drills).length,24);assert.equal(Object.keys(r.state.drillMistakes).length,24);assert.deepEqual(r.state.days,{});assert.deepEqual(r.state.lessons,{});
   const reload=r.loadPage('drills');reload.onLoad({id:'b2-report'});assert.equal(reload.data.text,L.drillPacks[11].output.model);assert.equal(reload.data.saved,true);
   reload.begin();for(const q of reload.pack.questions){reload.answer(q.answers[0]);reload.next();}
   assert.equal(r.state.drillMistakes['b2-report-q2'],undefined);assert.equal(r.state.drills['b2-report'].bestScore,100);

@@ -185,8 +185,10 @@ const packs = [
     output: { prompt: '写 6–8 句简短信息摘要：标明谁在何时说了什么，注明你的转述日期，区分计划、已核实事实和未知事项。可使用虚构场景。', starters: ['El lunes… dijo: «…».', 'El miércoles,…', 'Según…', 'Había anunciado que…', 'No sabemos si…', 'Por lo tanto,…'], rubric: ['原话与转述的时间参照是否一致？', '是否区分说过 / 计划 / 已完成？', '结论是否保留必要的不确定性？'], model: 'El lunes Ana dijo: «Presentaré el informe mañana». El miércoles Luis habló del anuncio. Según Luis, Ana había anunciado que presentaría el informe al día siguiente. Ese día era el martes. No sabemos si lo presentó. Por lo tanto, necesitamos confirmar el resultado antes de publicar la noticia.' }
   }
 ];
+packs.push(...require('./drill-extension')({ choice, text }));
+const levelNumbers = {};
 const labels = ['1 · 辨析', '2 · 填空', '3 · 纠错', '4 · 短阅读'];
-module.exports = packs.map((p, i) => ({ ...p, number: i + 1, previousId: i ? packs[i - 1].id : null,
+module.exports = packs.map((p, i) => ({ ...p, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
   references: p.lessonIds.flatMap(id => course.lessons.find(l => l.id === id).references),
   questions: p.questions.map((q, j) => ({ ...q, id: `${p.id}-q${j + 1}`, title: labels[j] }))
 }));

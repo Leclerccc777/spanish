@@ -3,13 +3,13 @@ const assert = require('node:assert/strict');
 const L = require('../miniprogram/lib/learning');
 const answers = p => p.questions.map(q => q.answers[0]);
 
-test('A1–B2 每级三包，辨析/填空/纠错/阅读与个性表达完整且有依据', () => {
-  assert.equal(L.drillPacks.length, 12);
-  assert.equal(L.drillPacks.flatMap(p=>p.questions).length, 48);
-  assert.equal(new Set(L.drillPacks.flatMap(p=>p.questions).map(q=>q.id)).size, 48);
-  for(const level of ['A1','A2','B1','B2'])assert.equal(L.drillPacks.filter(p=>p.level===level).length,3);
+test('A1–B2 每级六包，辨析/填空/纠错/阅读与个性表达完整且有依据', () => {
+  assert.equal(L.drillPacks.length, 24);
+  assert.equal(L.drillPacks.flatMap(p=>p.questions).length, 96);
+  assert.equal(new Set(L.drillPacks.flatMap(p=>p.questions).map(q=>q.id)).size, 96);
+  for(const level of ['A1','A2','B1','B2'])assert.equal(L.drillPacks.filter(p=>p.level===level).length,6);
   for(const [i,p] of L.drillPacks.entries()){
-    assert.equal(p.previousId,i?L.drillPacks[i-1].id:null);
+    if(p.branch==='core')assert.equal(p.previousId,i?L.drillPacks[i-1].id:null);else assert.ok(L.drillPacks.some(d=>d.id===p.previousId));
     assert.deepEqual(p.questions.map(q=>q.kind),['choice','text','text','choice']);
     assert.ok(p.reading.length>60&&p.glossary&&p.output.model&&p.output.rubric.length>=3);
     for(const id of p.lessonIds)assert.ok(L.course.lessons.some(l=>l.id===id));
@@ -27,7 +27,7 @@ test('整条路线必须按实际作答递进，75% 解锁下一包，不改变�
     const a=answers(p);a[1]='错误';const result=L.gradeDrill(s,p.id,a);
     assert.equal(result.score,75);assert.equal(result.passed,true);
     assert.equal(L.drillProgress(s).find(d=>d.id===p.id).mistakes.length,1);
-    if(i<11)assert.equal(L.drillUnlocked(s,L.drillPacks[i+1].id),true);
+    if(i<23)assert.equal(L.drillUnlocked(s,L.drillPacks[i+1].id),true);
   }
   assert.deepEqual(L.summary(s),before);assert.deepEqual(s.days,{});assert.deepEqual(s.reviews,{});assert.equal(L.isUnlocked(s,'u2'),false);
 });
@@ -48,6 +48,20 @@ test('受控输入保留重音与 ñ，接受公开的 -ra/-se 变体，拒绝�
   assert.equal(L.evaluateDrillAnswer('b2-concession',0,'cuesta').correct,false);
   assert.equal(L.evaluateDrillAnswer('b2-report',1,'presentaria').correct,false);
   assert.throws(()=>L.evaluateDrillAnswer('a1-place',1,''));
+  assert.equal(L.evaluateDrillAnswer('a1-greetings',2,'Cómo estás?').correct,false);
+  assert.equal(L.evaluateDrillAnswer('a1-greetings',2,'¿Cómo estás?').correct,true);
+});
+test('新增巩固分支覆盖所有 32 课，旧 12 包备份保持开放状态', () => {
+  const s=L.emptyState(),core=L.drillPacks.filter(p=>p.branch==='core');
+  assert.equal(core.length,12);assert.equal(new Set(L.drillPacks.flatMap(p=>p.lessonIds)).size,32);
+  for(const p of core)L.gradeDrill(s,p.id,answers(p));
+  const restored=L.restore(JSON.parse(JSON.stringify(s)));
+  for(const p of core)assert.equal(L.drillUnlocked(restored,p.id),true);
+  assert.equal(L.drillUnlocked(restored,'b2-specific'),true);
+  assert.equal(L.drillUnlocked(restored,'b2-passive'),false);
+  assert.equal(L.nextDrillPack(restored,'b2-report').id,'b2-specific');
+  assert.equal(L.nextDrillPack(restored,'a1-place').id,'a1-greetings');
+  assert.equal(L.drillPacks.filter(p=>p.level==='A2').map(p=>p.levelNumber).join(','),'1,2,3,4,5,6');
 });
 test('表达草稿独立保存，预览不允许写入，范文不自动产生能力记录', () => {
   const s=L.emptyState(),p=L.drillPacks[0];L.saveDrillDraft(s,p.id,p.output.model);

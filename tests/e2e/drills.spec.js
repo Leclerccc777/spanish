@@ -17,7 +17,7 @@ test('A1 到 B2 全路线真实逐包作答、错项订正、个人表达与备�
   test.setTimeout(90000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');await page.getByRole('button',{name:'进入分级练习'}).click();
-  await expect(page.locator('.drill-card')).toHaveCount(3);
+  await expect(page.locator('.drill-card')).toHaveCount(6);
   await page.getByRole('button',{name:'A2',exact:true}).click();await page.locator('[data-action="drill"][data-id="a2-weekend"]').click();
   await expect(page.getByRole('button',{name:'开始四步练习'})).toBeDisabled();await expect(page.locator('#drill-draft')).toBeDisabled();
   const first=L.drillPacks[0];await page.goto('/#drill/'+first.id);await complete(page,first,1);
@@ -34,7 +34,7 @@ test('A1 到 B2 全路线真实逐包作答、错项订正、个人表达与备�
     await page.goto('/#drill/'+p.id);await complete(page,p);await expect(page.locator('.result-score')).toHaveText('100%');
   }
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')));
-  expect(Object.keys(saved.drills)).toHaveLength(12);expect(saved.drillMistakes).toEqual({});expect(saved.days).toEqual({});expect(saved.lessons).toEqual({});expect(saved.reviews).toEqual({});
+  expect(Object.keys(saved.drills)).toHaveLength(24);expect(saved.drillMistakes).toEqual({});expect(saved.days).toEqual({});expect(saved.lessons).toEqual({});expect(saved.reviews).toEqual({});
   await page.goto('/#drill/a1-place');await page.reload();await expect(page.locator('#drill-draft')).toHaveValue(first.output.model);
   await page.goto('/#progress');page.once('dialog',dialog=>dialog.accept());
   const chooserPromise=page.waitForEvent('filechooser');await page.getByRole('button',{name:'导入备份',exact:true}).click();

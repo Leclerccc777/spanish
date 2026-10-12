@@ -1,9 +1,25 @@
 const drillPacks = require('../data/drills');
 const index = new Map(drillPacks.map(p => [p.id, p]));
-const normalize = text => text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ').replace(/^[¿¡]+/, '').replace(/[.!?。！？]+$/, '').trim();
+const normalize = (text, preservePunctuation = false) => {
+  const clean = text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ');
+  return preservePunctuation ? clean : clean.replace(/^[¿¡]+/, '').replace(/[.!?。！？]+$/, '').trim();
+};
 function drillUnlocked(state, id) {
-  const position = drillPacks.findIndex(p => p.id === id);
-  return position >= 0 && drillPacks.slice(0, position).every(p => state.drills[p.id] && state.drills[p.id].bestScore >= 75);
+  let pack = index.get(id);
+  if (!pack) return false;
+  const seen = new Set([id]);
+  while (pack.previousId) {
+    if (seen.has(pack.previousId)) return false;
+    seen.add(pack.previousId);
+    const previous = index.get(pack.previousId), result = state.drills[pack.previousId];
+    if (!previous || !result || result.bestScore < 75) return false;
+    pack = previous;
+  }
+  return true;
+}
+function nextDrillPack(state, id) {
+  const unfinished = p => drillUnlocked(state, p.id) && (!state.drills[p.id] || state.drills[p.id].bestScore < 75);
+  return drillPacks.find(p => p.previousId === id && unfinished(p)) || drillPacks.find(unfinished) || null;
 }
 function drillProgress(state) {
   return drillPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
@@ -12,7 +28,7 @@ function drillProgress(state) {
 function evaluateDrillAnswer(id, position, answer) {
   const pack = index.get(id), q = pack && pack.questions[position];
   if (!q || !Number.isInteger(position) || typeof answer !== 'string' || !answer.trim() || answer.length > 500) throw new Error('请填写本题答案');
-  return { correct: q.answers.some(a => normalize(a) === normalize(answer)), answer: q.answers.join(' / '), explanation: q.explanation };
+  return { correct: q.answers.some(a => normalize(a, q.preservePunctuation) === normalize(answer, q.preservePunctuation)), answer: q.answers.join(' / '), explanation: q.explanation };
 }
 function gradeDrill(state, id, answers) {
   const pack = index.get(id);
@@ -45,4 +61,4 @@ function restoreDrills(raw) {
   }
   return { drills, drillMistakes, drillDrafts };
 }
-module.exports = { drillPacks, drillUnlocked, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, restoreDrills };
+module.exports = { drillPacks, drillUnlocked, nextDrillPack, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, restoreDrills };

@@ -35,7 +35,7 @@ Page({
     if (!L.drillUnlocked(S.load(), this.pack.id)) return wx.showToast({ title: '请先完成前面的练习包', icon: 'none' });
     if (this.index === this.pack.questions.length - 1) {
       const result = S.commit(s => L.gradeDrill(s, this.pack.id, this.answers));
-      if (result) { this.setData({ phase: 'result', result }); this.refresh(); }
+      if (result) { this.setData({ phase: 'result', result, nextPack: L.nextDrillPack(S.load(), this.pack.id) }); this.refresh(); }
       return;
     }
     this.index++;
@@ -53,7 +53,7 @@ Page({
   },
   output() { this.setData({ phase: 'read' }); },
   menu() { this.setData({ phase: 'menu' }); this.refresh(); },
-  continuePack() { const next = L.drillPacks[this.pack.number]; if (next) this.open({ currentTarget: { dataset: { id: next.id } } }); },
+  continuePack() { const next = L.nextDrillPack(S.load(), this.pack.id); if (next) this.open({ currentTarget: { dataset: { id: next.id } } }); },
   previous() { if (this.pack.previousId) this.open({ currentTarget: { dataset: { id: this.pack.previousId } } }); },
   copy(e) { wx.setClipboardData({ data: e.currentTarget.dataset.url }); },
   home() { wx.switchTab({ url: '/pages/today/index' }); }
