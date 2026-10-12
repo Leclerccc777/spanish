@@ -101,6 +101,12 @@ test('原生首页建议优先订正，进度页按等级显示并可进入指�
   const progress=r.loadPage('progress');progress.onShow();assert.equal(progress.data.practice.levels[0].passed,1);assert.equal(progress.data.practice.passed,1);progress.drills({currentTarget:{dataset:{level:'B2'}}});assert.equal(r.routes.at(-1),'/pages/drills/index?level=B2');
   const drills=r.loadPage('drills');drills.onLoad({level:'B2'});assert.equal(drills.data.level,'B2');assert.equal(drills.data.packs.length,6);
 });
+test('原生周指南随周次改变，课程前置保持，短阅读可预览',()=>{
+  const r=runtime(),p=r.loadPage('year');p.onShow();assert.equal(p.data.guideDays.length,7);const first=p.data.guideDays[1].steps[0];
+  p.move({currentTarget:{dataset:{step:28}}});assert.equal(p.data.selectedWeek,29);assert.notEqual(p.data.guideDays[1].steps[0],first);
+  const lesson=p.data.guideDays[1].target;p.guide({currentTarget:{dataset:{kind:lesson.kind,id:lesson.id}}});assert.equal(r.routes.length,0);
+  const reading=p.data.guideDays[3].target;p.guide({currentTarget:{dataset:{kind:reading.kind,id:reading.id}}});assert.equal(r.routes.at(-1),'/pages/drills/index?id='+reading.id);
+});
 test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
   const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
   p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));
