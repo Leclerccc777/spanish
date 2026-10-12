@@ -5,6 +5,7 @@ Page({
   onShow() { const state = S.load(); const summary = L.summary(state); this.setData({ ...summary, foundationPassed:L.foundationProgress(state).filter(f=>f.passed).length, year:L.yearSummary(state,L.dateKey()), unitProgress: L.unitProgress(state, summary.unit.id) }); },
   foundations(){wx.navigateTo({url:'/pages/foundations/index'});},
   nouns(){wx.navigateTo({url:'/pages/nouns/index'});},
+  drills(){wx.navigateTo({url:'/pages/drills/index'});},
   year(){wx.navigateTo({url:'/pages/year/index'});},
   bank() {wx.navigateTo({url:'/pages/bank/index'});},
   study() { wx.navigateTo({ url: '/pages/session/index' }); },

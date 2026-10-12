@@ -31,6 +31,38 @@ test('原生名词选冠词、输入配合、完整句、错项重练与刷新�
   assert.equal(L.summary(r.state).learned,0);
   const today=r.loadPage('today'); today.nouns();assert.equal(r.routes.at(-1),'/pages/nouns/index');
 });
+test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不产生主课程进度', () => {
+  const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,3);
+  p.select({currentTarget:{dataset:{level:'B2'}}});p.open({currentTarget:{dataset:{id:'b2-report'}}});assert.equal(p.data.unlocked,false);p.begin();assert.equal(p.data.phase,'read');
+  for(const pack of L.drillPacks){
+    p.open({currentTarget:{dataset:{id:pack.id}}});assert.equal(p.data.unlocked,true);p.begin();
+    for(const [i,q] of pack.questions.entries()){
+      if(q.kind==='choice')p.choose({currentTarget:{dataset:{answer:q.answers[0]}}});
+      else{p.input({detail:{value:i===1?'wrong':q.answers[0]}});p.submit();}
+      p.next();
+    }
+    assert.equal(p.data.result.score,75);assert.equal(p.data.phase,'result');p.next();assert.equal(r.state.drills[pack.id].attempts,1);
+    p.output();p.draft({detail:{value:pack.output.model}});p.save();p.model();assert.equal(p.data.showModel,true);
+  }
+  assert.equal(Object.keys(r.state.drills).length,12);assert.equal(Object.keys(r.state.drillMistakes).length,12);assert.deepEqual(r.state.days,{});assert.deepEqual(r.state.lessons,{});
+  const reload=r.loadPage('drills');reload.onLoad({id:'b2-report'});assert.equal(reload.data.text,L.drillPacks[11].output.model);assert.equal(reload.data.saved,true);
+  reload.begin();for(const q of reload.pack.questions){reload.answer(q.answers[0]);reload.next();}
+  assert.equal(r.state.drillMistakes['b2-report-q2'],undefined);assert.equal(r.state.drills['b2-report'].bestScore,100);
+});
+test('原生递进包保存失败保留最终提交和未保存草稿，恢复后重试', () => {
+  const r=runtime(),p=r.loadPage('drills');p.onLoad({id:'a1-place'});p.begin();p.submit();assert.equal(p.data.feedback,null);
+  for(const q of p.pack.questions.slice(0,3)){p.answer(q.answers[0]);p.next();}p.answer(p.pack.questions[3].answers[0]);
+  const save=r.wx.setStorageSync;r.wx.setStorageSync=()=>{throw new Error('quota');};p.next();assert.equal(p.data.phase,'quiz');assert.deepEqual(r.state.drills,{});
+  r.wx.setStorageSync=save;p.next();assert.equal(p.data.phase,'result');assert.equal(r.state.drills['a1-place'].attempts,1);
+  p.output();p.draft({detail:{value:'Soy estudiante.'}});r.wx.setStorageSync=()=>{throw new Error('quota');};p.save();assert.equal(p.data.dirty,true);assert.equal(p.data.saved,false);p.model();assert.equal(p.data.showModel,false);
+  r.wx.setStorageSync=save;p.save();assert.equal(p.data.dirty,false);assert.equal(r.state.drillDrafts['a1-place'].text,'Soy estudiante.');
+});
+test('原生递进预览不能保存草稿；首页与语法页入口可达', () => {
+  const r=runtime(),p=r.loadPage('drills');p.onLoad({id:'a2-weekend'});p.draft({detail:{value:'preview'}});p.save();assert.deepEqual(r.state.drillDrafts,{});
+  p.previous();assert.equal(p.data.pack.id,'a1-likes');assert.equal(p.data.unlocked,false);
+  const today=r.loadPage('today');today.drills();assert.equal(r.routes.at(-1),'/pages/drills/index');
+  const grammar=r.loadPage('grammar');grammar.drills();assert.equal(r.routes.at(-1),'/pages/drills/index');
+});
 test('原生名词写入失败保留最终提交入口，重试只保存一次', () => {
   const r=runtime(),p=r.loadPage('nouns');p.onLoad({id:'w18'});p.begin();
   p.submit();assert.equal(p.data.feedback,null);assert.ok(r.messages.some(m=>m.includes('请先填写')));
