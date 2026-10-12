@@ -7,7 +7,12 @@
   const root = document.getElementById('app');
   let storageFailed = false;
   let state;
-  try { state = L.restore(JSON.parse(localStorage.getItem(KEY) || 'null')); }
+  function readStored(text = localStorage.getItem(KEY)) {
+    const raw = JSON.parse(text || 'null');
+    if (raw !== null && raw.version !== L.emptyState().version) throw new Error('Unsupported record version');
+    return L.restore(raw);
+  }
+  try { state = readStored(); }
   catch { state = L.emptyState(); storageFailed = true; }
   let levelFilter = '', grammarLevel = 'A1', expressionEditor = null;
   let query = '', unitFilter = '', sourceFilter = '', session = null, quiz = null, wordQuiz = null;
@@ -42,12 +47,17 @@
   const meter = value => `<div class="meter"><span style="width:${value}%"></span></div>`;
   function notify(message) { const element = document.getElementById('toast'); element.textContent = message; element.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => element.classList.remove('show'), 4000); }
   function commit(action) {
+    if (storageFailed) { reloadRecords(); return null; }
     const draft = L.restore(JSON.parse(JSON.stringify(state)));
     const result = action(draft);
     try { localStorage.setItem(KEY, JSON.stringify(draft)); }
     catch { notify('学习记录未保存，请检查浏览器存储权限或空间后重试。'); return null; }
     state = draft;
     return result;
+  }
+  function reloadRecords() {
+    try { state = readStored(); storageFailed = false; render(); notify('原记录已读取，请重新确认这次操作。'); return true; }
+    catch { storageFailed = true; notify('记录暂未读取，旧记录不会被覆盖。可重读或导入兼容备份。'); return false; }
   }
   const route = () => location.hash.slice(1) || 'today';
   function navigate(to) { if (route() === to) render(); else location.hash = to; }
@@ -193,7 +203,7 @@
   function progressPage() {
     const s=L.summary(state); const errors=L.mistakes(state); const wrong=L.wrongWords(state);
     const calendar=Array.from({length:14},(_,i)=> { const key=L.addDays(s.today,i-13); return `<div class="calendar-day ${L.isCheckedIn(state.days[key])?'done':''} ${key===s.today?'today':''}" aria-label="${key} ${L.isCheckedIn(state.days[key])?'已打卡':'未打卡'}">${key.slice(5)}</div>`; }).join('');
-    return heading('MI CAMINO','每一步，都算数。','真正的进步，是今天比昨天多懂一点。') + `<div class="stats">${stat(s.streak,'连续打卡','flame','天')}${stat(s.checkins,'累计打卡','calendar','天')}${stat(s.learned,'已学习词汇','book',`/ ${C.lexicon.catalogue.length}`)}${stat(s.grammarPassed,'语法已达标','layers',`/ ${C.lessons.length}`)}</div><div class="progress-columns"><section><div class="card"><div class="card-head"><h2>最近 14 天</h2>${pill('学习日历')}</div><div class="calendar">${calendar}</div><p class="tiny">深绿色：当日完成词汇目标 + 至少一次达标语法练习。按设备本地日期记录。</p></div><div class="card"><div class="card-head"><h2>词汇积累</h2><span>${s.learned} / ${C.lexicon.catalogue.length}</span></div>${meter(percent(s.learned,C.lexicon.catalogue.length))}<p class="tiny">有复习记录即“已学习”，不等于长期掌握。到期词会优先安排复习。</p></div></section><section><div class="card"><h2>每天，给自己一点时间</h2><p class="tiny">设置每天词汇量，再加 1 次达标语法练习。</p><div class="goal-options">${[3,5,10].map(g=>btn(`${g} 个词`,'goal',`data-goal="${g}"`,state.goal===g?'':'secondary')).join('')}</div><p class="tiny">当天首次学习时固定目标。今天开始学习后，调整目标对下一天生效。</p></div><div class="card"><h2>留住你的学习记录</h2><p class="tiny">数据只存在当前浏览器中，不与微信自动同步。清理浏览器或换设备前，请导出备份。</p><div class="backup-actions">${btn('导出备份','export','','small secondary')}${btn('导入备份','import','','small ghost')}</div></div></section></div><div class="section-head"><h2>词汇错词本</h2><span class="tiny">${wrong.length} 个待订正</span></div><div class="card">${wrong.length?wrong.map(w=>`<p><strong lang="es">${esc(w.spanish)}</strong> · ${esc(w.meaning)}<br><span class="tiny">你的答案：${esc(w.answer)}</span></p>`).join('')+btn('集中重练错词 →','word-quiz','data-wrong="1"','secondary'):'<p class="tiny">词汇测验中答错的词会保存在这里。</p>'}</div><div class="section-head"><h2>错题回顾</h2><span class="tiny">${errors.length} 题待订正</span></div>${errors.length ? errors.map(q=>`<article class="card mistake"><h3>${esc(q.prompt)}</h3><p>你的答案：${esc(q.options[q.selected])}</p><p>正确答案：${esc(q.options[q.answer])}</p><p>${esc(q.explanation)}</p>${btn('重练本课 →','lesson',`data-id="${q.lessonId}"`,'small secondary')}</article>`).join('') : '<div class="card empty">暂无待订正错题。练习中的错题会自动出现在这里。</div>'}`;
+    return heading('MI CAMINO','每一步，都算数。','真正的进步，是今天比昨天多懂一点。') + `${storageFailed?`<div class="notice">原记录暂未读取，旧数据不会被覆盖。可重读或导入兼容备份。${btn('重新读取记录','reload-records','','secondary')}</div>`:''}<div class="stats">${stat(s.streak,'连续打卡','flame','天')}${stat(s.checkins,'累计打卡','calendar','天')}${stat(s.learned,'已学习词汇','book',`/ ${C.lexicon.catalogue.length}`)}${stat(s.grammarPassed,'语法已达标','layers',`/ ${C.lessons.length}`)}</div><div class="progress-columns"><section><div class="card"><div class="card-head"><h2>最近 14 天</h2>${pill('学习日历')}</div><div class="calendar">${calendar}</div><p class="tiny">深绿色：当日完成词汇目标 + 至少一次达标语法练习。按设备本地日期记录。</p></div><div class="card"><div class="card-head"><h2>词汇积累</h2><span>${s.learned} / ${C.lexicon.catalogue.length}</span></div>${meter(percent(s.learned,C.lexicon.catalogue.length))}<p class="tiny">有复习记录即“已学习”，不等于长期掌握。到期词会优先安排复习。</p></div></section><section><div class="card"><h2>每天，给自己一点时间</h2><p class="tiny">设置每天词汇量，再加 1 次达标语法练习。</p><div class="goal-options">${[3,5,10].map(g=>btn(`${g} 个词`,'goal',`data-goal="${g}"`,state.goal===g?'':'secondary')).join('')}</div><p class="tiny">当天首次学习时固定目标。今天开始学习后，调整目标对下一天生效。</p></div><div class="card"><h2>留住你的学习记录</h2><p class="tiny">数据只存在当前浏览器中，不与微信自动同步。清理浏览器或换设备前，请导出备份。</p><div class="backup-actions">${btn('导出备份','export','','small secondary')}${btn('导入备份','import','','small ghost')}</div></div></section></div><div class="section-head"><h2>词汇错词本</h2><span class="tiny">${wrong.length} 个待订正</span></div><div class="card">${wrong.length?wrong.map(w=>`<p><strong lang="es">${esc(w.spanish)}</strong> · ${esc(w.meaning)}<br><span class="tiny">你的答案：${esc(w.answer)}</span></p>`).join('')+btn('集中重练错词 →','word-quiz','data-wrong="1"','secondary'):'<p class="tiny">词汇测验中答错的词会保存在这里。</p>'}</div><div class="section-head"><h2>错题回顾</h2><span class="tiny">${errors.length} 题待订正</span></div>${errors.length ? errors.map(q=>`<article class="card mistake"><h3>${esc(q.prompt)}</h3><p>你的答案：${esc(q.options[q.selected])}</p><p>正确答案：${esc(q.options[q.answer])}</p><p>${esc(q.explanation)}</p>${btn('重练本课 →','lesson',`data-id="${q.lessonId}"`,'small secondary')}</article>`).join('') : '<div class="card empty">暂无待订正错题。练习中的错题会自动出现在这里。</div>'}`;
   }
   function startSession(packId = '') { session={packId,items:packId?L.packQueue(state,packId):L.queue(state),index:0,revealed:false,retries:new Set(),day:L.dateKey()}; }
   function openWordQuiz(wrongOnly = false, packId = '') {
@@ -273,6 +283,7 @@
     window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(session.items[session.index].spanish); utterance.lang=voices[0].lang; utterance.voice=voices[0]; utterance.rate=.8; window.speechSynthesis.speak(utterance);
   }
   function exportBackup() {
+    if (storageFailed) return notify('记录暂未读取，暂不导出空备份。');
     const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
     const link=document.createElement('a'); link.href=url; link.download=`hola-${L.dateKey()}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -286,7 +297,7 @@
         if(raw.version!==1||!raw.reviews||!raw.days||!raw.lessons)throw new Error('不是受支持的 Hola 备份');
         const imported=L.restore(raw);
         if(!window.confirm(`导入 ${Object.keys(imported.reviews).length} 个词汇的记录将替换当前浏览器进度。建议先导出当前备份。继续导入？`))return;
-        localStorage.setItem(KEY,JSON.stringify(imported)); state=imported; session=null; quiz=null; render(); notify('学习记录已导入。');
+        localStorage.setItem(KEY,JSON.stringify(imported)); state=imported; storageFailed=false; session=null; quiz=null; render(); notify('学习记录已导入。');
       }catch(error){notify(`导入失败：${error.message}`);}
     }; input.click();
   }
@@ -441,6 +452,7 @@
     }
     else if(action==='goal'){if(commit(draft=>L.setGoal(draft,Number(element.dataset.goal)))){render();notify('目标已保存；今日已开始的学习目标不变。');}}
     else if(action==='speak')speak();
+    else if(action==='reload-records')reloadRecords();
     else if(action==='export')exportBackup();
     else if(action==='import')importBackup();
   });
@@ -456,7 +468,7 @@
     if(event.target.dataset.drillCheck!==undefined&&drillEditor){if(drillEditor.dirty)return;const checks=new Set(drillEditor.checks),i=Number(event.target.dataset.drillCheck);if(event.target.checked)checks.add(i);else checks.delete(i);const d=commit(s=>L.setDrillChecks(s,drillEditor.id,[...checks]));if(d){drillEditor.checks=d.checks;render();}else event.target.checked=!event.target.checked;}
  if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
   window.addEventListener('hashchange',()=>{if(route()!=='drill-review')drillReview=null;if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();window.scrollTo(0,0);});
-  window.addEventListener('storage',event=>{if(event.key===KEY){try{state=L.restore(JSON.parse(event.newValue));render();}catch{notify('另一个窗口的学习记录无法读取。');}}});
+  window.addEventListener('storage',event=>{if(event.key===KEY){try{state=readStored(event.newValue);storageFailed=false;render();}catch{storageFailed=true;render();notify('另一个窗口的记录未能读取，旧记录不会被覆盖。');}}});
   render();
   if(storageFailed)notify('原学习记录未能读取。旧记录尚未覆盖，请先检查浏览器存储。');
 })();

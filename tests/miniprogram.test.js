@@ -129,6 +129,19 @@ test('原生写入失败不前进词卡，也不显示已保存进度',()=>{
   r.wx.setStorageSync=()=>{throw new Error('quota exceeded');};session.rate({currentTarget:{dataset:{rating:'remember'}}});
   assert.equal(session.data.word.id,'w1');assert.equal(L.summary(r.state).learned,0);assert.ok(r.messages.some(m=>m.includes('未保存')));
 });
+test('原生读取失败不写临时空记录，也不导出空备份，读取恢复后保留旧进度',()=>{
+  const r=runtime(),s=L.emptyState();L.review(s,'w1','remember');r.wx.setStorageSync('',s);r.wx.setClipboardData({data:'keep-me'});
+  const read=r.wx.getStorageSync,write=r.wx.setStorageSync;let writes=0,clips=0;r.wx.getStorageSync=()=>{throw new Error('read failed');};r.wx.setStorageSync=(k,v)=>{writes++;write(k,v);};r.wx.setClipboardData=()=>{clips++;};
+  const p=r.loadPage('session');p.onLoad();p.reveal();p.rate({currentTarget:{dataset:{rating:'remember'}}});assert.equal(writes,0);assert.equal(p.data.word.id,'w1');assert.deepEqual(r.state,s);
+  const progress=r.loadPage('progress');progress.onShow();assert.equal(progress.data.readFailed,true);progress.exportData();assert.equal(clips,0);
+  r.wx.getStorageSync=read;p.rate({currentTarget:{dataset:{rating:'remember'}}});assert.equal(writes,1);assert.equal(L.summary(r.state).learned,1);assert.equal(r.state.reviews.w1.interval,s.reviews.w1.interval);assert.equal(r.state.reviews.w1.repetitions,s.reviews.w1.repetitions+1);
+});
+test('原生不覆盖未知版本，显式导入兼容备份后正常保存',()=>{
+  const r=runtime(),raw={version:2,reviews:{future:'opaque'},days:{},lessons:{}};r.wx.setStorageSync('',raw);const write=r.wx.setStorageSync;let writes=0;r.wx.setStorageSync=(k,v)=>{writes++;write(k,v);};
+  const p=r.loadPage('foundations');p.onLoad();p.open({currentTarget:{dataset:{id:'sounds'}}});p.begin();for(const q of p.lesson.questions){p.choose({currentTarget:{dataset:{index:q.answer}}});p.next();}
+  assert.equal(writes,0);assert.deepEqual(r.wx.getStorageSync(''),raw);assert.equal(p.data.phase,'quiz');
+  const s=L.emptyState();L.review(s,'w1','remember');r.wx.setClipboardData({data:JSON.stringify(s)});const progress=r.loadPage('progress');progress.importData();assert.equal(writes,1);assert.equal(L.summary(r.state).learned,1);
+});
 test('原生词汇测验答错只重排一次，订正不抬高首答正确率',()=>{
  const r=runtime(),p=r.loadPage('wordquiz');p.onLoad({});p.begin();
  p.answer('错误');assert.equal(r.state.days[L.dateKey()].words.length,0);p.next();

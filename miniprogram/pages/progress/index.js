@@ -2,11 +2,11 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   onShow() { this.refresh(); },
-  refresh() { const state = S.load(); const today = L.dateKey(); this.setData({ ...L.summary(state), goal: state.goal, mistakes: L.mistakes(state), wrongWords: L.wrongWords(state), calendar: Array.from({ length: 14 }, (_, i) => { const key = L.addDays(today, i - 13); return { key, label: key.slice(5), done: L.isCheckedIn(state.days[key]), today: key === today }; }) }); },
+  refresh() { const state = S.load(); const today = L.dateKey(); this.setData({ ...L.summary(state), readFailed: !S.isReadable(), goal: state.goal, mistakes: L.mistakes(state), wrongWords: L.wrongWords(state), calendar: Array.from({ length: 14 }, (_, i) => { const key = L.addDays(today, i - 13); return { key, label: key.slice(5), done: L.isCheckedIn(state.days[key]), today: key === today }; }) }); },
   wordRetry() { wx.navigateTo({ url: '/pages/wordquiz/index?wrong=1' }); },
   goal(e) { if (S.commit(state => L.setGoal(state, Number(e.currentTarget.dataset.goal)))) { this.refresh(); wx.showToast({ title: '已保存；今日已开始的目标不变', icon: 'none' }); } },
   retry(e) { wx.navigateTo({ url: `/pages/lesson/index?id=${e.currentTarget.dataset.id}` }); },
-  exportData() { wx.setClipboardData({ data: JSON.stringify(S.load()), success() { wx.showToast({ title: '已复制学习记录，请自行保管', icon: 'none' }); } }); },
+  exportData() { let state; try { state = S.read(); } catch (error) { return wx.showToast({ title: '记录未读取，暂不导出空备份', icon: 'none' }); } wx.setClipboardData({ data: JSON.stringify(state), success() { wx.showToast({ title: '已复制学习记录，请自行保管', icon: 'none' }); } }); },
   importData() {
     wx.getClipboardData({ success: response => {
       let imported;
