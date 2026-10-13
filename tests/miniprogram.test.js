@@ -60,6 +60,17 @@ test('原生订正提示不清除错项或提高原包分数', () => {
   p.next(); assert.equal(p.data.showHint, false);
   assert.equal(r.state.drills[pack.id].bestScore, 75);
 });
+test('原生短文大意默认收起，预览不开放练习，读后答题不显示翻译', () => {
+  const r = runtime(), p = r.loadPage('drills');
+  p.onLoad({ id: 'b2-report' }); assert.equal(p.data.showMeaning, false);
+  p.meaning(); assert.equal(p.data.showMeaning, true);
+  assert.ok(p.data.pack.meaning); p.begin(); assert.equal(p.data.phase, 'read');
+  p.open({ currentTarget: { dataset: { id: 'a1-place' } } });
+  assert.equal(p.data.showMeaning, false); p.meaning(); p.begin();
+  assert.equal(p.data.phase, 'quiz');
+  p.meaning(); assert.equal(p.data.phase, 'quiz');
+  assert.deepEqual(r.state, L.emptyState());
+});
 test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不产生主课程进度', () => {
   const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,6);
   p.select({currentTarget:{dataset:{level:'B2'}}});p.open({currentTarget:{dataset:{id:'b2-report'}}});assert.equal(p.data.unlocked,false);p.begin();assert.equal(p.data.phase,'read');

@@ -53,3 +53,25 @@ test('名词和各级订正沿用同一提示，查看不会修改学习记录',
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hola-learning-v1')))).toEqual(state);
   }
 });
+
+test('24 包中文大意可选展开，换包或刷新收起，作答时只展示西语', async ({ page }) => {
+  test.setTimeout(60000);
+  for (const pack of L.drillPacks) {
+    await page.goto('/#drill/' + pack.id);
+    await expect(page.locator('.reading-meaning')).toHaveCount(0);
+    await page.getByRole('button', { name: '看中文大意', exact: true }).click();
+    await expect(page.locator('.reading-meaning')).toHaveText(pack.meaning);
+    await expect(page.getByText(pack.reading, { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '收起中文大意', exact: true }).click();
+    await expect(page.locator('.reading-meaning')).toHaveCount(0);
+  }
+  expect(await page.evaluate(() => localStorage.getItem('hola-learning-v1'))).toBeNull();
+  await page.goto('/#drill/a1-place');
+  await page.getByRole('button', { name: '看中文大意', exact: true }).click();
+  await page.reload(); await expect(page.locator('.reading-meaning')).toHaveCount(0);
+  await page.getByRole('button', { name: '看中文大意', exact: true }).click();
+  await page.getByRole('button', { name: '开始四步练习' }).click();
+  await expect(page.locator('.reading-meaning')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '看中文大意', exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem('hola-learning-v1'))).toBeNull();
+});

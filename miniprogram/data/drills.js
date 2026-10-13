@@ -237,7 +237,7 @@ const packs = [
 packs.push(...require('./drill-extension')({ choice, text }));
 const levelNumbers = {};
 const labels = ['1 · 辨析', '2 · 填空', '3 · 纠错', '4 · 短阅读'];
-module.exports = packs.map((p, i) => ({ ...p, approach: coaching[p.id].approach, transfer: coaching[p.id].transfer, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
+module.exports = packs.map((p, i) => ({ ...p, meaning: coaching[p.id].meaning, approach: coaching[p.id].approach, transfer: coaching[p.id].transfer, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
   references: p.lessonIds.flatMap(id => course.lessons.find(l => l.id === id).references),
   questions: p.questions.map((q, j) => ({ ...q, hint: coaching[p.id].hints[j], id: `${p.id}-q${j + 1}`, title: labels[j] }))
 }));

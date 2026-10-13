@@ -24,7 +24,10 @@ const L = require('../miniprogram/lib/learning');
       await page.goto('http://127.0.0.1:4173/#drills');
       if(name==='drills-b2-mobile')await page.getByRole('button',{name:'B2',exact:true}).click();
     }
-    if(name==='drill-reading-mobile')await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+    if(name==='drill-reading-mobile'){
+      await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+      await page.getByRole('button',{name:'看中文大意',exact:true}).click();
+    }
     if(name==='drill-hint-mobile'){
       await page.goto('http://127.0.0.1:4173/#drill/a1-place');
       await page.getByRole('button',{name:'开始四步练习'}).click();
