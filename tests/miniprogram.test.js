@@ -12,7 +12,7 @@ function runtime() {
     const storageModule={exports:{}};
     vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../miniprogram/lib/storage.js'),'utf8'),{require(){return L;},wx,module:storageModule});
     const storage=storageModule.exports;
-    vm.runInNewContext(fs.readFileSync(file,'utf8'),{require(id){return id.endsWith('learning')?L:storage;},Page(value){page=value;},wx,Set,Date,Number,Array},{filename:file});
+    vm.runInNewContext(fs.readFileSync(file,'utf8'),{require(id){if (id.endsWith('learning')) return L; if (id.endsWith('storage')) return storage; return require(path.resolve(path.dirname(file), id));},Page(value){page=value;},wx,Set,Date,Number,Array},{filename:file});
     page.data=structuredClone(page.data||{});page.setData=function(value){Object.assign(this.data,value);}; return page;
   }
   return {loadPage,wx,messages,routes,get state(){return L.restore(saved);}};
@@ -30,6 +30,35 @@ test('原生名词选冠词、输入配合、完整句、错项重练与刷新�
   assert.equal(reload.data.result.score,100); assert.deepEqual(r.state.nounMistakes,{}); assert.deepEqual(r.state.days,{});
   assert.equal(L.summary(r.state).learned,0);
   const today=r.loadPage('today'); today.nouns();assert.equal(r.routes.at(-1),'/pages/nouns/index');
+});
+test('原生两类练习的提示默认收起，输入保留，翻题重置且不写成绩', () => {
+  for (const [name, id, answer] of [['nouns', 'w24', 'el'], ['drills', 'a1-place', 'soy']]) {
+    const r = runtime(), p = r.loadPage(name);
+    p.onLoad({ id }); p.begin();
+    assert.equal(p.data.showHint, false);
+    p.input({ detail: { value: '正在思考' } });
+    p.hint(); assert.equal(p.data.showHint, true);
+    assert.equal(p.data.input, '正在思考');
+    assert.ok(p.data.question.hint);
+    assert.deepEqual(r.state, L.emptyState());
+    p.answer(answer); p.hint();
+    assert.equal(p.data.feedback.correct, true);
+    p.next(); assert.equal(p.data.showHint, false);
+    assert.equal(p.data.input, '');
+    assert.deepEqual(r.state, L.emptyState());
+  }
+});
+test('原生订正提示不清除错项或提高原包分数', () => {
+  const r = runtime(), state = L.emptyState(), pack = L.drillPacks[0];
+  const answers = pack.questions.map(q => q.answers[0]); answers[1] = 'esta';
+  L.gradeDrill(state, pack.id, answers); r.wx.setStorageSync('', state);
+  const p = r.loadPage('drillreview'); p.onLoad(); p.begin(); p.hint();
+  assert.equal(p.data.showHint, true);
+  assert.deepEqual(r.state, state);
+  p.input({ detail: { value: 'esta' } }); p.submit();
+  assert.match(p.data.feedback.attention, /重音/);
+  p.next(); assert.equal(p.data.showHint, false);
+  assert.equal(r.state.drills[pack.id].bestScore, 75);
 });
 test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不产生主课程进度', () => {
   const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,6);

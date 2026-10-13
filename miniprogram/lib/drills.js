@@ -1,9 +1,6 @@
 const drillPacks = require('../data/drills');
 const index = new Map(drillPacks.map(p => [p.id, p]));
-const normalize = (text, preservePunctuation = false) => {
-  const clean = text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ');
-  return preservePunctuation ? clean : clean.replace(/^[¿¡]+/, '').replace(/[.!?。！？]+$/, '').trim();
-};
+const { checkSpanishAnswer } = require('./exercise');
 function drillUnlocked(state, id) {
   let pack = index.get(id);
   if (!pack) return false;
@@ -28,7 +25,7 @@ function drillProgress(state) {
 function evaluateDrillAnswer(id, position, answer) {
   const pack = index.get(id), q = pack && pack.questions[position];
   if (!q || !Number.isInteger(position) || typeof answer !== 'string' || !answer.trim() || answer.length > 500) throw new Error('请填写本题答案');
-  return { correct: q.answers.some(a => normalize(a, q.preservePunctuation) === normalize(answer, q.preservePunctuation)), answer: q.answers.join(' / '), explanation: q.explanation };
+  return { ...checkSpanishAnswer(answer, q.answers, { preservePunctuation: q.preservePunctuation, ignoreOpeningPunctuation: true }), explanation: q.explanation };
 }
 function gradeDrill(state, id, answers) {
   const pack = index.get(id);

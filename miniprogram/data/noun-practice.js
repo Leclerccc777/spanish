@@ -19,8 +19,8 @@ module.exports = rows.map(([id, noun, meaning, gender, singular, plural, phrase,
   note: id === 'w24' ? 'agua 常作不可数名词；las aguas 常指不同水域或不同来源的水，不能直接理解成几杯水。这里句子练单数。' : '本组只练所列常见义项与词形。',
   reviewScope: '基础词义与词性沿用既有核对记录；新增词形、搭配与练习待教师审稿。',
   questions: [
-    { id: `${id}-article`, kind: 'article', title: '1 · 选冠词', prompt: `紧接名词前，补定冠词：___ ${noun}（单数）`, options: ['el', 'la', 'los', 'las'], answer: singular.split(' ')[0], explanation: `${singular}：${gender}名词。${id === 'w24' ? '这里的 el 不改变 agua 的阴性。' : '单数定冠词与名词的语法性配合。'}` },
-    { id: `${id}-adjective`, kind: 'text', title: '2 · 改形容词', prompt: `${frame} 把 ${id === 'w24' ? 'frío' : 'pequeño'} 改成配合主语的词形，只填空格。`, answer: adjective, explanation: rule },
-    { id: `${id}-sentence`, kind: 'text', title: '3 · 补完整句', prompt: `写出整句：${frame}（${translation}）`, answer: sentence, explanation: `完整句：${sentence} ${rule}` }
+    { id: `${id}-article`, kind: 'article', title: '1 · 选冠词', prompt: `紧接名词前，补定冠词：___ ${noun}（单数）`, options: ['el', 'la', 'los', 'las'], answer: singular.split(' ')[0], hint: id === 'w24' ? 'agua 是阴性，但以重读的 a 开头。想想紧挨它前面的单数冠词有什么特别之处。' : `先想起把 ${noun} 和冠词一起读的样子，再看这里是单数还是复数。`, explanation: `${singular}：${gender}名词。${id === 'w24' ? '这里的 el 不改变 agua 的阴性。' : '单数定冠词与名词的语法性配合。'}` },
+    { id: `${id}-adjective`, kind: 'text', title: '2 · 改形容词', prompt: `${frame} 把 ${id === 'w24' ? 'frío' : 'pequeño'} 改成配合主语的词形，只填空格。`, answer: adjective, hint: id === 'w24' ? '冠词虽然用了 el，agua 仍是阴性。形容词要跟名词的性配合。' : `先看 ${plural} 是什么性、几个。形容词的结尾也要跟着一起变化。`, explanation: rule },
+    { id: `${id}-sentence`, kind: 'text', title: '3 · 补完整句', prompt: `写出整句：${frame}（${translation}）`, answer: sentence, hint: '先读题目里的中文意思，再把已给出的句子框架完整写下，最后补上刚才练过的形容词。不要只填一个词。', explanation: `完整句：${sentence} ${rule}` }
   ]
 }));

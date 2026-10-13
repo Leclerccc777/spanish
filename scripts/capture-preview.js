@@ -9,7 +9,7 @@ const L = require('../miniprogram/lib/learning');
   const output = path.resolve(__dirname, '../docs/screenshots');
   fs.mkdirSync(output, { recursive: true });
   const requested = new Set(process.argv.slice(2));
-  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
+  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-hint-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
     if (requested.size && !requested.has(name)) continue;
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, timezoneId: 'Asia/Shanghai' });
     await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
@@ -25,6 +25,14 @@ const L = require('../miniprogram/lib/learning');
       if(name==='drills-b2-mobile')await page.getByRole('button',{name:'B2',exact:true}).click();
     }
     if(name==='drill-reading-mobile')await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+    if(name==='drill-hint-mobile'){
+      await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+      await page.getByRole('button',{name:'开始四步练习'}).click();
+      await page.locator('[data-action="drill-answer"][data-answer="soy"]').click();
+      await page.getByRole('button',{name:'下一步'}).click();
+      await page.fill('#drill-answer','est');
+      await page.getByRole('button',{name:'需要一点提示'}).click();
+    }
     if(name==='drill-review-mobile'){
       const pack=L.drillPacks[0];await page.goto('http://127.0.0.1:4173/#drill/'+pack.id);await page.getByRole('button',{name:'开始四步练习'}).click();
       for(const [i,q] of pack.questions.entries()){

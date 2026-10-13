@@ -1,13 +1,18 @@
 // 原创受控练习；复用既有课程依据，新增材料待教师审稿。
 // 等级是本站教学顺序，不是官方逐题定级。
 const course = require('./course');
+const coaching = require('./drill-coaching');
 const choice = (prompt, options, answer, explanation) => ({ kind: 'choice', prompt, options, answers: [options[answer]], explanation });
 const text = (prompt, answers, explanation) => ({ kind: 'text', prompt, answers: Array.isArray(answers) ? answers : [answers], explanation });
 const packs = [
   {
     id: 'a1-place', level: 'A1', title: '我是谁，东西在哪里', lessonIds: ['g2', 'g4', 'g8'],
     goal: '区分身份、特定事物的位置和某处有某物。', recycled: ['el libro', 'la mesa', 'la casa'],
-    rules: ['身份用 ser：Soy estudiante。位置用 estar：El libro está en la mesa。', '介绍某处有某物，常用 hay + 不定名词：Hay un libro en la mesa。hay 不随数量改变。', '不能只按“永久 / 临时”判断 ser / estar；本包只练身份、位置与存在。'],
+    rules: [
+      "介绍“我是谁”，用 ser：Soy estudiante.（我是学生。）先把 soy 和自己的身份连起来说。",
+      "说“这本书在哪里”，用 estar：El libro está en la mesa.（这本书在桌上。）多个物品则用 están。",
+      "第一次告诉别人“这里有……”，用 hay：Hay un libro / dos libros.（有一本书 / 两本书。）数量变了，hay 不变。不要只靠“永久或临时”选择 ser / estar。"
+    ],
     examples: [['Soy estudiante. Estoy en casa.', '我是学生。我在家。'], ['Hay dos libros. Los libros están en la mesa.', '有两本书。这两本书在桌上。']],
     reading: 'Soy estudiante y estoy en casa. Hay una mesa en mi habitación. Mi libro está en la mesa.',
     glossary: 'habitación：房间；mi：我的；en：在……里面或上面。',
@@ -22,7 +27,11 @@ const packs = [
   {
     id: 'a1-routine', level: 'A1', title: '把每天的动作说出来', lessonIds: ['g5', 'g6'],
     goal: '按人称改变规则现在时，并把几个动作串起来。', recycled: ['estudiante', 'casa', 'libro'],
-    rules: ['规则现在时：yo estudio / como / vivo；nosotros estudiamos / comemos / vivimos。', '西语可省略人称主语，但动词仍要配合：Estudio español。', 'no 放在变位动词前：No trabajo hoy。'],
+    rules: [
+      "说“我做”，先练 yo estudio / como / vivo（我学习 / 吃 / 住）；说“我们做”，换成 estudiamos / comemos / vivimos。先看做事的人，再换结尾。",
+      "Estudio español. 就能表示“我学习西语”，不必每次都加 yo；动词本身已经提示是谁在做。",
+      "想说“不做”，把 no 放在变过形式的动词前：No trabajo hoy.（我今天不工作。）"
+    ],
     examples: [['Estudio español y leo en casa.', '我学习西语并在家阅读。'], ['Vivimos aquí. No trabajamos hoy.', '我们住在这里。我们今天不工作。']],
     reading: 'Ana vive en una ciudad pequeña. Estudia español por la mañana. Por la tarde trabaja. No trabaja los domingos.',
     glossary: 'por la mañana / tarde：在早上 / 下午；los domingos：每逢周日。',
@@ -37,7 +46,11 @@ const packs = [
   {
     id: 'a1-likes', level: 'A1', title: '喜欢一个东西，也喜欢做事情', lessonIds: ['g7'],
     goal: '区分 gusta / gustan，并给出简单理由。', recycled: ['estudiar', 'leer', 'libro'],
-    rules: ['me gusta + 单数名词或不定式：Me gusta el café / leer。', 'me gustan + 复数名词：Me gustan los libros；喜欢的东西是语法主语。', 'porque 接理由：Me gusta leer porque aprendo。'],
+    rules: [
+      "喜欢一个东西，用 me gusta：Me gusta el café. 喜欢做一件事，也用 me gusta：Me gusta leer.（我喜欢阅读。）leer 保持动词原形。",
+      "喜欢多个东西，用 me gustan：Me gustan los libros.（我喜欢书。）先看喜欢的东西是否为复数，再决定要不要加 n。",
+      "想告诉别人为什么喜欢，用 porque 接理由：Me gusta leer porque aprendo.（我喜欢阅读，因为能学到东西。）"
+    ],
     examples: [['Me gusta estudiar español.', '我喜欢学习西语。'], ['Me gustan las manzanas.', '我喜欢苹果。']],
     reading: 'A Luis le gusta el café. También le gustan las manzanas. Le gusta leer en casa porque aprende palabras nuevas.',
     glossary: 'también：也；aprende：学到；palabras nuevas：新词。',
@@ -52,7 +65,11 @@ const packs = [
   {
     id: 'a2-weekend', level: 'A2', title: '昨天发生了什么', lessonIds: ['g14'],
     goal: '用明确过去时间与顺序词叙述已结束的活动。', recycled: ['leer', 'gustar', 'ciudad'],
-    rules: ['已结束的活动可用简单过去时：visité、compré、comí。', 'ir 的第一人称为 fui，ver 为 vi。主语变化也要改变动词。', 'primero、después、al final 帮助交代顺序；先练完整事件，背景描写留到 B1。'],
+    rules: [
+      "说昨天已经结束的一次活动，可以用简单过去时：Ayer visité un museo.（昨天我参观了博物馆。）先交代时间，再说活动。",
+      "“我去了”和“我看了”要记特殊形式 fui 和 vi；换成别的人做，也要换动词。",
+      "用 primero（先）、después（然后）、al final（最后）帮助别人跟上事情的顺序。这一包先把事件讲清楚。"
+    ],
     examples: [['Ayer visité un museo. Después comí en casa.', '昨天我参观了博物馆。之后在家吃饭。'], ['Ana compró una entrada.', '安娜买了一张入场券。']],
     reading: 'El sábado visité a una amiga. Primero comimos en su casa. Después fuimos al cine y vimos una película. Al final volví a casa.',
     glossary: 'cine：电影院；comimos / fuimos / vimos：我们吃了 / 去了 / 看了；volví：我回去了。',
@@ -67,7 +84,11 @@ const packs = [
   {
     id: 'a2-shopping', level: 'A2', title: '在商店完成一次请求', lessonIds: ['g13', 'g16'],
     goal: '指称物品、提出请求，并用宾语代词避免重复。', recycled: ['café', 'pequeño', 'gustar'],
-    rules: ['esta / estas 配合阴性单数 / 复数：esta camisa、estas camisas。', 'la / las 指代阴性单数 / 复数直接宾语：La compro、Las compro。', '¿Puedes + 不定式, por favor? 是一种常见请求；礼貌还取决于语境和语调。'],
+    rules: [
+      "指一件衬衫，说 esta camisa；指几件，说 estas camisas。camisa 是阴性，指示词也要配合单复数。",
+      "已经说过衬衫，再说“我买它”可用 La compro；买几件则用 Las compro。la / las 代替刚提到的衬衫。",
+      "请求帮助可以说 ¿Puedes ayudarme, por favor?（你能帮我一下吗？）Puedes 后用动词原形；说话时也留意语气和场合。"
+    ],
     examples: [['¿Puedes ayudarme, por favor?', '你能帮我一下吗？'], ['Estas camisas son pequeñas. Las compro.', '这些衬衫是小号的。我买下它们。']],
     reading: 'Ana está en una tienda. Le gusta una camisa, pero esta talla es pequeña. Pregunta: «¿Puedes ayudarme, por favor? Necesito una talla más grande».',
     glossary: 'talla：尺码；más grande：更大的；pregunta：她问。',
@@ -82,7 +103,11 @@ const packs = [
   {
     id: 'a2-plans', level: 'A2', title: '比较两个安排，再做选择', lessonIds: ['g8', 'g9', 'g15'],
     goal: '比较地点，根据现实条件商量计划。', recycled: ['casa', 'ciudad', 'pequeño'],
-    rules: ['más + 形容词 + que 表示更……；tan + 形容词 + como 表示同等程度。', 'ir a + 不定式表达安排：Vamos a visitar un museo。', '现实条件常用 si + 现在时：Si llueve, vamos al museo。不要把条件当作已发生事实。'],
+    rules: [
+      "比较“更小”，用 más pequeño que；比较“一样小”，用 tan pequeño como。把两组词一起记，别只背 más 或 tan。",
+      "说接下来的安排，用 ir a 加动词原形：Vamos a visitar un museo.（我们打算参观博物馆。）",
+      "给计划加一个可能的条件：Si llueve, vamos al museo.（如果下雨，我们就去博物馆。）这里 si 后用现在时；下雨还只是条件。"
+    ],
     examples: [['Este museo es más pequeño que el otro.', '这座博物馆比另一座小。'], ['Si hace sol, podemos ir a la playa.', '如果晴天，我们可以去海滩。']],
     reading: 'Mañana vamos a visitar la ciudad. Si hace sol, vamos a la playa. Si llueve, vamos al museo. El museo está más cerca del hotel que la playa.',
     glossary: 'llueve：下雨；más cerca：更近；hotel：酒店；playa：海滩。',
@@ -97,7 +122,11 @@ const packs = [
   {
     id: 'b1-story', level: 'B1', title: '用背景衬托一次变化', lessonIds: ['g17'],
     goal: '把过去习惯、正在进行的背景和一次发生的事件连接起来。', recycled: ['ciudad', 'estudiar', 'ayer'],
-    rules: ['未完成过去时常交代习惯与背景：vivía、estudiaba。', '简单过去时推动已结束事件：me mudé、sonó。不能只按时间长短判断。', 'cuando 可连接背景与事件：Estudiaba cuando sonó el teléfono。'],
+    rules: [
+      "交代过去的生活、习惯或当时的背景，常用未完成过去时：De niña vivía aquí.（小时候她住在这里。）",
+      "讲一次发生并结束的事件，用简单过去时推进故事：Me mudé.（我搬了家。）选择时看叙述作用，不只看持续多久。",
+      "把背景和事件接起来：Estudiaba cuando sonó el teléfono.（我正在学习时，电话响了。）学习是背景，铃响是发生的事件。"
+    ],
     examples: [['De niño vivía en una ciudad pequeña.', '小时候我住在一座小城市。'], ['Estudiaba cuando sonó el teléfono.', '我正在学习时，电话响了。']],
     reading: 'Cuando era pequeña, Ana vivía en una ciudad tranquila. Leía cada tarde. Un día se mudó a Madrid. La primera noche estudiaba cuando sonó el teléfono: era su amiga.',
     glossary: 'se mudó：她搬了家；sonó：响了；cada tarde：每天下午。',
@@ -112,7 +141,11 @@ const packs = [
   {
     id: 'b1-advice', level: 'B1', title: '针对困难给出建议', lessonIds: ['g18', 'g21'],
     goal: '说明学习困难，向别人提出建议并交代目的。', recycled: ['leer', 'estudiar', 'porque'],
-    rules: ['对另一主语提出建议：Te aconsejo que estudies。', '同一主语表达目的：Estudio para aprender；目的面向另一主语：Hablo despacio para que me entiendas。', '当前虚拟式常见词形：estudiar → estudies（tú），leer → leas，entender → entiendas。'],
+    rules: [
+      "给另一个人建议，说 Te aconsejo que estudies.（我建议你学习。）提出建议的是我，去学习的是你，que 后用虚拟式。",
+      "同一个人说自己的目的，用 para 加动词原形：Estudio para aprender. 若目的涉及另一个人，用 para que：Hablo despacio para que me entiendas.（我慢慢说，好让你听懂。）",
+      "先练“你”的几个形式：estudies、leas、entiendas。用它们分别说学习、阅读和听懂的建议或目的。"
+    ],
     examples: [['Te aconsejo que leas en voz alta.', '我建议你大声读。'], ['Hablo despacio para que me entiendas.', '我慢慢说，好让你听懂我。']],
     reading: 'Luis quiere mejorar su pronunciación. Ana le aconseja que lea en voz alta cada día. También habla despacio para que Luis la entienda. Luis repasa para recordar palabras.',
     glossary: 'en voz alta：大声；despacio：慢慢地；repasa：复习；la entienda：听懂她。',
@@ -127,7 +160,11 @@ const packs = [
   {
     id: 'b1-opinion', level: 'B1', title: '把观点与信息来源分开', lessonIds: ['g20', 'g22'],
     goal: '提出看法、注明信息来源，并用理由支持观点。', recycled: ['porque', 'aprender', 'libro'],
-    rules: ['典型肯定判断：Creo que es útil；典型否定判断：No creo que sea útil。', 'según + 来源帮助交代信息；引用一个来源并不自动证明结论。', 'pero 可提出限制，porque 可交代理由。真实语气选择还与引用、强调等语境有关。'],
+    rules: [
+      "直接说自己的肯定判断：Creo que es útil.（我觉得它有用。）典型地否定这个判断：No creo que sea útil.（我不觉得它有用。）",
+      "用 según 标明信息来自谁：Según Ana,…（据安娜说，……）。再想一想，来源给了什么依据，不要只因为有人说过就下结论。",
+      "先用 porque 说明理由，再用 pero 补充限制。这一包练常见肯定与否定判断；引用或强调等语境也会影响实际语气。"
+    ],
     examples: [['Creo que este curso es útil porque practicamos.', '我认为这门课有用，因为我们练习。'], ['No creo que sea suficiente.', '我认为那还不够。']],
     reading: 'Según la profesora, leer ayuda a aprender palabras. Ana cree que es útil, pero no cree que sea suficiente. También necesita practicar conversaciones. Su opinión se basa en su experiencia.',
     glossary: 'suficiente：足够的；se basa en：基于；conversaciones：对话。',
@@ -142,7 +179,11 @@ const packs = [
   {
     id: 'b2-concession', level: 'B2', title: '承认限制，再说明立场', lessonIds: ['g27', 'g31', 'g32'],
     goal: '区分事实让步与假设让步，组织理由与限制。', recycled: ['creo que', 'porque', 'experiencia'],
-    rules: ['本包对照：断言已知事实可用 aunque + 直陈式；把条件当作假设可用虚拟式。', '语气还受共享信息、话语立场影响；不是所有“真实”都只能用直陈式。', 'sin embargo 标记转折，por lo tanto 引出结论；结论要由前面的理由支撑。'],
+    rules: [
+      "承认费用这个事实，再说仍然支持：Aunque cuesta dinero, lo apoyo. 把费用设为未确定的可能性：Aunque cueste dinero, lo apoyaré. 先区分说话者的立场。",
+      "已经真实存在的信息，也可能因双方已知或话语立场而用虚拟式。因此这里练的是两种明确语境，不把“真实 / 假设”当作所有情况的唯一标准。",
+      "用 sin embargo 提出限制，用 por lo tanto 得出结论。写完后检查：前面的理由真的能支持这个结论吗？"
+    ],
     examples: [['Aunque cuesta dinero, apoyo el proyecto.（我断言确实有费用）', '尽管有费用，我支持这个项目。'], ['Aunque cueste dinero, lo apoyaré.（即使需要费用）', '即使需要费用，我也将支持。']],
     reading: 'El proyecto cuesta dinero y requiere tiempo. Aunque cuesta dinero, Marta lo apoya porque ayuda al barrio. Sin embargo, propone empezar con una prueba pequeña. Por lo tanto, recomienda evaluar los resultados antes de ampliarlo.',
     glossary: 'requiere：需要；prueba：试行；ampliarlo：扩大它；evaluar：评估。',
@@ -157,7 +198,11 @@ const packs = [
   {
     id: 'b2-hypothesis', level: 'B2', title: '讨论一个尚未实现的方案', lessonIds: ['g26', 'g19'],
     goal: '用假设条件说明方案、结果与取舍。', recycled: ['estudiar', 'aconsejar', 'proyecto'],
-    rules: ['本包练不现实或较难实现的现在 / 将来假设：si + 未完成过去虚拟式，主句用条件式。', 'tuviera / tuviese 都是可用的同类形式；主句例：estudiaría、haríamos。', '不要把条件式放入本题的 si 从句；现实条件仍可用 si + 现在时。'],
+    rules: [
+      "设想不现实或较难实现的现在、将来条件：Si tuviera más tiempo, estudiaría más.（如果有更多时间，我会多学一些。）si 后用未完成过去虚拟式，结果用条件式。",
+      "tuviera 和 tuviese 都可以表示这里的假设；结果部分可用 estudiaría、haríamos。先把条件与结果作为一整句练。",
+      "在这一类假设中，不把条件式放进 si 从句。对比现实中可能的条件：Si tengo tiempo, estudio.（如果有时间，我就学习。）"
+    ],
     examples: [['Si tuviera más tiempo, estudiaría cada día.', '如果我有更多时间，我会每天学习。'], ['Si hubiera más recursos, haríamos un curso gratuito.', '如果有更多资源，我们会办免费课程。']],
     reading: 'El equipo no tiene suficiente dinero. Si tuviera más recursos, ofrecería clases gratuitas. Con el presupuesto actual, solo puede organizar un grupo pequeño. Por eso propone empezar con diez participantes y revisar el plan después.',
     glossary: 'recursos：资源；presupuesto：预算；ofrecería：会提供；participantes：参与者。',
@@ -172,7 +217,11 @@ const packs = [
   {
     id: 'b2-report', level: 'B2', title: '转述信息，并核对时间参照', lessonIds: ['g29', 'g31'],
     goal: '区分原话、转述时间与自己的判断。', recycled: ['según', 'creo que', 'ayer'],
-    rules: ['过去的转述可出现“从过去看未来”：Dijo que vendría。并不是任何转述都必须机械改时态。', '时间词按实际参照改变；本包明确跨日转述时，把原话的 mañana 对应为 al día siguiente。', '转述只说明某人说过什么，不证明内容已经发生或得到验证。'],
+    rules: [
+      "从过去的说话时间看将来的计划，可说 Dijo que vendría.（他 / 她说会来。）先确定时间关系，不把所有转述都机械地改成过去时。",
+      "周一原话中的 mañana 是周二；周三转述时，用 al día siguiente（次日）保留这个参照。先标出具体日期，再选时间词。",
+      "“她说会提交”只说明一个计划。若不知道是否完成，加上 No sabemos si…，把转述、事实和未知事项分清。"
+    ],
     examples: [['El lunes Ana dijo: «Vendré mañana».', '周一安娜说：“我明天来。”'], ['El miércoles: Ana dijo el lunes que vendría al día siguiente.', '周三转述：安娜周一说她次日会来。']],
     reading: 'El lunes Ana anunció: «Presentaré el informe mañana». El miércoles Luis escribió que Ana había anunciado que presentaría el informe al día siguiente. Luis aclaró que no sabía si lo había presentado.',
     glossary: 'anunció：宣布；había anunciado：此前宣布过；aclaró：澄清；informe：报告。',
@@ -188,7 +237,7 @@ const packs = [
 packs.push(...require('./drill-extension')({ choice, text }));
 const levelNumbers = {};
 const labels = ['1 · 辨析', '2 · 填空', '3 · 纠错', '4 · 短阅读'];
-module.exports = packs.map((p, i) => ({ ...p, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
+module.exports = packs.map((p, i) => ({ ...p, approach: coaching[p.id].approach, transfer: coaching[p.id].transfer, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
   references: p.lessonIds.flatMap(id => course.lessons.find(l => l.id === id).references),
-  questions: p.questions.map((q, j) => ({ ...q, id: `${p.id}-q${j + 1}`, title: labels[j] }))
+  questions: p.questions.map((q, j) => ({ ...q, hint: coaching[p.id].hints[j], id: `${p.id}-q${j + 1}`, title: labels[j] }))
 }));

@@ -1,8 +1,9 @@
-/* global HolaLearning */
+/* global HolaLearning, HolaExerciseUI */
 (() => {
   'use strict';
   const L = window.HolaLearning;
   const C = L.course;
+  const UI = window.HolaExerciseUI;
   const KEY = 'hola-learning-v1';
   const root = document.getElementById('app');
   let storageFailed = false;
@@ -22,7 +23,7 @@
   let drillLevel='A1', drillQuiz=null, drillEditor=null, drillReview=null;
   let monthDay=0;
   let toastTimer;
-  const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = UI.escape;
   const paths = {
     home: '<path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/>',
     book: '<path d="M12 5c-3-2-7-2-10-1v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1z"/><path d="M12 5v15"/>',
@@ -41,7 +42,7 @@
     globe: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>'
   };
   const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.book}</svg>`;
-  const btn = (label, action, attrs = '', cls = '') => `<button class="btn ${cls}" data-action="${action}" ${attrs}>${label}</button>`;
+  const btn = UI.button;
   const pill = (label, warm = false) => `<span class="pill${warm ? ' warm' : ''}">${esc(label)}</span>`;
   const percent = (value, total) => Math.min(100, Math.round(value / total * 100));
   const meter = value => `<div class="meter"><span style="width:${value}%"></span></div>`;
@@ -106,8 +107,7 @@
   function submitNounAnswer(answer) {
     if(!nounQuiz||nounQuiz.feedback||nounQuiz.result)return;
     if(typeof answer!=='string'||!answer.trim())return notify('请先填写答案。');
-    nounQuiz.feedback=L.evaluateNounAnswer(nounQuiz.id,nounQuiz.index,answer);
-    nounQuiz.input=answer;nounQuiz.answers[nounQuiz.index]=answer;render();
+    L.answerExercise(nounQuiz,answer,L.evaluateNounAnswer);render();
   }
   function nounPage(id) {
     const n=L.nounLessons.find(n=>n.id===id);
@@ -116,7 +116,7 @@
     if(!nounQuiz||nounQuiz.id!==id)return `<section class="reading">${head}<div class="card"><h2>把冠词一起记</h2><p class="example" lang="es">${esc(n.singular)} → ${esc(n.plural)}</p><p class="example" lang="es">${esc(n.phrase)}</p><p>${esc(n.phraseTranslation)}</p><p>${esc(n.rule)}</p><div class="notice">${esc(n.note)}</div><p class="example" lang="es">${esc(n.sentence)}</p><p>${esc(n.translation)}</p></div><p class="tiny">${esc(n.reviewScope)}</p><div class="card"><h2>本组参考</h2><p><a href="${esc(L.findWord(n.id).dictionaryUrl)}" target="_blank" rel="noopener noreferrer">查原词典义项 ↗</a></p>${n.references.map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}</div>${btn('开始三步练习 →','noun-begin',`data-id="${id}"`)}</section>`;
     if(nounQuiz.result){const r=nounQuiz.result;return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>三步练习已保存</h2><p>答对 ${r.correct} / ${r.total} 题。错项保留在名词列表，下次答对即可移除。</p><p class="tiny">仅检查本题指定答案，不判断自由表达能力；不计每日打卡或词汇掌握。</p><div class="actions">${btn('再练这三步','noun-begin',`data-id="${id}"`)}${btn('换一个名词 →','nouns','','secondary')}</div></div></section>`;}
     const q=n.questions[nounQuiz.index],f=nounQuiz.feedback;
-    return `<section class="reading">${head}${pill(`${nounQuiz.index+1} / 3`)}<h2 class="question-title">${esc(q.title)}</h2><p>${esc(q.prompt)}</p>${q.kind==='article'?q.options.map(o=>`<button class="choice ${f&&o===q.answer?'correct':f&&o===nounQuiz.input?'wrong':''}" data-action="noun-answer" data-answer="${o}" ${f?'disabled':''}>${o}</button>`).join(''):`<label for="noun-answer">西语答案</label><input id="noun-answer" class="search-input spelling-input" value="${esc(nounQuiz.input)}" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false" ${f?'disabled':''}/><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ'].map(c=>`<button data-action="noun-accent" data-char="${c}" aria-label="添加 ${c}" ${f?'disabled':''}>${c}</button>`).join('')}</div><p class="tiny">大小写、空格和句末标点可灵活；重音与 ñ 要准确。</p>${f?'':btn('检查答案','noun-submit')}`}${f?`<div class="feedback" role="status"><strong>${f.correct?'✓ 答对了':'再看一下配合与拼写'}</strong><p lang="es">参考答案：${esc(f.answer)}</p><p>${esc(f.explanation)}</p></div>${btn(nounQuiz.index===2?'保存并查看结果':'下一步 →','noun-next')}`:''}</section>`;
+    return `<section class="reading">${head}${pill(`${nounQuiz.index+1} / 3`)}<h2 class="question-title">${esc(q.title)}</h2><p>${esc(q.prompt)}</p>${UI.hint(q,nounQuiz,'noun')}${UI.controls({question:q,session:nounQuiz,prefix:'noun',limit:200,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'noun-next',label:nounQuiz.index+1===nounQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
   }
   function drillsPage() {
     const packs=L.drillProgress(state).filter(p=>p.level===drillLevel);
@@ -131,11 +131,11 @@
     if(drillReview.phase==='empty')return `<section class="reading">${back}${head}<div class="card empty">当前范围没有待订正项。</div>${btn('查看其他等级','review-setup','','secondary')}</section>`;
     if(drillReview.phase==='result')return `<section class="reading">${back}${head}<div class="card result-card"><div class="result-score">${Math.round(drillReview.firstCorrect/drillReview.original*100)}%</div><h2>本轮首次正确率</h2><p>首次答对 ${drillReview.firstCorrect} / ${drillReview.original} 项；还剩 ${count} 项待订正。</p><p class="tiny">重练后的正确答案不改变首次统计，原包分数与打卡保持原值。</p>${btn('再看待订正项','review-setup')}</div></section>`;
     const q=drillReview.items[drillReview.index],f=drillReview.feedback;
-    return `<section class="reading">${back}${head}${pill(`${q.level} · ${drillReview.index+1} / ${drillReview.items.length}`)}<p class="tiny">${esc(q.packTitle)} · ${esc(q.title)}</p>${q.position===3?`<div class="card"><p class="example" lang="es">${esc(q.reading)}</p><p class="tiny">${esc(q.glossary)}</p></div>`:''}<h2 class="question-title">${esc(q.prompt)}</h2>${q.kind==='choice'?q.options.map(o=>`<button class="choice ${f&&q.answers.includes(o)?'correct':f&&o===drillReview.input?'wrong':''}" data-action="review-answer" data-answer="${esc(o)}" ${f?'disabled':''}>${esc(o)}</button>`).join(''):`<label for="review-answer">订正答案</label><input id="review-answer" class="search-input spelling-input" value="${esc(drillReview.input)}" maxlength="500" autocomplete="off" spellcheck="false" ${f?'disabled':''}/><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="review-accent" data-char="${c}" aria-label="添加 ${c}" ${f?'disabled':''}>${c}</button>`).join('')}</div>${f?'':btn('检查订正','review-submit')}`}${f?`<div class="feedback"><strong>${f.correct?'✓ 答对了，错项已移除':'再看一下规则，本轮稍后重练'}</strong><p lang="es">${esc(f.answer)}</p><p>${esc(f.explanation)}</p></div>${btn(drillReview.index+1===drillReview.items.length?'查看订正结果':'下一项 →','review-next')}`:''}</section>`;
+    return `<section class="reading">${back}${head}${pill(`${q.level} · ${drillReview.index+1} / ${drillReview.items.length}`)}<p class="tiny">${esc(q.packTitle)} · ${esc(q.title)}</p>${q.position===3?`<div class="card"><p class="example" lang="es">${esc(q.reading)}</p><p class="tiny">${esc(q.glossary)}</p></div>`:''}<h2 class="question-title">${esc(q.prompt)}</h2>${UI.hint(q,drillReview,'review')}${UI.controls({question:q,session:drillReview,prefix:'review',limit:500,label:'订正答案',submitLabel:'检查订正',accents:'áéíóúüñ¿¡'})}${UI.feedback(f,{action:'review-next',correctLabel:'✓ 答对了，错项已移除',wrongLabel:'再看一下，本轮稍后再试一次',label:drillReview.index+1===drillReview.items.length?'查看订正结果':'下一项 →'})}</section>`;
   }
   function beginDrillReview() {
     const items=L.drillReviewQueue(state,drillReview.level);
-    Object.assign(drillReview,{phase:items.length?'quiz':'empty',items,original:items.length,index:0,firstCorrect:0,answered:new Set(),retries:new Set(),input:'',feedback:null});render();
+    Object.assign(drillReview,{phase:items.length?'quiz':'empty',items,original:items.length,index:0,firstCorrect:0,answered:new Set(),retries:new Set(),input:'',feedback:null,showHint:false});render();
   }
   function submitDrillReview(answer) {
     if(!drillReview||drillReview.phase!=='quiz'||drillReview.feedback)return;
@@ -149,7 +149,7 @@
   }
   function drillOutput(p, unlocked) {
     const e=drillEditor;
-    return `<div class="card"><h2>5 · 写自己的表达</h2><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。保存版本 ${e.revisions}，此处不自动评分。</p><div class="actions">${e.dirty?btn('撤销未保存修改','drill-reset','','secondary'):''}${!e.dirty&&e.hasPrevious?btn('恢复上一保存版本','drill-revert','','secondary'):''}</div><h3>自己检查，再修改</h3><p class="tiny">完成后自行勾选；修改文字并保存后重新自查，不是能力评分。</p>${p.output.rubric.map((r,i)=>`<label class="week-check"><input type="checkbox" data-drill-check="${i}" ${e.checks.includes(i)?'checked':''} ${!unlocked||e.dirty||!e.saved||!e.text.trim()?'disabled':''}/> ${esc(r)}</label>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
+    return `<div class="card"><h2>先开口试一句</h2><p>${esc(p.transfer)}</p><h2>5 · 写自己的表达</h2><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。保存版本 ${e.revisions}，此处不自动评分。</p><div class="actions">${e.dirty?btn('撤销未保存修改','drill-reset','','secondary'):''}${!e.dirty&&e.hasPrevious?btn('恢复上一保存版本','drill-revert','','secondary'):''}</div><h3>自己检查，再修改</h3><p class="tiny">完成后自行勾选；修改文字并保存后重新自查，不是能力评分。</p>${p.output.rubric.map((r,i)=>`<label class="week-check"><input type="checkbox" data-drill-check="${i}" ${e.checks.includes(i)?'checked':''} ${!unlocked||e.dirty||!e.saved||!e.text.trim()?'disabled':''}/> ${esc(r)}</label>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
   }
   function drillPage(id) {
     const p=L.drillPacks.find(p=>p.id===id);
@@ -157,17 +157,16 @@
     if(!drillEditor||drillEditor.id!==id){const d=state.drillDrafts[id];drillEditor={id,text:d?d.text:'',saved:!!d,revisions:d?d.revisions:0,checks:d?d.checks:[],hasPrevious:!!d&&typeof d.previousText==='string',dirty:false,showModel:false};}
     const unlocked=L.drillUnlocked(state,id),previous=L.drillPacks.find(d=>d.id===p.previousId);
     const head=`${btn(`${icon('back')} 返回分级练习`,'drills','','back')}${heading(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`,p.title,p.goal)}`;
-    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card"><h2>先理解规则</h2><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}<div class="card"><h2>先读一小段</h2><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p></div>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}${drillOutput(p,unlocked)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
+    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card"><h2>先想清楚要表达什么</h2><p>${esc(p.approach)}</p><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}<div class="card"><h2>先读一小段</h2><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p></div>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}${drillOutput(p,unlocked)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
     if(drillQuiz.result){const r=drillQuiz.result,next=L.nextDrillPack(state,id);return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>${r.passed?'基础练习已达标':'再巩固一次'}</h2><p>答对 ${r.correct} / ${r.total} 题；错项保留在列表，重新练习答对后移除。</p><p class="tiny">75% 是本包继续练习的门槛，不能证明语言等级；个人表达需自行检查与反馈。</p><div class="actions">${btn('写自己的表达 →','drill-output')}${btn('重练四步练习','drill-begin',`data-id="${id}"`,'secondary')}${r.passed&&next?btn('继续下一包 →','drill',`data-id="${next.id}"`,'secondary'):''}</div></div></section>`;}
     const q=p.questions[drillQuiz.index],f=drillQuiz.feedback;
-    return `<section class="reading">${head}${pill(`${drillQuiz.index+1} / 4`)}<h2 class="question-title">${esc(q.title)}</h2>${drillQuiz.index===3?`<div class="card"><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">${esc(p.glossary)}</p></div>`:''}<p>${esc(q.prompt)}</p>${q.kind==='choice'?q.options.map(o=>`<button class="choice ${f&&q.answers.includes(o)?'correct':f&&o===drillQuiz.input?'wrong':''}" data-action="drill-answer" data-answer="${esc(o)}" ${f?'disabled':''}>${esc(o)}</button>`).join(''):`<label for="drill-answer">西语答案</label><input id="drill-answer" class="search-input spelling-input" value="${esc(drillQuiz.input)}" maxlength="500" autocomplete="off" autocapitalize="off" spellcheck="false" ${f?'disabled':''}/><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ'].map(c=>`<button data-action="drill-accent" data-char="${c}" aria-label="添加 ${c}" ${f?'disabled':''}>${c}</button>`).join('')}</div><p class="tiny">重音与 ñ 要准确；本题只核对指定词形和改写。</p>${f?'':btn('检查答案','drill-submit')}`}${f?`<div class="feedback" role="status"><strong>${f.correct?'✓ 答对了':'再看一下语境和词形'}</strong><p lang="es">参考答案：${esc(f.answer)}</p><p>${esc(f.explanation)}</p></div>${btn(drillQuiz.index===3?'保存并查看结果':'下一步 →','drill-next')}`:''}</section>`;
+    return `<section class="reading">${head}${pill(`${drillQuiz.index+1} / 4`)}<h2 class="question-title">${esc(q.title)}</h2>${drillQuiz.index===3?`<div class="card"><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">${esc(p.glossary)}</p></div>`:''}<p>${esc(q.prompt)}</p>${UI.hint(q,drillQuiz,'drill')}${UI.controls({question:q,session:drillQuiz,prefix:'drill',limit:500,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'drill-next',label:drillQuiz.index+1===drillQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
   }
   function submitDrillAnswer(answer) {
     if(!drillQuiz||drillQuiz.feedback||drillQuiz.result)return;
     if(!L.drillUnlocked(state,drillQuiz.id))return notify('请先完成前面的练习包。');
     if(typeof answer!=='string'||!answer.trim())return notify('请先填写答案。');
-    drillQuiz.input=answer;drillQuiz.answers[drillQuiz.index]=answer;
-    drillQuiz.feedback=L.evaluateDrillAnswer(drillQuiz.id,drillQuiz.index,answer);render();
+    L.answerExercise(drillQuiz,answer,L.evaluateDrillAnswer);render();
   }
   function foundationPage(id) {
     const f=L.foundations.find(f=>f.id===id);
@@ -280,6 +279,15 @@
     if (!lesson || !L.isUnlocked(state,lesson.unitId)) return notify('先学习前一单元至少 6 个词，并通过语法练习。');
     quiz=null; navigate(`lesson/${id}`);
   }
+  function openLearningTarget(kind, id) {
+    if(kind==='session'){startSession();navigate('study');}
+    else if(kind==='lesson')openLesson(id);
+    else if(kind==='foundation'){foundationQuiz=null;navigate(`foundation/${id}`);}
+    else if(kind==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${id}`);}
+    else if(kind==='nouns'){nounQuiz=null;navigate(`noun/${id}`);}
+    else if(kind==='review'){drillReview={phase:'setup',level:''};navigate('drill-review');}
+    else if(kind==='expression'){expressionEditor=null;navigate(`expression/${id}`);}
+  }
   function startQuiz(id) { const lesson=C.lessons.find(l=>l.id===id); if(!lesson||!L.isUnlocked(state,lesson.unitId))return; quiz={id,index:0,answers:[],day:L.dateKey(),result:null}; render(); }
   function speakText(text) {
     if(!('speechSynthesis' in window))return;const voice=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('es'));if(!voice)return notify('设备暂无西班牙语音色，可在系统设置中安装西语语音包。');
@@ -319,30 +327,21 @@
     else if(action==='month'){monthDay=0;navigate('first-month');}
     else if(action==='month-start'){if(commit(s=>L.startJourney(s,L.dateKey())))render();}
     else if(action==='month-current'){monthDay=0;render();}
-    else if(action==='week-guide'){const kind=element.dataset.kind,id=element.dataset.id;if(kind==='session'){startSession();navigate('study');}else if(kind==='lesson')openLesson(id);else if(kind==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${id}`);}else if(kind==='expression'){expressionEditor=null;navigate(`expression/${id}`);}else if(kind==='review'){drillReview={phase:'setup',level:''};navigate('drill-review');}}
-    else if(action==='month-target'){
-      const kind=element.dataset.kind,id=element.dataset.id;
-      if(kind==='foundation'){foundationQuiz=null;navigate(`foundation/${id}`);}
-      else if(kind==='lesson')openLesson(id);
-      else if(kind==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${id}`);}
-      else if(kind==='nouns'){nounQuiz=null;navigate(`noun/${id}`);}
-      else if(kind==='review'){drillReview={phase:'setup',level:''};navigate('drill-review');}
-      else if(kind==='expression'){expressionEditor=null;navigate(`expression/${id}`);}
-    }
+    else if(action==='week-guide'||action==='month-target')openLearningTarget(element.dataset.kind,element.dataset.id);
     else if(action==='drill-review'){drillReview={phase:'setup',level:''};navigate('drill-review');}
     else if(action==='review-level'){drillReview.level=element.dataset.level;render();}
     else if(action==='review-begin')beginDrillReview();
     else if(action==='review-answer')submitDrillReview(element.dataset.answer);
     else if(action==='review-submit')submitDrillReview(drillReview&&drillReview.input);
     else if(action==='review-accent'){const input=document.getElementById('review-answer');if(!input||input.disabled)return;const start=input.selectionStart,end=input.selectionEnd;if(input.value.length-(end-start)>=500)return;drillReview.input=input.value.slice(0,start)+element.dataset.char+input.value.slice(end);render();const updated=document.getElementById('review-answer');updated.focus();updated.setSelectionRange(start+1,start+1);}
-    else if(action==='review-next'){if(!drillReview||drillReview.phase!=='quiz'||!drillReview.feedback)return;drillReview.index++;drillReview.feedback=null;drillReview.input='';if(drillReview.index===drillReview.items.length)drillReview.phase='result';render();}
+    else if(action==='review-next'){if(!drillReview||drillReview.phase!=='quiz'||!drillReview.feedback)return;drillReview.index++;drillReview.feedback=null;drillReview.input='';drillReview.showHint=false;if(drillReview.index===drillReview.items.length)drillReview.phase='result';render();}
     else if(action==='review-setup'){drillReview.phase='setup';render();}
     else if(action==='drills'){if(drillEditor)drillLevel=L.drillPacks.find(p=>p.id===drillEditor.id).level;drillQuiz=null;drillEditor=null;navigate('drills');}
     else if(action==='drills-level'){drillLevel=element.dataset.level;render();}
     else if(action==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${element.dataset.id}`);}
     else if(action==='drill-begin'){
       const id=element.dataset.id;if(!L.drillUnlocked(state,id))return notify('先完成前一包，正确率至少 75%。');
-      drillQuiz={id,index:0,answers:[],input:'',feedback:null,result:null};render();
+      drillQuiz=L.createExerciseSession(id,L.drillPacks.find(p=>p.id===id).questions);render();
     }
     else if(action==='drill-answer')submitDrillAnswer(element.dataset.answer);
     else if(action==='drill-submit')submitDrillAnswer(drillQuiz&&drillQuiz.input);
@@ -355,11 +354,15 @@
       if(draft){drillEditor.text=value;drillEditor.dirty=true;drillEditor.showModel=false;}else drillQuiz.input=value;
       render();const updated=document.getElementById(draft?'drill-draft':'drill-answer');updated.focus();updated.setSelectionRange(start+1,start+1);
     }
+    else if(action==='drill-hint'||action==='noun-hint'||action==='review-hint'){
+      const active=action==='drill-hint'?drillQuiz:action==='noun-hint'?nounQuiz:drillReview;
+      if(!active||active.feedback||active.result)return;
+      active.showHint=!active.showHint;render();
+    }
     else if(action==='drill-next'){
       if(!drillQuiz||!drillQuiz.feedback||drillQuiz.result)return;
       if(!L.drillUnlocked(state,drillQuiz.id))return notify('请先完成前面的练习包。');
-      if(drillQuiz.index===3){const r=commit(s=>L.gradeDrill(s,drillQuiz.id,drillQuiz.answers));if(!r)return;drillQuiz.result=r;}
-      else{drillQuiz.index++;drillQuiz.input='';drillQuiz.feedback=null;}render();
+      if(L.advanceExercise(drillQuiz,(id,answers)=>commit(s=>L.gradeDrill(s,id,answers))))render();
     }
     else if(action==='drill-output'){drillQuiz=null;render();document.getElementById('drill-draft').focus();}
     else if(action==='drill-save'){
@@ -371,7 +374,7 @@
     else if(action==='drill-model'){if(!drillEditor||drillEditor.dirty||!drillEditor.saved||!drillEditor.text.trim()||!L.drillUnlocked(state,drillEditor.id))return;drillEditor.showModel=!drillEditor.showModel;render();}
     else if(action==='nouns'){nounQuiz=null;navigate('nouns');}
     else if(action==='noun'){nounQuiz=null;navigate(`noun/${element.dataset.id}`);}
-    else if(action==='noun-begin'){if(!L.nounLessons.some(n=>n.id===element.dataset.id))return;nounQuiz={id:element.dataset.id,index:0,answers:[],input:'',feedback:null,result:null};render();}
+    else if(action==='noun-begin'){if(!L.nounLessons.some(n=>n.id===element.dataset.id))return;nounQuiz=L.createExerciseSession(element.dataset.id,L.nounLessons.find(n=>n.id===element.dataset.id).questions);render();}
     else if(action==='noun-answer')submitNounAnswer(element.dataset.answer);
     else if(action==='noun-submit')submitNounAnswer(nounQuiz&&nounQuiz.input);
     else if(action==='noun-accent'){
@@ -381,9 +384,7 @@
       const updated=document.getElementById('noun-answer');updated.focus();updated.setSelectionRange(start+1,start+1);
     }
     else if(action==='noun-next'){
-      if(!nounQuiz||!nounQuiz.feedback||nounQuiz.result)return;
-      if(nounQuiz.index===2){const r=commit(s=>L.gradeNoun(s,nounQuiz.id,nounQuiz.answers));if(!r)return;nounQuiz.result=r;}
-      else{nounQuiz.index++;nounQuiz.input='';nounQuiz.feedback=null;}render();
+      if(L.advanceExercise(nounQuiz,(id,answers)=>commit(s=>L.gradeNoun(s,id,answers))))render();
     }
     else if(action==='foundations'){foundationQuiz=null;navigate('foundations');}
     else if(action==='foundation'){foundationQuiz=null;navigate(`foundation/${element.dataset.id}`);}

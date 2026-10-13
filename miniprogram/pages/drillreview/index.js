@@ -10,7 +10,8 @@ Page({
     this.setData({ original: this.items.length, phase: this.items.length ? 'quiz' : 'empty' });
     if (this.items.length) this.show();
   },
-  show() { this.setData({ question: this.items[this.index], position: this.index + 1, total: this.items.length, input: '', feedback: null }); },
+  show() { this.setData({ question: this.items[this.index], position: this.index + 1, total: this.items.length, input: '', feedback: null, showHint: false }); },
+  hint() { if (this.data.phase === 'quiz' && !this.data.feedback) this.setData({ showHint: !this.data.showHint }); },
   input(e) { if (!this.data.feedback) this.setData({ input: e.detail.value }); },
   accent(e) { if (!this.data.feedback && this.data.input.length < 500) this.setData({ input: this.data.input + e.currentTarget.dataset.char }); },
   choose(e) { this.answer(e.currentTarget.dataset.answer); },

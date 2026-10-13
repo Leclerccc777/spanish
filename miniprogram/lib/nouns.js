@@ -1,10 +1,10 @@
 const nounLessons = require('../data/noun-practice');
 const byId = new Map(nounLessons.map(n => [n.id, n]));
-const normalize = text => text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!?。！？]+$/, '').trim();
+const { checkSpanishAnswer } = require('./exercise');
 function evaluateNounAnswer(id, position, answer) {
   const lesson = byId.get(id), question = lesson && lesson.questions[position];
   if (!question || !Number.isInteger(position) || typeof answer !== 'string' || !answer.trim() || answer.length > 200) throw new Error('请填写本题答案');
-  return { correct: normalize(answer) === normalize(question.answer), answer: question.answer, explanation: question.explanation };
+  return { ...checkSpanishAnswer(answer, [question.answer]), explanation: question.explanation };
 }
 function restoreNouns(raw) {
   const nounPractice = {}, nounMistakes = {};
