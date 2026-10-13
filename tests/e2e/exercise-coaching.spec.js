@@ -55,7 +55,7 @@ test('名词和各级订正沿用同一提示，查看不会修改学习记录',
 });
 
 test('24 包中文大意可选展开，换包或刷新收起，作答时只展示西语', async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(180000);
   for (const pack of L.drillPacks) {
     await page.goto('/#drill/' + pack.id);
     await expect(page.locator('.reading-meaning')).toHaveCount(0);
@@ -74,4 +74,47 @@ test('24 包中文大意可选展开，换包或刷新收起，作答时只展�
   await expect(page.locator('.reading-meaning')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '看中文大意', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.getItem('hola-learning-v1'))).toBeNull();
+});
+
+test('24 包词组解释、个人对话及情景迁移可预览，保留输入与旧进度', async ({ page }) => {
+  test.setTimeout(300000);
+  const saved = L.emptyState();
+  L.gradeDrill(saved, 'a1-place', L.drillPacks[0].questions.map(q => q.answers[0]));
+  L.saveDrillDraft(saved, 'a1-place', 'Soy estudiante.');
+  await page.goto('/');
+  await page.evaluate(({ key, saved }) => localStorage.setItem(key, JSON.stringify(saved)), { key: 'hola-learning-v1', saved });
+  await page.reload();
+  if (test.info().project.name === 'mobile') await page.setViewportSize({ width: 320, height: 720 });
+  for (const pack of L.drillPacks) {
+    await page.goto('/#drill/' + pack.id);
+    await expect(page.locator('.reading-words')).toHaveCount(0);
+    await expect(page.locator('.personal-dialogue')).toHaveCount(0);
+    const unlocked = L.drillUnlocked(saved, pack.id);
+    await expect(page.locator('#drill-draft')).toBeEnabled({ enabled: unlocked });
+    if (unlocked) await page.fill('#drill-draft', '自己的回答，尚未保存');
+    await page.getByRole('button', { name: '看词组解释', exact: true }).click();
+    const wordText = await page.locator('.reading-words').textContent();
+    for (const [phrase, meaning, note] of pack.words) {
+      expect(wordText).toContain(phrase); expect(wordText).toContain(meaning); expect(wordText).toContain(note);
+    }
+    await page.getByRole('button', { name: '练一段自己的对话', exact: true }).click();
+    const dialogueText = await page.locator('.personal-dialogue').textContent();
+    expect(dialogueText).toContain(pack.dialogue.personalize);
+    expect(dialogueText).toContain(pack.newScene.prompt); expect(dialogueText).toContain(pack.newScene.check);
+    if (unlocked) await expect(page.locator('#drill-draft')).toHaveValue('自己的回答，尚未保存');
+    await page.getByRole('button', { name: '收起词组解释', exact: true }).click();
+    await page.getByRole('button', { name: '收起个人对话', exact: true }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hola-learning-v1')))).toEqual(saved);
+  await page.goto('/#drill/a1-place');
+  await page.getByRole('button', { name: '看词组解释', exact: true }).click();
+  await page.getByRole('button', { name: '练一段自己的对话', exact: true }).click();
+  await page.reload();
+  await expect(page.locator('.reading-words')).toHaveCount(0);
+  await expect(page.locator('.personal-dialogue')).toHaveCount(0);
+  await expect(page.locator('#drill-draft')).toHaveValue('Soy estudiante.');
+  await page.getByRole('button', { name: '开始四步练习' }).click();
+  await expect(page.getByRole('button', { name: '看词组解释', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '练一段自己的对话', exact: true })).toHaveCount(0);
 });

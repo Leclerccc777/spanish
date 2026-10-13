@@ -5,6 +5,7 @@
   "description": "中文学习者的西班牙语入门微信小程序",
   "scripts": {
     "build": "node scripts/build-web.js",
+    "package:html": "node scripts/package-html.js",
     "dev": "node scripts/server.js",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",

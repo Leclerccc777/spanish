@@ -12,6 +12,13 @@ test('A1–B2 每级六包，辨析/填空/纠错/阅读与个性表达完整且
     if(p.branch==='core')assert.equal(p.previousId,i?L.drillPacks[i-1].id:null);else assert.ok(L.drillPacks.some(d=>d.id===p.previousId));
     assert.deepEqual(p.questions.map(q=>q.kind),['choice','text','text','choice']);
     assert.ok(p.reading.length>60&&p.glossary&&p.output.model&&p.output.rubric.length>=3);
+    assert.equal(p.words.length, 3);
+    for (const [phrase, meaning, note] of p.words) {
+      assert.ok(p.reading.toLowerCase().includes(phrase.toLowerCase()), `${p.id}: ${phrase} 必须来自原文`);
+      assert.ok(meaning && note);
+    }
+    assert.ok(p.dialogue.scene && p.dialogue.personalize && p.dialogue.turns.length === 3);
+    assert.ok(p.newScene.prompt && p.newScene.check);
     for(const id of p.lessonIds)assert.ok(L.course.lessons.some(l=>l.id===id));
     for(const r of p.references)assert.ok(L.course.sources.some(s=>s.id===r.sourceId));
     for(const q of p.questions){assert.ok(q.explanation);assert.ok(q.answers.length);if(q.options){assert.equal(new Set(q.options).size,3);assert.ok(q.options.includes(q.answers[0]));}}

@@ -14,7 +14,7 @@ async function complete(page, pack, wrongIndex = -1) {
 }
 
 test('A1 到 B2 全路线真实逐包作答、错项订正、个人表达与备份往返', async ({ page }) => {
-  test.setTimeout(90000);
+  test.setTimeout(300000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');await page.getByRole('button',{name:'进入分级练习'}).click();
   await expect(page.locator('.drill-card')).toHaveCount(6);

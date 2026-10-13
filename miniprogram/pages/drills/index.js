@@ -23,12 +23,14 @@ Page({
     if (!pack) return wx.showToast({ title: '没有找到练习包', icon: 'none' });
     const state = S.load(), draft = state.drillDrafts[pack.id];
     this.pack = pack;
-    this.setData({ phase: 'read', showMeaning: false, pack, level: pack.level, unlocked: L.drillUnlocked(state, pack.id), previous: L.drillPacks.find(p => p.id === pack.previousId) || null,
+    this.setData({ phase: 'read', showMeaning: false, showWords: false, showDialogue: false, pack, level: pack.level, unlocked: L.drillUnlocked(state, pack.id), previous: L.drillPacks.find(p => p.id === pack.previousId) || null,
       references: [...new Map(pack.references.map(r => [r.sourceId + r.section, { ...r, ...L.course.sources.find(s => s.id === r.sourceId) }])).values()],
       text: draft ? draft.text : '', hasText: !!draft && !!draft.text.trim(), saved: !!draft, revisions: draft ? draft.revisions : 0, checks: draft ? draft.checks : [], hasPrevious: !!draft && typeof draft.previousText === 'string', dirty: false, showModel: false, result: null });
     this.showChecks(draft ? draft.checks : []);
   },
   meaning() { if (this.data.phase === 'read') this.setData({ showMeaning: !this.data.showMeaning }); },
+  words() { if (this.data.phase === 'read') this.setData({ showWords: !this.data.showWords }); },
+  dialogue() { if (this.data.phase === 'read') this.setData({ showDialogue: !this.data.showDialogue }); },
   draft(e) { this.setData({ text: e.detail.value, hasText: !!e.detail.value.trim(), dirty: true, showModel: false }); },
   draftAccent(e) { if (this.data.unlocked && this.data.text.length < 3000) this.setData({ text: this.data.text + e.currentTarget.dataset.char, hasText: true, dirty: true, showModel: false }); },
   showChecks(checks) { this.setData({ checks, rubricRows: this.pack.output.rubric.map((label, index) => ({ label, index, checked: checks.includes(index) })) }); },

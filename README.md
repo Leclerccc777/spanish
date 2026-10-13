@@ -1,6 +1,14 @@
 # Hola · 每天一点西语
 
-面向中文零基础学习者的**原生微信小程序**，附可在浏览器运行的体验版。默认通用西班牙语，注明西班牙与拉美的常见用法差异。
+面向中文零基础学习者的西班牙语学习项目，提供**电脑浏览器单文件 HTML** 和原生微信小程序源码。先在浏览器体验与验收，再考虑微信打包。默认通用西班牙语，注明西班牙与拉美的常见用法差异。
+
+## 电脑上直接打开
+
+下载 [hola-spanish.html](releases/hola-spanish.html)（GitHub 文件页点击 **Download raw file**），用 Chrome / Edge / Firefox 打开。只需要这一个 HTML；6500 词库、四步入门、年度计划和分级练习均已包含，不用安装 Node、启动服务器或连接外网。查官方资料链接需要网络，设备朗读取决于本机西语音色。
+
+学习记录保存在当前浏览器。服务器体验版、不同浏览器与 HTML 文件之间不会自动同步；首次换用 HTML 请先从原体验版“我的 / 学习进度”导出 JSON，再在 HTML 中导入。保持 HTML 的位置和文件名，更新或移动前导出备份；浏览器对本地文件存储的处理可能不同。微信打包、官方编译和真机验收留待浏览器验收后。
+
+开发者运行 `npm run package:html` 可从当前源码重新生成 `releases/hola-spanish.html`；`npm run build` 也生成 `dist/hola-spanish.html`。
 
 ![浏览器体验版首页](docs/screenshots/today-desktop.png)
 
@@ -12,6 +20,7 @@
 - **A1 名词三步练习**：首批 8 个常用名词，补充冠词、阴阳性、复数与短语；24 道“选冠词 → 改形容词 → 补完整句”练习。逐题解析、重音输入、最佳正确率和待订正项独立保存，可反复巩固。
 - **A1–B2 递进练习**：每级 3 个核心包 + 3 个巩固包，共 24 包、96 道辨析 / 填空 / 纠错 / 阅读题、24 篇原创短阅读与 24 项个人表达任务。前置包最佳正确率至少 75% 后继续，保留错项、草稿与参考范文，逐步复用旧知识。
 - **先想明白，再自己说**：24 包提供情景引导、可选中文阅读大意与开口迁移练习；96 道分级题、24 道名词题可展开思路提示，集中订正沿用相同提示。讲解从“这句话想说什么”开始；反馈指出重音 / ü / ñ 的近似拼写问题，保留原答案要求。
+- **读懂后换情景表达**：24 包各补 3 组原文词组解释、1 段留出自己回答的角色对话、1 个新情景任务与检查问题。支持默认收起；先换成自己的内容，再收起重说，可记入原有草稿，不自动评分。
 - **前四周每日小任务**：28 天 / 84 项复习、理解和表达提示，连接已有微课、词卡、练习包与输出；沿用年度开始日，记录可反选，未来天只可预览。
 - **一年 A1 → B1 计划**：52 周加第 365 天复盘；A1 12 周、A2 16 周、B1 20 周及综合复盘 4 周，配套已有课程与表达任务，每周提供与本周材料对应的七天指南，以及听说读写自检。
 
@@ -70,7 +79,7 @@ python3 scripts/build_lexicon.py --download
 python3 scripts/check_lexicon.py
 ```
 
-来源文件固定提交和 SHA-256，见 [来源清单](docs/lexicon-sources.json)；构建统计见 [lexicon-build.json](docs/lexicon-build.json)。已缓存数据可运行不带 `--download` 的命令重建，运行应用不需要下载源词典。主包源码预检约 1.29 MiB，官方编译后的大小仍需微信开发者工具确认。
+来源文件固定提交和 SHA-256，见 [来源清单](docs/lexicon-sources.json)；构建统计见 [lexicon-build.json](docs/lexicon-build.json)。已缓存数据可运行不带 `--download` 的命令重建，运行应用不需要下载源词典。主包源码预检约 1.32 MiB，官方编译后的大小仍需微信开发者工具确认。
 
 ## 在微信开发者工具中运行
 
@@ -99,12 +108,15 @@ npm run dev
 npm test         # 学习引擎及原生页面控制逻辑测试
 npm run check    # JS / JSON 与页面注册检查，不是微信编译器
 npm run build    # 生成 dist/，可部署到静态托管服务
+npm run package:html # 生成可下载、直接打开的 releases/hola-spanish.html
 npm run test:e2e # 桌面 + 手机浏览器交互测试
 python3 scripts/check_lexicon.py # 离线核对词量、哈希、覆盖和源码包体积
 python3 scripts/check_wxml.py # 可选的 WXML 标签结构检查，需要 Python 3
 ```
 
 E2E 优先使用系统 `/usr/bin/chromium`；其他机器可设置 `PLAYWRIGHT_CHROMIUM_EXECUTABLE` 为已安装浏览器路径，或通过 Playwright 官方安装方式 `npx playwright install chromium` 安装。首次安装可能需要网络。云环境已有系统 Chromium，无需下载。
+
+云环境运行较慢时可用 `npm run test:e2e -- --timeout=120000` 延长每项等待时限；断言与完整作答要求不变。
 
 运行 `python3 scripts/verify_sources.py` 可重新检查官方参考页面，写入 `docs/source-verification.json`。该检查会比对页面标题，防止把 HTTP 200 的错误页当作有效资料；访问成功本身不能代替内容审阅。
 
@@ -133,6 +145,7 @@ miniprogram/
   data/vocabulary-review.js # 人工核对的范围与义项说明
   data/noun-practice.js   # 首批 8 名词词形、搭配和三步练习
   data/drills.js         # A1–B2 递进包、短阅读和个人表达
+  data/drill-practice.js # 原文词组解释、个人对话与新情景任务
   data/sources.js         # 权威参考资料元数据
   lib/learning.js         # 两端共用的学习与打卡逻辑
   lib/storage.js          # 微信本地存储适配
@@ -141,6 +154,7 @@ miniprogram/
   data/lexicon/           # 固定版本派生词库、分级词包、表达组
   pages/                  # 今日、词汇、语法、资料、进度、词卡、课程、测验与输出任务
 web/                      # 浏览器体验版，共用原生课程与学习引擎
+releases/hola-spanish.html # 电脑浏览器单文件交付，按源码重新构建
 scripts/                  # 构建、开发服务、静态检查、资料核验
 tests/                    # 引擎、原生页面与浏览器交互测试
 docs/                     # 课程依据、开发说明、验收记录、截图

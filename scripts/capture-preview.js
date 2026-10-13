@@ -9,7 +9,7 @@ const L = require('../miniprogram/lib/learning');
   const output = path.resolve(__dirname, '../docs/screenshots');
   fs.mkdirSync(output, { recursive: true });
   const requested = new Set(process.argv.slice(2));
-  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-hint-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
+  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-words-mobile',390,844],['drill-dialogue-desktop',1440,1000],['drill-hint-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
     if (requested.size && !requested.has(name)) continue;
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, timezoneId: 'Asia/Shanghai' });
     await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
@@ -27,6 +27,10 @@ const L = require('../miniprogram/lib/learning');
     if(name==='drill-reading-mobile'){
       await page.goto('http://127.0.0.1:4173/#drill/a1-place');
       await page.getByRole('button',{name:'看中文大意',exact:true}).click();
+    }
+    if(name==='drill-words-mobile'||name==='drill-dialogue-desktop'){
+      await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+      await page.getByRole('button',{name:name==='drill-words-mobile'?'看词组解释':'练一段自己的对话',exact:true}).click();
     }
     if(name==='drill-hint-mobile'){
       await page.goto('http://127.0.0.1:4173/#drill/a1-place');
@@ -59,7 +63,9 @@ const L = require('../miniprogram/lib/learning');
       await page.getByRole('button',{name:'检查答案'}).click();
     }
     if(name==='expression-mobile')await page.goto('http://127.0.0.1:4173/#expression/e1');
-    await page.screenshot({ path: path.join(output, `${name}.png`), fullPage: !name.startsWith('bank-') });
+    const screenshotPath=path.join(output, `${name}.png`);
+    if(name==='drill-words-mobile'||name==='drill-dialogue-desktop')await page.locator(name==='drill-words-mobile'?'.reading-words':'.personal-dialogue').locator('..').screenshot({path:screenshotPath});
+    else await page.screenshot({ path:screenshotPath, fullPage: !name.startsWith('bank-') });
     await page.close();
   }
   console.log('Saved learning preview screenshots (practice previews use empty or unsaved records).');

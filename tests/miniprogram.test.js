@@ -71,6 +71,20 @@ test('原生短文大意默认收起，预览不开放练习，读后答题不�
   p.meaning(); assert.equal(p.data.phase, 'quiz');
   assert.deepEqual(r.state, L.emptyState());
 });
+test('原生词组解释与个人对话保留草稿，预览不写记录，换包撤去支持', () => {
+  const r = runtime(), p = r.loadPage('drills');
+  for (const pack of L.drillPacks) {
+    p.open({ currentTarget: { dataset: { id: pack.id } } });
+    assert.equal(p.data.showWords, false); assert.equal(p.data.showDialogue, false);
+    p.draft({ detail: { value: '自己的对话' } }); p.words(); p.dialogue();
+    assert.equal(p.data.showWords, true); assert.equal(p.data.showDialogue, true);
+    assert.equal(p.data.text, '自己的对话'); assert.equal(p.data.dirty, true);
+    assert.deepEqual(r.state, L.emptyState());
+  }
+  p.open({ currentTarget: { dataset: { id: 'a1-place' } } });
+  p.words(); p.dialogue(); p.begin(); p.words(); p.dialogue();
+  assert.equal(p.data.phase, 'quiz'); assert.deepEqual(r.state, L.emptyState());
+});
 test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不产生主课程进度', () => {
   const r=runtime(),p=r.loadPage('drills');p.onLoad();assert.equal(p.data.packs.length,6);
   p.select({currentTarget:{dataset:{level:'B2'}}});p.open({currentTarget:{dataset:{id:'b2-report'}}});assert.equal(p.data.unlocked,false);p.begin();assert.equal(p.data.phase,'read');
