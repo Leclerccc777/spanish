@@ -20,8 +20,13 @@ function build() {
   const scripts = standalone.match(/<script>[\s\S]*?<\/script>/g).join('\n');
   standalone = standalone.replace(/<script>[\s\S]*?<\/script>\n?/g, '').replace('</body>', () => `${scripts}\n</body>`);
   fs.writeFileSync(path.join(output, 'hola-spanish.html'), standalone);
+  const pages = path.join(output, 'pages');
+  fs.mkdirSync(pages, { recursive: true });
+  fs.writeFileSync(path.join(pages, 'index.html'), standalone);
+  fs.writeFileSync(path.join(pages, '.nojekyll'), '');
   console.log('Built browser companion in dist/ (shared mini program course and learning engine).');
   console.log('Standalone HTML: dist/hola-spanish.html (open directly in a desktop browser).');
+  console.log('GitHub Pages: dist/pages/ (self-contained index.html, supports repository subpaths).');
   return output;
 }
 if (require.main === module) build();

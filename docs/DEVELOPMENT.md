@@ -12,6 +12,14 @@
 
 沿用 `hola-learning-v1` 与 version 1；HTTP 与本地文件不自动共享存储。换入口或更新路径前先导出，再导入。不能因 HTML 初次打开没有记录而重置原入口的进度。先完成浏览器验收，再安排微信官方编译与真机打包。
 
+## GitHub Pages 发布
+
+`.github/workflows/pages.yml` 在 main 推送或手动运行时构建网站，上传 `dist/pages` 并部署到 GitHub Pages。构建只用 Node.js 内置模块，无需 npm ci；构建任务仅 contents:read，部署任务另授 pages:write / id-token:write。首次需要仓库管理员在 Settings → Pages 将 Source 设为 GitHub Actions，普通工作流 GITHUB_TOKEN 不能代为启用未开启的 Pages。
+
+`dist/pages/index.html` 与同次构建的 `dist/hola-spanish.html` 字节一致，内嵌资源避免 `/spanish/` 子路径引用站点根目录的问题；`.nojekyll` 表明无需 Jekyll。不要把带站点根路径引用的原始 web/index.html 直接当作项目站点首页。
+
+预期地址是 `https://leclerccc777.github.io/spanish/`；需确认部署记录成功并打开真实页面后，才能声称已上线。线上沿用原记录格式，文件入口迁移到 HTTPS 入口需显式导入 JSON，原文件的存储不被覆盖。
+
 ## 共用练习交互
 
 `lib/exercise.js` 维护名词和分级包的临时作答状态，以及带重音的答案检查。先检查答案再写入临时数组；最后一题只在保存成功后进入结果页，失败或重复点击不会增加作答次数。`showHint` 属于临时界面状态，不加入备份。

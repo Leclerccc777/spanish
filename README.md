@@ -10,6 +10,14 @@
 
 开发者运行 `npm run package:html` 可从当前源码重新生成 `releases/hola-spanish.html`；`npm run build` 也生成 `dist/hola-spanish.html`。
 
+## GitHub Pages 在线版
+
+发布地址为 **https://leclerccc777.github.io/spanish/**。首次使用需在 [仓库 Pages 设置](https://github.com/Leclerccc777/spanish/settings/pages) 将 **Build and deployment → Source** 选择为 **GitHub Actions**。开启后到 [发布记录](https://github.com/Leclerccc777/spanish/actions/workflows/pages.yml) 运行或重跑最新工作流，部署成功后网址才可访问。
+
+main 每次推送自动构建和发布，不需要安装前端依赖或配置密钥。`npm run build` 生成 `dist/pages/index.html` 与 `.nojekyll`；首页为完整单文件，包含词库、样式和脚本，支持 `/spanish/` 项目路径。工作流仅上传此目录。
+
+在线版的进度保存在当前浏览器，不能自动读取此前本地 HTML 的记录；换到网址前先导出 JSON，再从在线版的“学习进度”导入。
+
 ![浏览器体验版首页](docs/screenshots/today-desktop.png)
 
 ## 已实现

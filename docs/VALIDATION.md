@@ -156,3 +156,11 @@
 新增并实际查看 [手机词组解释](screenshots/drill-words-mobile.png) 与 [桌面个人对话和迁移](screenshots/drill-dialogue-desktop.png)。截图使用空记录，只展开阅读支持，草稿和分数未保存。
 
 最终全量浏览器回归：`npm run test:e2e -- --timeout=120000` **72 / 72 通过**，桌面与 Pixel 7 各 36 项。包含两端从空记录真实完成全部 24 包、全部新增阅读支持的展开 / 收起 / 草稿保留 / 前置保护，以及词库、打卡、集中订正、版本恢复、前四周、年度指南、单文件与存储失败回归。默认 30 秒时限在此云环境出现等待超时；最终延长时限，完整路线及整批阅读预览单独设置长流程时限，所有断言与实际作答要求保持不变。
+
+## 2026-10-15 GitHub Pages 发布准备
+
+新增 main 推送与手动触发的 Pages 构建 / 部署工作流。`npm run build` 另生成 `dist/pages/index.html` 与 `.nojekyll`；首页与已验证的 `releases/hola-spanish.html` 字节一致，课程、引擎和记录格式未改动。自包含首页用于 `/spanish/` 项目路径，不依赖站点根目录的脚本或样式。
+
+本地浏览器实际通过 1440px 桌面与 390px 手机两组 `/spanish/` 路径检查：词组解释和个人对话可用，草稿保存后刷新保留，全部 6500 条目可访问，无页面错误、额外资源请求或横向溢出。工作流 YAML 解析及构建通过。
+
+发布准备时 GitHub 仓库 API 返回 `has_pages: false`。当前可用连接未提供修改 Pages 设置的工具，终端 GitHub API 认证未就绪，因此需管理员在仓库 Settings → Pages 将 Source 设为 GitHub Actions。待部署记录成功及真实网页验收后才能标记上线；预期地址为 `https://leclerccc777.github.io/spanish/`，本条不声称已发布。
