@@ -1,4 +1,5 @@
 const drillPacks = require('../data/drills');
+const studyPacks = [...drillPacks].sort((a, b) => a.studyOrder - b.studyOrder);
 const index = new Map(drillPacks.map(p => [p.id, p]));
 const { checkSpanishAnswer } = require('./exercise');
 function drillUnlocked(state, id) {
@@ -16,10 +17,11 @@ function drillUnlocked(state, id) {
 }
 function nextDrillPack(state, id) {
   const unfinished = p => drillUnlocked(state, p.id) && (!state.drills[p.id] || state.drills[p.id].bestScore < 75);
-  return drillPacks.find(p => p.previousId === id && unfinished(p)) || drillPacks.find(unfinished) || null;
+  const current = index.get(id);
+  return (current && studyPacks.find(p => p.level === current.level && unfinished(p))) || studyPacks.find(unfinished) || null;
 }
 function drillProgress(state) {
-  return drillPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
+  return studyPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
     mistakes: p.questions.filter(q => state.drillMistakes[q.id]).map(q => ({ ...q, previousAnswer: state.drillMistakes[q.id].answer })) }));
 }
 function evaluateDrillAnswer(id, position, answer) {

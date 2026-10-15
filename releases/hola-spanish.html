@@ -669,11 +669,6 @@ font-size:14px}
 margin:20px 0}
 .reading .example{
 font-size:20px}
-.reading .actions{
-display:flex;
-gap:12px;
-margin-top:22px;
-flex-wrap:wrap}
 .back{
 border:0;
 background:none;
@@ -1172,8 +1167,8 @@ background:var(--lime)}
 
 .level-tabs {
 display:flex;
-gap:10px;
-margin:0 0 20px;
+gap:16px;
+margin:24px 0;
 flex-wrap:wrap;
 }
 
@@ -1686,10 +1681,46 @@ bottom:88px}
 transition:none}
 }
 
-.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.actions{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:22px 0 8px}
 .btn:disabled{transform:none}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.expression-input:focus-visible{outline:3px solid var(--blue-ink);outline-offset:4px}
 .dashboard-grid{margin-bottom:24px}
+
+/* Reading and action areas keep room for pointer, keyboard and touch use. */
+.study-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0}
+.study-steps .btn{padding:14px 10px}
+.study-section{scroll-margin-top:24px}
+.study-section:focus{outline:3px solid var(--blue-ink);outline-offset:4px}
+.reading-support{display:grid;justify-items:start;gap:18px;margin-top:24px}
+.reading-support p{margin:0}
+.reading-words,.reading-evidence,.article-evidence{width:100%;padding:20px;background:var(--blue-soft);border-radius:16px}
+.reading-words p + p{margin-top:20px}
+.reading-task{padding:16px;border-left:4px solid var(--green);background:var(--green-soft)}
+.reading blockquote{margin:16px 0;padding-left:16px;border-left:3px solid #8ac8e8;line-height:1.9}
+.personal-dialogue{margin:24px 0;padding:20px;background:var(--blue-soft);border-radius:16px}
+.dialogue-turn{padding:16px;background:white;border-radius:12px;line-height:1.9}
+.reading .writing-title{margin-top:32px}
+.bridge-reading{margin-top:28px}
+.bridge-reading > .btn{margin:16px 0 24px}
+.article-words{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px;padding:20px;background:var(--blue-soft);border-radius:16px}
+.article-words dt{font-weight:700}
+.article-words dd{margin:0}
+.article-evidence{margin:24px 0}
+.reading .bridge-reading .example{font-size:19px;line-height:1.95;margin:24px 0}
+.card > .btn{margin-block:8px}
+.card > .btn + .btn{margin-inline-start:12px}
+@media(min-width:1000px){
+.actions{gap:20px}
+.reading .card{padding:32px;margin:28px 0}
+.lesson-grid{gap:24px}
+.accent-buttons{gap:12px;margin-bottom:28px}
+}
+@media(max-width:700px){
+.study-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.article-words{grid-template-columns:1fr;gap:8px}
+.article-words dd{margin-bottom:12px}
+.reading-words,.reading-evidence,.article-evidence,.personal-dialogue{padding:16px}
+}
 
 </style>
       </head>
@@ -9095,6 +9126,120 @@ module.exports = {
 };
 
 },
+"data/drill-path": function(module, exports, require) {
+// Presentation order only: stable IDs, prerequisites and saved scores stay intact.
+const order = [
+  'a1-place', 'a1-greetings', 'a1-agreement', 'a1-routine', 'a1-questions', 'a1-likes',
+  'a2-weekend', 'a2-shopping', 'a2-plans', 'a2-routine', 'a2-help', 'a2-travel',
+  'b1-story', 'b1-advice', 'b1-opinion', 'b1-relative', 'b1-wishes', 'b1-anterior',
+  'b2-concession', 'b2-hypothesis', 'b2-report', 'b2-specific', 'b2-passive', 'b2-evaluation'
+];
+const levels = {
+  A1: { title: '读懂身边的短句', preparation: '先认识元音和重音，把 el / la 与名词一起读；不熟悉时先回四步入门。', strategy: '先找谁、在哪里、做什么。遇到生词先借助已认识的词猜意思，再看词组提示。', milestone: '读完一段生活介绍，找出人物、地点和时间，再换成自己的信息说三句。' },
+  A2: { title: '把事件连成一段', preparation: '能用现在时介绍自己、说喜好并问简单问题后，再练过去活动和出行安排。', strategy: '圈出时间词，再按先后顺序连起事件；分清已经做的事和还没做的事。', milestone: '读懂一封出行邮件，说明发生了什么、有什么问题、下一步怎么做。' },
+  B1: { title: '读懂多段生活文章', preparation: '先能讲清过去活动、日常安排和求助，再加入背景、建议及不同人的观点。', strategy: '每段先用一句中文概括，再找原因、转折和结果。用原文说明判断，不必逐词翻译。', milestone: '读一篇多段经历文章，说出主旨、变化及依据，再用自己的话概括并回应。' },
+  B2: { title: '比较观点与证据', preparation: '能连贯叙述并区分事实和个人看法后，再讨论假设、信息来源与方案限制。', strategy: '标出谁提出什么观点、凭什么、还有什么未知。留意假设或计划是否真的发生。', milestone: '读一篇项目评论，区分证据和推断，提出有条件的建议。' }
+};
+// Question, exact source evidence, interpretation: optional support, never a score.
+const reading = {
+  'a1-place': ['房间里有什么？书在哪里？', 'Hay una mesa en mi habitación. Mi libro está en la mesa.', 'hay 先介绍一张桌子；está 再说明已知的书在哪里。不要把两句话都理解成“有”。'],
+  'a1-greetings': ['顾客先说了什么，提出请求后怎么道谢？', 'Dice: «Buenos días. Un café, por favor». Después dice «Gracias».', '先打招呼并提出请求，再道谢；por favor 是请求时的礼貌用语。'],
+  'a1-agreement': ['哪些东西不止一个？它们大小一样吗？', 'Los libros son pequeños. Cerca de la mesa hay dos sillas. Las sillas son grandes.', 'libros 和 sillas 都不止一个；书小、椅子大。先找所说的东西，再看形容词。'],
+  'a1-routine': ['Ana 什么时候学习，什么时候不工作？', 'Estudia español por la mañana. Por la tarde trabaja. No trabaja los domingos.', '上午学习，下午工作，星期日不工作；no 只否定它后面的工作。'],
+  'a1-questions': ['Luis 今天为什么不工作？他在读什么？', 'Hoy no trabaja porque es domingo. Ana pregunta: «¿Qué lees?». Luis responde: «Leo un libro de español».', 'porque 后解释原因；问题里的 lees 是问你，回答里的 leo 是说我。'],
+  'a1-likes': ['Luis 为什么喜欢在家读书？', 'Le gusta leer en casa porque aprende palabras nuevas.', 'porque 引出理由。先说喜欢做什么，再补为什么，而不是把全部喜好列一遍。'],
+  'a2-weekend': ['看电影之前和之后分别做了什么？', 'Primero comimos en su casa. Después fuimos al cine y vimos una película. Al final volví a casa.', 'primero、después、al final 串起吃饭、看电影、回家；comimos 是我们，volví 是我。'],
+  'a2-shopping': ['Ana 不满意的是衣服本身，还是尺码？', 'Le gusta una camisa, pero esta talla es pequeña.', '她喜欢这件衬衫，pero 后才是问题：尺码小。换大一号不等于不喜欢衣服。'],
+  'a2-plans': ['他们一定会去海滩吗？', 'Si hace sol, vamos a la playa. Si llueve, vamos al museo.', '两项安排都有天气条件，不能把有条件的计划读成确定事实。'],
+  'a2-routine': ['洗澡和准备早餐，哪件事在前？', 'Después de ducharse, prepara el desayuno.', 'después de 后面的洗澡先发生，准备早餐在后；句子顺序不等于事件顺序。'],
+  'a2-help': ['Luis 打电话想办什么事？接电话的人先问什么？', 'Llama al centro de salud para pedir una cita. Dice que necesita hablar con una médica. La persona que atiende le pregunta su nombre.', 'para 表示打电话的目的；询问姓名是安排预约的一步，不是已经看完医生。'],
+  'a2-travel': ['出发前还有什么没准备好？', 'Todavía no han preparado las maletas. Van a salir mañana.', 'todavía no 表示还没有；明天出发是计划。不要把订房、买票都误当作未完成。'],
+  'b1-story': ['电话响起时，Ana 正在做什么？', 'La primera noche estudiaba cuando sonó el teléfono: era su amiga.', 'estudiaba 是当时的背景，sonó 是发生的事件；最后说明打来电话的是朋友。'],
+  'b1-advice': ['Ana 的建议和她自己采取的帮助有什么不同？', 'Ana le aconseja que lea en voz alta cada día. También habla despacio para que Luis la entienda.', '大声读是让 Luis 做的；慢慢说是 Ana 自己做的，目的是让 Luis 听懂她。'],
+  'b1-opinion': ['Ana 否定阅读的作用了吗？', 'Ana cree que es útil, pero no cree que sea suficiente.', '她认为阅读有用，却不认为只阅读就足够。转折限制的是充分性，并没有否定用处。'],
+  'b1-relative': ['哪一个地方提供下午的课程，哪一个地方有大图书馆？', 'Marta estudia en una escuela que ofrece cursos por la tarde. La profesora que la ayuda prepara ejercicios claros. La ciudad donde vive Marta tiene una biblioteca grande.', 'que ofrece 补充学校的信息；donde vive 补充城市的信息。看清修饰对象，不能混成同一地点。'],
+  'b1-wishes': ['一起学习与五点到达，分别是谁的愿望？', 'Espero que podamos estudiar juntas. Yo espero llegar a la biblioteca a las cinco', 'podamos 包含说话者和朋友；llegar 的主语沿用 yo。愿望不等于已经实现。'],
+  'b1-anterior': ['Luis 到站前，什么已经发生了？', 'Cuando Luis llegó a la estación, el tren ya había salido. Había comprado el billete el día anterior.', '火车已走，车票也在前一天买好；先找 llegó 这个参照点，再排更早的事。'],
+  'b2-concession': ['Marta 支持项目时保留了什么条件？', 'Sin embargo, propone empezar con una prueba pequeña. Por lo tanto, recomienda evaluar los resultados antes de ampliarlo.', '她主张先小规模试行、评估后再扩大；支持并不意味着马上全面铺开。'],
+  'b2-hypothesis': ['免费课程是现有安排还是理想方案？', 'Si tuviera más recursos, ofrecería clases gratuitas. Con el presupuesto actual, solo puede organizar un grupo pequeño.', '免费课程建立在更多资源的假设上；现有预算只够小组活动，两者要分开。'],
+  'b2-report': ['转述了计划以后，是否就能确认事情完成？', 'Luis aclaró que no sabía si lo había presentado.', '不能。no sabía si 明确保留未知；lo 指报告，不能用宣布计划来证明提交结果。'],
+  'b2-specific': ['谁已经找到课程，谁仍在寻找？', 'Marta ya conoce un curso que ofrece prácticas. Su hermano todavía busca uno que tenga horario nocturno.', 'ya conoce 说明已知课程；todavía busca 表示仍在寻找，要求符合条件不代表已经存在。'],
+  'b2-passive': ['这份报告交代了什么，又没有交代什么？', 'El documento explica el método, pero no incluye los nombres de los participantes.', '交代方法，没有公开参与者姓名。隐去姓名并不能单凭这一点推断没有访谈。'],
+  'b2-evaluation': ['为什么建议先从小空间开始？', 'El proyecto requiere dinero; sin embargo, puede empezar con un espacio pequeño.', '先承认资金需求，再给出缩小规模的办法；办法回应限制，而不只是加一个转折词。']
+};
+module.exports = { order, levels, reading };
+
+},
+"data/drill-articles": function(module, exports, require) {
+// Original bridge readings. Preview and self-check only; no new progress fields.
+module.exports = {
+  'a1-likes': {
+    title: 'Una tarde con Mei · 小美的一个下午',
+    goal: '先读两小段生活介绍，再把人物的信息换成自己的。',
+    paragraphs: [
+      'Me llamo Mei. Soy estudiante y vivo en una ciudad pequeña. Por la mañana estudio español en casa. En mi habitación hay una mesa y dos sillas. Mis libros están en la mesa. Me gusta leer porque aprendo palabras nuevas.',
+      'Por la tarde voy a una cafetería. Mi amiga Ana trabaja allí. Pido un café y digo «gracias». Los domingos Ana no trabaja. Le gusta leer también. Ese día leemos en mi casa.'
+    ],
+    words: [['voy', '我去，ir 的“我”形式'], ['leemos', '我们读书，leer 的“我们”形式'], ['allí', '在那里，指前句的咖啡馆'], ['pido', '我点 / 我要，pedir 的“我”形式'], ['ese día', '那一天，指星期日']],
+    checks: [
+      ['两段分别在介绍什么？', 'Por la mañana estudio español en casa.', '第一段介绍 Mei 和上午的学习环境；第二段写下午去咖啡馆以及星期日和朋友读书。'],
+      ['星期日为什么能和 Ana 一起读书？', 'Los domingos Ana no trabaja. Le gusta leer también.', 'Ana 星期日不工作，而且也喜欢读书；这两条信息一起支持她们的安排。'],
+      ['最后一句的“那一天”是哪一天？', 'Ese día leemos en mi casa.', '回到前面的 Los domingos；不是泛指每天下午。leemos 表示我们读书。']
+    ],
+    response: '合上文章，说三句：你是谁、在哪里学习、喜欢什么以及一个理由。再假设朋友星期日要工作，换一天邀请对方。'
+  },
+  'a2-travel': {
+    title: 'Un cambio de planes · 一次行程调整',
+    goal: '读一封出行邮件，把过去的事、已完成的准备和下一步安排分开。',
+    paragraphs: [
+      'Hola, Marta: El sábado pasado fui a Toledo con Luis. Salimos temprano, pero perdimos el autobús al centro. Primero buscamos información en la estación. Una señora nos explicó dónde comprar otro billete. Después llegamos al hotel y dejamos las maletas.',
+      'Queríamos visitar un museo, pero estaba cerrado. Por eso paseamos por la ciudad y comimos cerca de una plaza. La comida era más barata que en nuestro barrio. Al final volvimos al hotel a pie.',
+      'Hoy hemos reservado las entradas para mañana. Todavía no hemos elegido un restaurante. Si hace sol, vamos a comer fuera. Si llueve, podemos comer en el hotel. ¿Quieres venir con nosotros? Un abrazo, Ana.'
+    ],
+    words: [['perdimos el autobús', '我们没赶上公交车'], ['queríamos', '我们当时想；先按整块理解这种过去的想法'], ['era más barata', '当时更便宜；比较那时的价格'], ['estaba cerrado', '当时关着门；描述那时的状态'], ['hemos reservado las entradas', '我们已经订好门票'], ['todavía no hemos elegido', '我们还没有选好']],
+    checks: [
+      ['这封邮件主要是在抱怨，还是在说明变化并邀请朋友？', '¿Quieres venir con nosotros?', '前两段介绍遇到的问题和调整，最后说明准备与安排，并邀请 Marta。'],
+      ['为什么没去博物馆？后来做了什么？', 'Queríamos visitar un museo, pero estaba cerrado. Por eso paseamos por la ciudad y comimos cerca de una plaza.', 'pero 给出障碍，por eso 接调整；原计划没有发生，散步和吃饭发生了。'],
+      ['明天的安排中，哪些已准备好，哪些还不确定？', 'Hoy hemos reservado las entradas para mañana. Todavía no hemos elegido un restaurante.', '门票已订；餐厅没选，在哪里吃还取决于天气。不能把 si 后的情况当作天气预报。']
+    ],
+    response: '用四五句回复 Ana：能否参加、一个原因、你能帮忙准备什么。再把情景换成雨天与朋友去公园，提出一个室内替代安排。'
+  },
+  'b1-anterior': {
+    title: 'Aprender a leer de otra manera · 换一种方式阅读',
+    goal: '读三段经历文章，抓住问题、做法和有保留的结论；不要求认识每一个词。',
+    paragraphs: [
+      'Cuando Mei empezó a estudiar español, intentaba traducir todas las palabras de cada texto. Leía muy despacio y a menudo olvidaba el principio antes de llegar al final. Un día encontró un artículo sobre una biblioteca que organizaba actividades gratuitas. Había estudiado muchas palabras, pero no pudo explicar de qué trataba el artículo. Se dio cuenta de que necesitaba cambiar su forma de leer.',
+      'Su profesora le dio un consejo: «Busca primero el tema de cada párrafo. Después puedes elegir dos o tres palabras importantes y comprobar su significado». Mei probó este método con una amiga. Primero leyeron por separado; luego compararon sus resúmenes. Cuando no estaban de acuerdo, volvieron al texto para buscar una frase para apoyar cada idea. También escribieron una pregunta para la autora del artículo.',
+      'Al cabo de un mes, Mei comprendía mejor los textos sobre temas conocidos. Todavía necesitaba ayuda con artículos especializados, pero ya podía contar lo esencial sin traducir cada frase. Según ella, lo más útil no fue leer más rápido, sino aprender a justificar lo que había entendido. Ahora quiere participar en el grupo de lectura de la biblioteca.'
+    ],
+    words: [['de qué trataba el artículo', '文章在讲什么；抓主题'], ['por separado', '各自独立地'], ['para apoyar cada idea', '用来支持每个想法；这里指原文依据'], ['lo esencial', '最主要的内容'], ['sino', '不是前一项，而是后一项；纠正重点']],
+    checks: [
+      ['用一句话概括每段，再把三段连成一个主旨。', 'Se dio cuenta de que necesitaba cambiar su forma de leer.', '逐词翻译带来困难 → 先抓段意、找词义并核对依据 → 熟悉主题的阅读改善。主旨是阅读方法的改变。'],
+      ['意见不同时，她们如何判断，而不是只凭感觉？', 'Cuando no estaban de acuerdo, volvieron al texto para buscar una frase para apoyar cada idea.', '回到原文找支持想法的句子；不同摘要需要证据，不能只看谁说得流利。'],
+      ['能否据此认为 Mei 已经能独立读懂任何文章？', 'Todavía necesitaba ayuda con artículos especializados, pero ya podía contar lo esencial sin traducir cada frase.', '不能。专业文章仍需帮助；进步体现在熟悉主题和概括主要内容，原文保留了范围。']
+    ],
+    response: '先用三句西语概括问题、改变和结果，再用两句说你的阅读习惯及想尝试的办法。换到“听一段公告”的情景：哪些方法还能用，哪些需要调整？'
+  },
+  'b2-evaluation': {
+    title: 'Una biblioteca abierta al barrio · 社区图书馆提案',
+    goal: '读一篇项目评论，分清调查、提议和未知结果，再作有依据的回应。',
+    paragraphs: [
+      'El ayuntamiento estudia abrir una biblioteca en un local que lleva varios años vacío. Según un informe municipal, se entrevistó a veinte vecinos y la mayoría pidió un lugar tranquilo para leer. Algunos también propusieron cursos de idiomas por la noche. Sin embargo, el documento no explica cómo se eligió a las personas entrevistadas. Por eso, sus respuestas ofrecen información útil, pero no permiten conocer las necesidades de todo el barrio.',
+      'La asociación vecinal apoya la propuesta, aunque reconoce que el presupuesto es limitado. Si hubiera más recursos, contrataría a varias personas y abriría todos los días. Con el dinero disponible, propone empezar tres tardes por semana. Busca voluntarios que puedan ayudar, pero todavía no ha confirmado cuántos participarían. El lunes anunció que presentaría un plan detallado al día siguiente; al cierre de este artículo, no se había publicado.',
+      'Una profesora del barrio recomienda que la prueba dure tres meses. Durante ese periodo, se podrían registrar las visitas y preguntar a los usuarios qué horarios necesitan. También sería importante escuchar a quienes no acudan, para no confundir la opinión de los visitantes con la de toda la comunidad.',
+      'La idea merece una oportunidad, siempre que se evalúen sus resultados antes de ampliarla. Abrir un local no garantiza por sí solo que más personas lean. Un objetivo razonable sería comprobar si el espacio responde a necesidades concretas y si puede mantenerse con los recursos existentes.'
+    ],
+    words: [['ayuntamiento', '市政府'], ['al cierre de este artículo', '截至本文完稿时；给未知结果限定时间'], ['quienes no acudan', '那些不来的人'], ['siempre que', '只要；这里提出支持的条件'], ['por sí solo', '仅凭这件事本身']],
+    checks: [
+      ['作者支持什么，又对支持提出了什么条件？', 'La idea merece una oportunidad, siempre que se evalúen sus resultados antes de ampliarla.', '支持试行，在扩大前先评估；这不是对项目必然成功的断言。'],
+      ['为什么不能把二十人的回答直接代表全社区？', 'Sin embargo, el documento no explica cómo se eligió a las personas entrevistadas.', '抽取受访者的方法不明，代表性尚不清楚；还应听取不使用图书馆的人。'],
+      ['哪些内容还是假设或计划，而非已实现的事实？', 'Busca voluntarios que puedan ayudar, pero todavía no ha confirmado cuántos participarían.', '更多资源下每天开放是设想；志愿者人数未确认；宣布提交计划也不代表已公开计划，均需后续核实。']
+    ],
+    response: '用六至八句写一段回应：立场、两条原文依据、一项未知和一个可执行建议。再把项目换成晚间语言交流角，说明预算不变时先试什么、如何判断是否继续。'
+  }
+};
+
+},
 "data/drills": function(module, exports, require) {
 // 原创受控练习；复用既有课程依据，新增材料待教师审稿。
 // 等级是本站教学顺序，不是官方逐题定级。
@@ -9336,7 +9481,13 @@ packs.push(...require('./drill-extension')({ choice, text }));
 const levelNumbers = {};
 const labels = ['1 · 辨析', '2 · 填空', '3 · 纠错', '4 · 短阅读'];
 const practice = require('./drill-practice');
-module.exports = packs.map((p, i) => ({ ...p, ...practice[p.id], meaning: coaching[p.id].meaning, approach: coaching[p.id].approach, transfer: coaching[p.id].transfer, number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
+const path = require('./drill-path');
+const articles = require('./drill-articles');
+module.exports = packs.map((p, i) => ({
+  ...p, ...practice[p.id],
+  studyOrder: path.order.indexOf(p.id) + 1, readingGuide: path.reading[p.id], levelGuide: path.levels[p.level], article: articles[p.id] || null,
+  meaning: coaching[p.id].meaning, approach: coaching[p.id].approach, transfer: coaching[p.id].transfer,
+  number: i + 1, levelNumber: levelNumbers[p.level] = (levelNumbers[p.level] || 0) + 1, branch: i < 12 ? 'core' : 'extension', previousId: p.previousId || (i ? packs[i - 1].id : null),
   references: p.lessonIds.flatMap(id => course.lessons.find(l => l.id === id).references),
   questions: p.questions.map((q, j) => ({ ...q, hint: coaching[p.id].hints[j], id: `${p.id}-q${j + 1}`, title: labels[j] }))
 }));
@@ -9515,6 +9666,7 @@ module.exports = { nounLessons, evaluateNounAnswer, restoreNouns, nounProgress, 
 },
 "lib/drills": function(module, exports, require) {
 const drillPacks = require('../data/drills');
+const studyPacks = [...drillPacks].sort((a, b) => a.studyOrder - b.studyOrder);
 const index = new Map(drillPacks.map(p => [p.id, p]));
 const { checkSpanishAnswer } = require('./exercise');
 function drillUnlocked(state, id) {
@@ -9532,10 +9684,11 @@ function drillUnlocked(state, id) {
 }
 function nextDrillPack(state, id) {
   const unfinished = p => drillUnlocked(state, p.id) && (!state.drills[p.id] || state.drills[p.id].bestScore < 75);
-  return drillPacks.find(p => p.previousId === id && unfinished(p)) || drillPacks.find(unfinished) || null;
+  const current = index.get(id);
+  return (current && studyPacks.find(p => p.level === current.level && unfinished(p))) || studyPacks.find(unfinished) || null;
 }
 function drillProgress(state) {
-  return drillPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
+  return studyPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
     mistakes: p.questions.filter(q => state.drillMistakes[q.id]).map(q => ({ ...q, previousAnswer: state.drillMistakes[q.id].answer })) }));
 }
 function evaluateDrillAnswer(id, position, answer) {
@@ -10116,8 +10269,8 @@ Object.assign(module.exports,exercise);
     return `<section class="reading">${head}${pill(`${nounQuiz.index+1} / 3`)}<h2 class="question-title">${esc(q.title)}</h2><p>${esc(q.prompt)}</p>${UI.hint(q,nounQuiz,'noun')}${UI.controls({question:q,session:nounQuiz,prefix:'noun',limit:200,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'noun-next',label:nounQuiz.index+1===nounQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
   }
   function drillsPage() {
-    const packs=L.drillProgress(state).filter(p=>p.level===drillLevel);
-    return heading('PASO A PASO · A1 → B2','一层一层，练到能用。','每级 3 个核心包 + 3 个巩固包：辨析 → 填空 → 纠错 → 短阅读 → 自己表达。')+`<div class="notice">从核心第 1 包开始，按前置关系继续；每包 4 题至少答对 3 题即可达标；后续内容可预览。补充路线单独保存，不计每日打卡、词汇确认或自动提升等级。</div>${btn(`集中订正 · ${L.drillWrongQuestions(state).length} 项 →`,'drill-review','','secondary')}<div class="level-tabs" role="group" aria-label="分级练习等级">${['A1','A2','B1','B2'].map(level=>btn(level,'drills-level',`data-level="${level}" aria-pressed="${level===drillLevel}"`,level===drillLevel?'':'secondary')).join('')}</div><div class="lesson-grid">${packs.map(p=>`<article class="card drill-card ${p.unlocked?'':'locked'}"><div class="card-head">${pill(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`)}<span class="tiny">${p.unlocked?'可练习':'可预览'}</span></div><h2>${esc(p.title)}</h2><p>${esc(p.goal)}</p><p class="tiny">${p.bestScore===null?'尚未练习':`最佳正确率 ${p.bestScore}%`} · 待订正 ${p.mistakes.length} 项</p>${p.mistakes.map(q=>`<p class="tiny">${esc(q.title)} · 上次：${esc(q.previousAnswer)}</p>`).join('')}${btn(p.unlocked?'进入学习包 →':'预览与查看前置 →','drill',`data-id="${p.id}"`,'secondary')}</article>`).join('')}</div>`;
+    const packs=L.drillProgress(state).filter(p=>p.level===drillLevel), guide=packs[0].levelGuide;
+    return heading('PASO A PASO · A1 → B2','一层一层，练到能用。','每级 3 个核心包 + 3 个巩固包：辨析 → 填空 → 纠错 → 短阅读 → 自己表达。')+`<div class="notice">建议按下方顺序学完同级核心与巩固，再进入下一级；每包 4 题至少答对 3 题即可达标；后续内容可预览。补充路线单独保存，不计每日打卡、词汇确认或自动提升等级。</div>${btn(`集中订正 · ${L.drillWrongQuestions(state).length} 项 →`,'drill-review','','secondary')}<div class="level-tabs" role="group" aria-label="分级练习等级">${['A1','A2','B1','B2'].map(level=>btn(level,'drills-level',`data-level="${level}" aria-pressed="${level===drillLevel}"`,level===drillLevel?'':'secondary')).join('')}</div><div class="card level-overview"><h2>${esc(drillLevel)} · ${esc(guide.title)}</h2><p>${esc(guide.preparation)}</p><p>${esc(guide.strategy)}</p><p><strong>本级读到哪里：</strong>${esc(guide.milestone)}</p>${drillLevel==='A1'?btn('先学四步入门','foundations','','secondary'):''}</div><div class="lesson-grid">${packs.map((p,i)=>`<article class="card drill-card ${p.unlocked?'':'locked'}"><div class="card-head">${pill(`${p.level} · ${p.branch==='core'?'核心练习':'巩固练习'}`)}<span class="tiny">${p.unlocked?'可练习':'可预览'}</span></div><h2>${i+1}. ${esc(p.title)}</h2><p>${esc(p.goal)}</p>${p.article?'<p class="tiny">含本级进阶文章 · 读后复述与迁移</p>':''}<p class="tiny">${p.bestScore===null?'尚未练习':`最佳正确率 ${p.bestScore}%`} · 待订正 ${p.mistakes.length} 项</p>${p.mistakes.map(q=>`<p class="tiny">${esc(q.title)} · 上次：${esc(q.previousAnswer)}</p>`).join('')}${btn(p.unlocked?'进入学习包 →':'预览与查看前置 →','drill',`data-id="${p.id}"`,'secondary')}</article>`).join('')}</div>`;
   }
   function drillReviewPage() {
     if(!drillReview)drillReview={phase:'setup',level:''};
@@ -10144,25 +10297,40 @@ Object.assign(module.exports,exercise);
     if(!result.correct&&!drillReview.retries.has(q.id)){drillReview.items.push(q);drillReview.retries.add(q.id);}
     drillReview.input=answer;drillReview.feedback=result;render();
   }
+  function drillSteps() {
+    return `<nav class="study-steps" aria-label="本包学习步骤">${[['prepare','1 · 看例句'],['read','2 · 读短文'],['practice','3 · 做四题'],['express','4 · 自己表达']].map(([id,label])=>btn(label,'drill-section',`data-section="${id}"`,'secondary')).join('')}</nav><p class="tiny">可按步骤阅读，也可直接回到需要的部分。跳转不会提交答案或保存草稿。</p>`;
+  }
+  function readingEvidence(guide) {
+    return `<blockquote lang="es">${esc(guide[1])}</blockquote><p>${esc(guide[2])}</p>`;
+  }
   function drillWords(p) {
     const shown = !!drillEditor.showWords;
     return `${btn(shown?'收起词组解释':'看词组解释','drill-words',`aria-expanded="${shown}"`,'secondary')}${shown?`<div class="reading-words">${p.words.map(([es,zh,note])=>`<p><strong lang="es">${esc(es)}</strong> · ${esc(zh)}<br><span class="tiny">${esc(note)}</span></p>`).join('')}<p class="tiny">回到原文找这三组词，再收起提示重读一次。</p></div>`:''}`;
   }
+  function drillReading(p) {
+    const e=drillEditor;
+    return `<div class="card study-section" id="drill-read" tabindex="-1"><h2>2 · 先读一小段</h2><p class="reading-task"><strong>带着问题读：</strong>${esc(p.readingGuide[0])}</p><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p><div class="reading-support">${drillWords(p)}<p class="tiny">先找原文，再看词组；仍读不懂时展开大意，最后收起重读。</p>${btn(e.showMeaning?'收起中文大意':'看中文大意','drill-meaning',`aria-expanded="${!!e.showMeaning}"`,'secondary')}${e.showMeaning?`<p class="reading-meaning">${esc(p.meaning)}</p>`:''}${btn(e.showEvidence?'收起原文依据':'我想好了，看原文依据','drill-evidence',`aria-expanded="${!!e.showEvidence}"`,'secondary')}${e.showEvidence?`<div class="reading-evidence">${readingEvidence(p.readingGuide)}</div>`:''}</div></div>`;
+  }
+  function drillArticle(p) {
+    if(!p.article)return '';
+    const a=p.article,e=drillEditor;
+    return `<div class="card article-bridge"><h2>从短文再往前一步</h2><p>${esc(a.goal)}</p>${btn(e.showArticle?'收起本级文章':'试读本级长一点的文章','drill-article',`aria-expanded="${!!e.showArticle}"`,'secondary')}${e.showArticle?`<div class="bridge-reading"><h3>${esc(a.title)}</h3><p class="tiny">先通读抓主题，再逐段找依据，最后合上文章复述。不必一次读完。</p>${a.paragraphs.map(t=>`<p class="example" lang="es">${esc(t)}</p>`).join('')}<dl class="article-words">${a.words.map(([es,zh])=>`<dt lang="es">${esc(es)}</dt><dd>${esc(zh)}</dd>`).join('')}</dl><h3>读懂了吗？先自己回答</h3><ol class="rules">${a.checks.map(c=>`<li>${esc(c[0])}</li>`).join('')}</ol>${btn(e.showArticleEvidence?'收起文章参考':'看文章依据与解释','drill-article-evidence',`aria-expanded="${!!e.showArticleEvidence}"`,'secondary')}${e.showArticleEvidence?`<div class="article-evidence">${a.checks.map((c,i)=>`<h3>${i+1}. ${esc(c[0])}</h3>${readingEvidence(c)}`).join('')}</div>`:''}<h3>合上文章，换成自己的表达</h3><p>${esc(a.response)}</p><p class="tiny">这是阅读与表达自练，不计入四题成绩；可写在本包草稿中，原写作自查仍只对应原任务。</p>${btn('去写自己的回答','drill-section','data-section="express"','secondary')}</div>`:''}</div>`;
+  }
   function drillDialogue(p) {
     const shown = !!drillEditor.showDialogue;
-    return `${btn(shown?'收起个人对话':'练一段自己的对话','drill-dialogue',`aria-expanded="${shown}"`,'secondary')}${shown?`<div class="personal-dialogue"><p>${esc(p.dialogue.scene)}</p>${p.dialogue.turns.map(t=>`<p class="example">${esc(t)}</p>`).join('')}<p>${esc(p.dialogue.personalize)}</p><h3>换个情景，再自己说</h3><p>${esc(p.newScene.prompt)}</p><p class="tiny">说完检查：${esc(p.newScene.check)}</p><p class="tiny">先补上自己的回答，再收起对话，用自己的话说一遍。可在下方草稿中记下对话或新情景表达；手工自查仍对应原写作任务，不自动评分。</p></div>`:''}`;
+    return `${btn(shown?'收起个人对话':'练一段自己的对话','drill-dialogue',`aria-expanded="${shown}"`,'secondary')}${shown?`<div class="personal-dialogue"><h3>先理解对方，再接一句</h3><p>${esc(p.dialogue.scene)}</p>${p.dialogue.turns.map(t=>`<p class="dialogue-turn">${esc(t)}</p>`).join('')}<h3>把回答换成你自己的</h3><p>${esc(p.dialogue.personalize)}</p><h3>换个情景，再自己说</h3><p>${esc(p.newScene.prompt)}</p><p class="tiny">说完检查：${esc(p.newScene.check)}</p><p class="tiny">先补上自己的回答，再收起对话，用自己的话说一遍。可在下方草稿中记下对话或新情景表达；手工自查仍对应原写作任务，不自动评分。</p></div>`:''}`;
   }
   function drillOutput(p, unlocked) {
     const e=drillEditor;
-    return `<div class="card"><h2>先开口试一句</h2><p>${esc(p.transfer)}</p>${drillDialogue(p)}<h2>5 · 写自己的表达</h2><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。保存版本 ${e.revisions}，此处不自动评分。</p><div class="actions">${e.dirty?btn('撤销未保存修改','drill-reset','','secondary'):''}${!e.dirty&&e.hasPrevious?btn('恢复上一保存版本','drill-revert','','secondary'):''}</div><h3>自己检查，再修改</h3><p class="tiny">完成后自行勾选；修改文字并保存后重新自查，不是能力评分。</p>${p.output.rubric.map((r,i)=>`<label class="week-check"><input type="checkbox" data-drill-check="${i}" ${e.checks.includes(i)?'checked':''} ${!unlocked||e.dirty||!e.saved||!e.text.trim()?'disabled':''}/> ${esc(r)}</label>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
+    return `<div class="card study-section" id="drill-express" tabindex="-1"><h2>4 · 先开口试一句</h2><p>${esc(p.transfer)}</p>${drillDialogue(p)}<h3 class="writing-title">再写自己的表达</h3><p>${esc(p.output.prompt)}</p><ol class="rules">${p.output.starters.map(t=>`<li lang="es">${esc(t)}</li>`).join('')}</ol><label for="drill-draft">个人表达草稿</label><textarea id="drill-draft" class="expression-input" maxlength="3000" placeholder="先用自己的经历写短句，再按提示连接。" ${unlocked?'':'disabled'}>${esc(e.text)}</textarea><div class="accent-buttons">${['á','é','í','ó','ú','ü','ñ','¿','¡'].map(c=>`<button data-action="drill-draft-accent" data-char="${c}" aria-label="草稿添加 ${c}" ${unlocked?'':'disabled'}>${c}</button>`).join('')}</div>${btn('保存表达草稿','drill-save',unlocked?'':'disabled')}<p id="drill-draft-status" class="tiny" role="status">${e.dirty?'修改尚未保存':e.saved?'草稿已保存':'尚无已保存草稿'}。保存版本 ${e.revisions}，此处不自动评分。</p><div class="actions">${e.dirty?btn('撤销未保存修改','drill-reset','','secondary'):''}${!e.dirty&&e.hasPrevious?btn('恢复上一保存版本','drill-revert','','secondary'):''}</div><h3>自己检查，再修改</h3><p class="tiny">完成后自行勾选；修改文字并保存后重新自查，不是能力评分。</p>${p.output.rubric.map((r,i)=>`<label class="week-check"><input type="checkbox" data-drill-check="${i}" ${e.checks.includes(i)?'checked':''} ${!unlocked||e.dirty||!e.saved||!e.text.trim()?'disabled':''}/> ${esc(r)}</label>`).join('')}${btn(e.showModel?'收起参考范文':'对照参考范文','drill-model',!unlocked||!e.saved||e.dirty||!e.text.trim()?'disabled':'','secondary')}${e.showModel?`<p class="example expression-model" lang="es">${esc(p.output.model)}</p>`:''}</div>`;
   }
   function drillPage(id) {
     const p=L.drillPacks.find(p=>p.id===id);
     if(!p)return '<div class="card empty">没有找到练习包。<a href="#drills">返回分级练习</a></div>';
     if(!drillEditor||drillEditor.id!==id){const d=state.drillDrafts[id];drillEditor={id,text:d?d.text:'',saved:!!d,revisions:d?d.revisions:0,checks:d?d.checks:[],hasPrevious:!!d&&typeof d.previousText==='string',dirty:false,showModel:false,showMeaning:false};}
     const unlocked=L.drillUnlocked(state,id),previous=L.drillPacks.find(d=>d.id===p.previousId);
-    const head=`${btn(`${icon('back')} 返回分级练习`,'drills','','back')}${heading(`${p.level} · ${p.branch==='core'?'核心':'巩固'} ${p.levelNumber}`,p.title,p.goal)}`;
-    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card"><h2>先想清楚要表达什么</h2><p>${esc(p.approach)}</p><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}<div class="card"><h2>先读一小段</h2><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p>${drillWords(p)}<p class="tiny">先读西语。读不懂时看大意，再回到原文找对应的句子。</p>${btn(drillEditor.showMeaning?'收起中文大意':'看中文大意','drill-meaning',`aria-expanded="${!!drillEditor.showMeaning}"`,'secondary')}${drillEditor.showMeaning?`<p class="reading-meaning">${esc(p.meaning)}</p>`:''}</div>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}${drillOutput(p,unlocked)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
+    const head=`${btn(`${icon('back')} 返回分级练习`,'drills','','back')}${heading(`${p.level} · ${p.branch==='core'?'核心练习':'巩固练习'}`,p.title,p.goal)}`;
+    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${drillSteps()}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card study-section" id="drill-prepare" tabindex="-1"><h2>1 · 先想清楚要表达什么</h2><p>${esc(p.approach)}</p><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}${drillReading(p)}<div class="card study-section practice-entry" id="drill-practice" tabindex="-1"><h2>3 · 用四题检查理解</h2><p>辨析 → 填空 → 纠错 → 阅读。每题先回答再看解析，最后保存整包结果。</p>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}</div>${drillOutput(p,unlocked)}${drillArticle(p)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
     if(drillQuiz.result){const r=drillQuiz.result,next=L.nextDrillPack(state,id);return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>${r.passed?'基础练习已达标':'再巩固一次'}</h2><p>答对 ${r.correct} / ${r.total} 题；错项保留在列表，重新练习答对后移除。</p><p class="tiny">75% 是本包继续练习的门槛，不能证明语言等级；个人表达需自行检查与反馈。</p><div class="actions">${btn('写自己的表达 →','drill-output')}${btn('重练四步练习','drill-begin',`data-id="${id}"`,'secondary')}${r.passed&&next?btn('继续下一包 →','drill',`data-id="${next.id}"`,'secondary'):''}</div></div></section>`;}
     const q=p.questions[drillQuiz.index],f=drillQuiz.feedback;
     return `<section class="reading">${head}${pill(`${drillQuiz.index+1} / 4`)}<h2 class="question-title">${esc(q.title)}</h2>${drillQuiz.index===3?`<div class="card"><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">${esc(p.glossary)}</p></div>`:''}<p>${esc(q.prompt)}</p>${UI.hint(q,drillQuiz,'drill')}${UI.controls({question:q,session:drillQuiz,prefix:'drill',limit:500,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'drill-next',label:drillQuiz.index+1===drillQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
@@ -10346,7 +10514,7 @@ Object.assign(module.exports,exercise);
     else if(action==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${element.dataset.id}`);}
     else if(action==='drill-begin'){
       const id=element.dataset.id;if(!L.drillUnlocked(state,id))return notify('先完成前一包，正确率至少 75%。');
-      drillQuiz=L.createExerciseSession(id,L.drillPacks.find(p=>p.id===id).questions);render();
+      drillQuiz=L.createExerciseSession(id,L.drillPacks.find(p=>p.id===id).questions);render();window.scrollTo(0,0);
     }
     else if(action==='drill-answer')submitDrillAnswer(element.dataset.answer);
     else if(action==='drill-submit')submitDrillAnswer(drillQuiz&&drillQuiz.input);
@@ -10376,8 +10544,14 @@ Object.assign(module.exports,exercise);
     }
     else if(action==='drill-reset'){const d=state.drillDrafts[drillEditor.id];Object.assign(drillEditor,{text:d?d.text:'',dirty:false,showModel:false,checks:d?d.checks:[]});render();}
     else if(action==='drill-revert'){if(!drillEditor||drillEditor.dirty)return;const d=commit(s=>L.revertDrillDraft(s,drillEditor.id));if(d){Object.assign(drillEditor,{text:d.text,revisions:d.revisions,checks:d.checks,hasPrevious:typeof d.previousText==='string',dirty:false,showModel:false});render();}}
-    else if(action==='drill-words'||action==='drill-dialogue'){if(!drillEditor)return;const key=action==='drill-words'?'showWords':'showDialogue';drillEditor[key]=!drillEditor[key];render();}
-    else if(action==='drill-meaning'){if(!drillEditor)return;drillEditor.showMeaning=!drillEditor.showMeaning;render();}
+    else if(action==='drill-section'){
+      const section=document.getElementById('drill-'+element.dataset.section);if(section){section.focus({preventScroll:true});section.scrollIntoView({block:'start'});}
+    }
+    else if(['drill-words','drill-dialogue','drill-meaning','drill-evidence','drill-article','drill-article-evidence'].includes(action)){
+      if(!drillEditor)return;
+      const key={'drill-words':'showWords','drill-dialogue':'showDialogue','drill-meaning':'showMeaning','drill-evidence':'showEvidence','drill-article':'showArticle','drill-article-evidence':'showArticleEvidence'}[action];
+      drillEditor[key]=!drillEditor[key];render();root.querySelector(`[data-action="${action}"]`).focus({preventScroll:true});
+    }
     else if(action==='drill-model'){if(!drillEditor||drillEditor.dirty||!drillEditor.saved||!drillEditor.text.trim()||!L.drillUnlocked(state,drillEditor.id))return;drillEditor.showModel=!drillEditor.showModel;render();}
     else if(action==='nouns'){nounQuiz=null;navigate('nouns');}
     else if(action==='noun'){nounQuiz=null;navigate(`noun/${element.dataset.id}`);}

@@ -15,7 +15,7 @@ Page({
   data: { phase: 'menu', level: 'A1', input: '', feedback: null, text: '', dirty: false, saved: false, showModel: false },
   onLoad(options = {}) { if (['A1','A2','B1','B2'].includes(options.level)) this.setData({ level: options.level }); this.refresh(); if (options.id) this.open({ currentTarget: { dataset: { id: options.id } } }); },
   onShow() { this.refresh(); },
-  refresh() { const state = S.load(); this.setData({ packs: L.drillProgress(state).filter(p => p.level === this.data.level), wrongCount: L.drillWrongQuestions(state).length }); },
+  refresh() { const state = S.load(); this.setData({ packs: L.drillProgress(state).filter(p => p.level === this.data.level), levelGuide: L.drillPacks.find(p => p.level === this.data.level).levelGuide, wrongCount: L.drillWrongQuestions(state).length }); },
   review() { wx.navigateTo({ url: '/pages/drillreview/index' }); },
   select(e) { if (!['A1','A2','B1','B2'].includes(e.currentTarget.dataset.level)) return; this.setData({ level: e.currentTarget.dataset.level }); this.refresh(); },
   open(e) {
@@ -23,7 +23,7 @@ Page({
     if (!pack) return wx.showToast({ title: '没有找到练习包', icon: 'none' });
     const state = S.load(), draft = state.drillDrafts[pack.id];
     this.pack = pack;
-    this.setData({ phase: 'read', showMeaning: false, showWords: false, showDialogue: false, pack, level: pack.level, unlocked: L.drillUnlocked(state, pack.id), previous: L.drillPacks.find(p => p.id === pack.previousId) || null,
+    this.setData({ phase: 'read', showMeaning: false, showWords: false, showDialogue: false, showEvidence: false, showArticle: false, showArticleEvidence: false, pack, level: pack.level, unlocked: L.drillUnlocked(state, pack.id), previous: L.drillPacks.find(p => p.id === pack.previousId) || null,
       references: [...new Map(pack.references.map(r => [r.sourceId + r.section, { ...r, ...L.course.sources.find(s => s.id === r.sourceId) }])).values()],
       text: draft ? draft.text : '', hasText: !!draft && !!draft.text.trim(), saved: !!draft, revisions: draft ? draft.revisions : 0, checks: draft ? draft.checks : [], hasPrevious: !!draft && typeof draft.previousText === 'string', dirty: false, showModel: false, result: null });
     this.showChecks(draft ? draft.checks : []);
@@ -31,6 +31,15 @@ Page({
   meaning() { if (this.data.phase === 'read') this.setData({ showMeaning: !this.data.showMeaning }); },
   words() { if (this.data.phase === 'read') this.setData({ showWords: !this.data.showWords }); },
   dialogue() { if (this.data.phase === 'read') this.setData({ showDialogue: !this.data.showDialogue }); },
+  support(e) {
+    const key = e.currentTarget.dataset.key;
+    if (this.data.phase === 'read' && ['showEvidence', 'showArticle', 'showArticleEvidence'].includes(key)) this.setData({ [key]: !this.data[key] });
+  },
+  section(e) {
+    const section = e.currentTarget.dataset.section;
+    if (this.data.phase === 'read' && ['prepare','read','practice','express'].includes(section)) wx.pageScrollTo({ selector: '#drill-' + section, duration: 0 });
+  },
+  foundations() { wx.navigateTo({ url: '/pages/foundations/index' }); },
   draft(e) { this.setData({ text: e.detail.value, hasText: !!e.detail.value.trim(), dirty: true, showModel: false }); },
   draftAccent(e) { if (this.data.unlocked && this.data.text.length < 3000) this.setData({ text: this.data.text + e.currentTarget.dataset.char, hasText: true, dirty: true, showModel: false }); },
   showChecks(checks) { this.setData({ checks, rubricRows: this.pack.output.rubric.map((label, index) => ({ label, index, checked: checks.includes(index) })) }); },
@@ -54,7 +63,7 @@ Page({
     if (!this.data.saved || this.data.dirty || !this.data.text.trim()) return wx.showToast({ title: '先写自己的表达并保存草稿', icon: 'none' });
     this.setData({ showModel: !this.data.showModel });
   },
-  output() { this.setData({ phase: 'read' }); },
+  output() { this.setData({ phase: 'read' }, () => wx.pageScrollTo({ selector: '#drill-express', duration: 0 })); },
   menu() { this.setData({ phase: 'menu' }); this.refresh(); },
   continuePack() { const next = L.nextDrillPack(S.load(), this.pack.id); if (next) this.open({ currentTarget: { dataset: { id: next.id } } }); },
   previous() { if (this.pack.previousId) this.open({ currentTarget: { dataset: { id: this.pack.previousId } } }); },

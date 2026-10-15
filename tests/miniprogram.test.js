@@ -264,3 +264,21 @@ test('原生一年计划开始、周自检、未来周预览与跨页重载',()=
  reload.check({currentTarget:{dataset:{id:'words'}}});assert.equal(r.state.journey.weekChecks[1].skills.length,0);
  r.wx.setStorageSync=()=>{throw new Error('quota');};reload.check({currentTarget:{dataset:{id:'write'}}});assert.equal(reload.data.skills.find(s=>s.id==='write').checked,false);
 });
+
+test('原生阅读分步定位、文章预览与依据不改草稿或开放状态', () => {
+  const r = runtime(), p = r.loadPage('drills'), scrolls = [];
+  r.wx.pageScrollTo = options => scrolls.push(options.selector);
+  p.onLoad({ id: 'a1-place' });
+  p.draft({ detail: { value: 'Soy estudiante.' } });
+  for (const section of ['read', 'practice', 'express']) p.section({ currentTarget: { dataset: { section } } });
+  assert.deepEqual(scrolls, ['#drill-read', '#drill-practice', '#drill-express']);
+  p.support({ currentTarget: { dataset: { key: 'showEvidence' } } });
+  assert.equal(p.data.showEvidence, true); assert.equal(p.data.text, 'Soy estudiante.');
+  p.support({ currentTarget: { dataset: { key: 'unlocked' } } });
+  assert.deepEqual(r.state, L.emptyState());
+  p.open({ currentTarget: { dataset: { id: 'b1-anterior' } } });
+  assert.equal(p.data.showEvidence, false);
+  for (const key of ['showArticle', 'showArticleEvidence']) p.support({ currentTarget: { dataset: { key } } });
+  assert.equal(p.data.showArticleEvidence, true); assert.equal(p.data.unlocked, false);
+  p.begin(); p.save(); assert.equal(p.data.phase, 'read'); assert.deepEqual(r.state, L.emptyState());
+});

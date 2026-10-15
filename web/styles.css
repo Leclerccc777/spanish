@@ -661,11 +661,6 @@ font-size:14px}
 margin:20px 0}
 .reading .example{
 font-size:20px}
-.reading .actions{
-display:flex;
-gap:12px;
-margin-top:22px;
-flex-wrap:wrap}
 .back{
 border:0;
 background:none;
@@ -1164,8 +1159,8 @@ background:var(--lime)}
 
 .level-tabs {
 display:flex;
-gap:10px;
-margin:0 0 20px;
+gap:16px;
+margin:24px 0;
 flex-wrap:wrap;
 }
 
@@ -1678,7 +1673,43 @@ bottom:88px}
 transition:none}
 }
 
-.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.actions{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:22px 0 8px}
 .btn:disabled{transform:none}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.expression-input:focus-visible{outline:3px solid var(--blue-ink);outline-offset:4px}
 .dashboard-grid{margin-bottom:24px}
+
+/* Reading and action areas keep room for pointer, keyboard and touch use. */
+.study-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0}
+.study-steps .btn{padding:14px 10px}
+.study-section{scroll-margin-top:24px}
+.study-section:focus{outline:3px solid var(--blue-ink);outline-offset:4px}
+.reading-support{display:grid;justify-items:start;gap:18px;margin-top:24px}
+.reading-support p{margin:0}
+.reading-words,.reading-evidence,.article-evidence{width:100%;padding:20px;background:var(--blue-soft);border-radius:16px}
+.reading-words p + p{margin-top:20px}
+.reading-task{padding:16px;border-left:4px solid var(--green);background:var(--green-soft)}
+.reading blockquote{margin:16px 0;padding-left:16px;border-left:3px solid #8ac8e8;line-height:1.9}
+.personal-dialogue{margin:24px 0;padding:20px;background:var(--blue-soft);border-radius:16px}
+.dialogue-turn{padding:16px;background:white;border-radius:12px;line-height:1.9}
+.reading .writing-title{margin-top:32px}
+.bridge-reading{margin-top:28px}
+.bridge-reading > .btn{margin:16px 0 24px}
+.article-words{display:grid;grid-template-columns:1fr 2fr;gap:12px 24px;padding:20px;background:var(--blue-soft);border-radius:16px}
+.article-words dt{font-weight:700}
+.article-words dd{margin:0}
+.article-evidence{margin:24px 0}
+.reading .bridge-reading .example{font-size:19px;line-height:1.95;margin:24px 0}
+.card > .btn{margin-block:8px}
+.card > .btn + .btn{margin-inline-start:12px}
+@media(min-width:1000px){
+.actions{gap:20px}
+.reading .card{padding:32px;margin:28px 0}
+.lesson-grid{gap:24px}
+.accent-buttons{gap:12px;margin-bottom:28px}
+}
+@media(max-width:700px){
+.study-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.article-words{grid-template-columns:1fr;gap:8px}
+.article-words dd{margin-bottom:12px}
+.reading-words,.reading-evidence,.article-evidence,.personal-dialogue{padding:16px}
+}

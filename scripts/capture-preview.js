@@ -9,7 +9,7 @@ const L = require('../miniprogram/lib/learning');
   const output = path.resolve(__dirname, '../docs/screenshots');
   fs.mkdirSync(output, { recursive: true });
   const requested = new Set(process.argv.slice(2));
-  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-words-mobile',390,844],['drill-dialogue-desktop',1440,1000],['drill-hint-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
+  for (const [name, width, height] of [['today-desktop',1440,1000],['today-mobile',390,844],['grammar-b2-mobile',390,844],['expression-mobile',390,844],['bank-desktop',1440,1000],['bank-mobile',390,844],['foundations-mobile',390,844],['year-mobile',390,844],['nouns-desktop',1440,1000],['nouns-mobile',390,844],['noun-quiz-mobile',390,844],['drill-steps-desktop',1440,1000],['drill-article-desktop',1440,1000],['drill-article-mobile',390,844],['drills-desktop',1440,1000],['drills-mobile',390,844],['drills-b2-mobile',390,844],['drill-reading-mobile',390,844],['drill-words-mobile',390,844],['drill-dialogue-desktop',1440,1000],['drill-hint-mobile',390,844],['drill-review-mobile',390,844],['drill-draft-mobile',390,844],['month-mobile',390,844],['month-desktop',1440,1000],['progress-mobile',390,844],['progress-desktop',1440,1000]]) {
     if (requested.size && !requested.has(name)) continue;
     const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, timezoneId: 'Asia/Shanghai' });
     await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
@@ -23,6 +23,11 @@ const L = require('../miniprogram/lib/learning');
     if(name.startsWith('drills-')){
       await page.goto('http://127.0.0.1:4173/#drills');
       if(name==='drills-b2-mobile')await page.getByRole('button',{name:'B2',exact:true}).click();
+    }
+    if(name==='drill-steps-desktop')await page.goto('http://127.0.0.1:4173/#drill/a1-place');
+    if(name.startsWith('drill-article-')){
+      await page.goto('http://127.0.0.1:4173/#drill/b1-anterior');
+      await page.getByRole('button',{name:'试读本级长一点的文章'}).click();
     }
     if(name==='drill-reading-mobile'){
       await page.goto('http://127.0.0.1:4173/#drill/a1-place');
@@ -64,7 +69,9 @@ const L = require('../miniprogram/lib/learning');
     }
     if(name==='expression-mobile')await page.goto('http://127.0.0.1:4173/#expression/e1');
     const screenshotPath=path.join(output, `${name}.png`);
-    if(name==='drill-words-mobile'||name==='drill-dialogue-desktop')await page.locator(name==='drill-words-mobile'?'.reading-words':'.personal-dialogue').locator('..').screenshot({path:screenshotPath});
+    if(name.startsWith('drill-article-'))await page.locator('.article-bridge').screenshot({path:screenshotPath,style:'.sidebar { visibility: hidden; }'});
+    else if(name==='drill-steps-desktop')await page.screenshot({path:screenshotPath});
+    else if(name==='drill-words-mobile'||name==='drill-dialogue-desktop')await page.locator(name==='drill-words-mobile'?'.reading-words':'.personal-dialogue').locator('..').screenshot({path:screenshotPath});
     else await page.screenshot({ path:screenshotPath, fullPage: !name.startsWith('bank-') });
     await page.close();
   }
