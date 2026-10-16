@@ -1,17 +1,19 @@
 const E = require('./exercise');
 
 // 页面只提供内容、开放条件和保存动作；交互由这一个控制器维护。
-module.exports = function exercisePage({ storage, platform, itemKey, maxLength, evaluate, grade, canPractice = () => true, afterSave }) {
+module.exports = function exercisePage({ storage, platform, itemKey, maxLength, evaluate, grade, questions, progressKey, canPractice = () => true, afterSave }) {
   return {
     showExercise() {
       const s = this.exercise;
-      this.setData({ phase: s.result ? 'result' : 'quiz', question: this[itemKey].questions[s.index], position: s.index + 1,
+      this.setData({ phase: s.result ? 'result' : 'quiz', question: s.questions[s.index], position: s.index + 1,
         input: s.input, feedback: s.feedback, result: s.result, showHint: s.showHint });
     },
     begin() {
       const item = this[itemKey];
       if (!item || !canPractice(item.id)) return;
-      this.exercise = E.createExerciseSession(item.id, item.questions);
+      if (this.stopAudio) this.stopAudio();
+      const form = questions ? require('./variants').practiceForm((storage.load()[progressKey][item.id] || {}).attempts) : 0;
+      this.exercise = E.createExerciseSession(item.id, questions ? questions(item.id, form) : item.questions, form);
       this.showExercise();
     },
     input(e) {
@@ -38,7 +40,7 @@ module.exports = function exercisePage({ storage, platform, itemKey, maxLength, 
     },
     next() {
       if (this.data.phase !== 'quiz' || !this.data.feedback || !canPractice(this[itemKey].id)) return;
-      if (!E.advanceExercise(this.exercise, (id, answers) => storage.commit(s => grade(s, id, answers)))) return;
+      if (!E.advanceExercise(this.exercise, (id, answers) => storage.commit(s => grade(s, id, answers, this.exercise.form)))) return;
       this.showExercise();
       if (this.exercise.result) {
         if (afterSave) afterSave.call(this);

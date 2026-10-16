@@ -2,7 +2,7 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 Page({
   data: { phase: 'setup', mode: 'meaning', input: '', result: null, accents: ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ'] },
-  onLoad(options = {}) { this.wrongOnly = options.wrong === '1'; this.packId=options.pack; this.setData({ wrongOnly: this.wrongOnly }); },
+  onLoad(options = {}) { this.previousOptions = new Map(); this.wrongOnly = options.wrong === '1'; this.packId=options.pack; this.setData({ wrongOnly: this.wrongOnly }); },
   mode(e) { this.setData({ mode: e.currentTarget.dataset.mode }); },
   begin() {
     const state = S.load(); this.words = this.wrongOnly ? L.wrongWords(state).filter(w => L.isWordUnlocked(state, w.id)) : this.packId ? L.packQueue(state,this.packId) : L.queue(state);
@@ -11,7 +11,9 @@ Page({
   },
   showQuestion() {
     if (this.index >= this.words.length) return this.setData({ phase: 'result', score: this.data.originalCount ? Math.round(this.firstCorrect / this.data.originalCount * 100) : 0, firstCorrect: this.firstCorrect, summary: L.summary(S.load()) });
-    this.setData({ question: L.wordQuestion(this.words[this.index].id, this.data.mode), position: this.index + 1, total: this.words.length, input: '', result: null, selected: null });
+    const id=this.words[this.index].id, question=L.wordQuestion(id,this.data.mode,Math.random,this.previousOptions.get(id)||[]);
+    if(this.data.mode==='meaning')this.previousOptions.set(id,question.options);
+    this.setData({ question, position: this.index + 1, total: this.words.length, input: '', result: null, selected: null });
   },
   input(e) { this.setData({ input: e.detail.value }); },
   accent(e) { if (this.data.phase === 'quiz' && !this.data.result) this.setData({ input: (this.data.input + e.currentTarget.dataset.char).slice(0,200) }); },

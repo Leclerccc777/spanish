@@ -7,8 +7,10 @@
   <title>Hola · 每天一点西语</title>
   <link rel="stylesheet" href="/styles.css" />
   <script src="/learning.bundle.js" defer></script>
+  <script src="/audio.bundle.js" defer></script>
+  <script src="/audio.js" defer></script>
   <script src="/exercise-ui.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
-<body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><noscript>请启用 JavaScript 以使用学习卡片和保存进度。</noscript></body>
+<body><div id="app"></div><div class="audio-status-bar"><span id="audio-status" role="status" aria-live="polite"></span><button class="btn small secondary" data-action="audio-stop" hidden>停止朗读</button></div><div id="toast" role="status" aria-live="polite"></div><noscript>请启用 JavaScript 以使用学习卡片和保存进度。</noscript></body>
 </html>

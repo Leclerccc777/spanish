@@ -5,13 +5,13 @@ const answers = p => p.questions.map(q => q.answers[0]);
 test('集中订正按等级抽取实际错项，最多 12 项，订正不抬高整包分数', () => {
   const s=L.emptyState();for(const p of L.drillPacks){const a=answers(p);a[1]='wrong';L.gradeDrill(s,p.id,a);}
   assert.equal(L.drillWrongQuestions(s).length,24);assert.equal(L.drillReviewQueue(s).length,12);assert.equal(L.drillWrongQuestions(s,'B2').length,6);
-  const before=structuredClone(s.drills),q=L.drillReviewQueue(s)[0];assert.equal(L.reviewDrillMistake(s,q.id,'wrong').correct,false);
-  assert.equal(L.reviewDrillMistake(s,q.id,q.answers[0]).correct,true);assert.equal(s.drillMistakes[q.id],undefined);
-  assert.deepEqual(s.drills,before);assert.deepEqual(s.days,{});assert.equal(L.reviewDrillMistake(s,q.id,'wrong').alreadyCleared,true);assert.equal(s.drillMistakes[q.id],undefined);
+  const before=structuredClone(s.drills),q=L.drillReviewQueue(s)[0];assert.equal(L.reviewDrillMistake(s,q.id,'wrong',q.form).correct,false);
+  assert.equal(L.reviewDrillMistake(s,q.id,q.answers[0],q.form).correct,true);assert.equal(s.drillMistakes[q.id],undefined);
+  assert.deepEqual(s.drills,before);assert.deepEqual(s.days,{});assert.equal(L.reviewDrillMistake(s,q.id,'wrong',q.form).alreadyCleared,true);assert.equal(s.drillMistakes[q.id],undefined);
 });
 test('订正不绕过未达标完整包，尚未开放的伪造错项不能复习', () => {
   const s=L.emptyState(),p=L.drillPacks[0],a=answers(p);a[0]='wrong';a[1]='wrong';L.gradeDrill(s,p.id,a);
-  for(const q of L.drillReviewQueue(s))L.reviewDrillMistake(s,q.id,q.answers[0]);
+  for(const q of L.drillReviewQueue(s))L.reviewDrillMistake(s,q.id,q.answers[0],q.form);
   assert.equal(s.drills[p.id].bestScore,50);assert.equal(L.drillUnlocked(s,'a1-routine'),false);
   s.drillMistakes['b2-report-q2']={answer:'bad'};assert.equal(L.drillReviewQueue(s).length,0);
   assert.throws(()=>L.reviewDrillMistake(s,'b2-report-q2','presentaría'));assert.throws(()=>L.drillWrongQuestions(s,'C2'));

@@ -1,3 +1,5 @@
+const { parallelQuestions } = require('./variants');
+const variants = require('../data/drill-variants');
 const drillPacks = require('../data/drills');
 const studyPacks = [...drillPacks].sort((a, b) => a.studyOrder - b.studyOrder);
 const index = new Map(drillPacks.map(p => [p.id, p]));
@@ -22,22 +24,27 @@ function nextDrillPack(state, id) {
 }
 function drillProgress(state) {
   return studyPacks.map(p => ({ ...p, unlocked: drillUnlocked(state, p.id), bestScore: state.drills[p.id] ? state.drills[p.id].bestScore : null,
-    mistakes: p.questions.filter(q => state.drillMistakes[q.id]).map(q => ({ ...q, previousAnswer: state.drillMistakes[q.id].answer })) }));
+    mistakes: p.questions.filter(q => state.drillMistakes[q.id]).map(q => ({ ...drillQuestions(p.id, state.drillMistakes[q.id].form || 0).find(item => item.id === q.id), previousAnswer: state.drillMistakes[q.id].answer })) }));
 }
-function evaluateDrillAnswer(id, position, answer) {
-  const pack = index.get(id), q = pack && pack.questions[position];
+function drillQuestions(id, form = 0) {
+  const pack = index.get(id);
+  if (!pack) throw new Error('未知练习包');
+  return parallelQuestions(pack.questions, form, variants).map(q => ({...q, reading:q.reading || pack.reading, glossary:form ? '' : pack.glossary}));
+}
+function evaluateDrillAnswer(id, position, answer, form = 0) {
+  const q = drillQuestions(id, form)[position];
   if (!q || !Number.isInteger(position) || typeof answer !== 'string' || !answer.trim() || answer.length > 500) throw new Error('请填写本题答案');
   return { ...checkSpanishAnswer(answer, q.answers, { preservePunctuation: q.preservePunctuation, ignoreOpeningPunctuation: true }), explanation: q.explanation };
 }
-function gradeDrill(state, id, answers) {
+function gradeDrill(state, id, answers, form = 0) {
   const pack = index.get(id);
   if (!pack || !drillUnlocked(state, id)) throw new Error('请先完成前面的练习包');
   if (!Array.isArray(answers) || answers.length !== pack.questions.length) throw new Error('请完整作答四道练习');
-  const results = pack.questions.map((q, i) => evaluateDrillAnswer(id, i, answers[i]));
+  const results = pack.questions.map((q, i) => evaluateDrillAnswer(id, i, answers[i], form));
   const correct = results.filter(r => r.correct).length, score = correct * 25;
   const previous = state.drills[id] || { bestScore: 0, attempts: 0 };
   state.drills[id] = { bestScore: Math.max(previous.bestScore, score), attempts: previous.attempts + 1 };
-  pack.questions.forEach((q, i) => { if (results[i].correct) delete state.drillMistakes[q.id]; else state.drillMistakes[q.id] = { answer: answers[i] }; });
+  pack.questions.forEach((q, i) => { if (results[i].correct) delete state.drillMistakes[q.id]; else state.drillMistakes[q.id] = { answer: answers[i], ...(form ? {form} : {}) }; });
   return { correct, total: results.length, score, passed: score >= 75, results };
 }
 function saveDrillDraft(state, id, text) {
@@ -74,9 +81,9 @@ function restoreDrills(raw) {
     }
     for (const q of pack.questions) {
       const m = raw.drillMistakes && raw.drillMistakes[q.id];
-      if (m && typeof m.answer === 'string' && m.answer.trim() && m.answer.length <= 500) drillMistakes[q.id] = { answer: m.answer };
+      if (m && typeof m.answer === 'string' && m.answer.trim() && m.answer.length <= 500) drillMistakes[q.id] = { answer: m.answer, ...(m.form === 1 ? {form:1} : {}) };
     }
   }
   return { drills, drillMistakes, drillDrafts };
 }
-module.exports = { drillPacks, drillUnlocked, nextDrillPack, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, revertDrillDraft, setDrillChecks, restoreDrills };
+module.exports = { drillQuestions, drillPacks, drillUnlocked, nextDrillPack, drillProgress, evaluateDrillAnswer, gradeDrill, saveDrillDraft, revertDrillDraft, setDrillChecks, restoreDrills };

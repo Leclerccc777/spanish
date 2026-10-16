@@ -2,7 +2,8 @@ const { test, expect } = require('@playwright/test');
 const L = require('../../miniprogram/lib/learning');
 async function complete(page, pack, wrongIndex = -1) {
   await page.getByRole('button', { name: '开始四步练习' }).click();
-  for (const [i, q] of pack.questions.entries()) {
+  const attempts=await page.evaluate(id=>JSON.parse(localStorage.getItem('hola-learning-v1')||'{}').drills?.[id]?.attempts||0,pack.id);
+  for (const [i, q] of L.drillQuestions(pack.id,L.practiceForm(attempts)).entries()) {
     if (q.kind === 'choice') await page.locator('[data-action="drill-answer"]').filter({ hasText: q.answers[0] }).click();
     else {
       await page.fill('#drill-answer', i === wrongIndex ? '错误' : q.answers[0]);

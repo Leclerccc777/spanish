@@ -1,3 +1,4 @@
+const { parallelQuestions, practiceForm } = require('./variants');
 const course = require('../data/course');
 const journey = require('./journey');
 const nouns = require('./nouns');
@@ -51,7 +52,7 @@ function restore(raw) {
   }
   const questions = new Set(course.lessons.flatMap(l => l.questions.map(q => q.id)));
   for (const [id, entry] of Object.entries(raw.mistakes || {})) {
-    if (questions.has(id) && entry && Number.isInteger(entry.selected) && entry.selected >= 0 && entry.selected < 3) clean.mistakes[id] = entry;
+    if (questions.has(id) && entry && Number.isInteger(entry.selected) && entry.selected >= 0 && entry.selected < 3) { const {form, ...previous} = entry; clean.mistakes[id] = { ...previous, ...(form === 1 ? {form:1} : {}) }; }
   }
   for (const word of course.words) {
     const practice = raw.wordPractice && raw.wordPractice[word.id];
@@ -153,14 +154,19 @@ function review(state, wordId, rating, today = dateKey(), credit = true) {
 }
 function normalizeWord(text) { return text.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' '); }
 function acceptedSpellings(word) { return word.spanish.split('/').map(normalizeWord); }
-function wordQuestion(wordId, mode = 'meaning', random = Math.random) {
+function wordQuestion(wordId, mode = 'meaning', random = Math.random, previousOptions = []) {
   const word = findWord(wordId);
   if (!word || !['meaning', 'spelling'].includes(mode)) throw new Error('无效的词汇题');
   if (mode === 'spelling') return { wordId, mode, prompt: word.meaning, hint: `本词卡首字母 ${acceptedSpellings(word)[0][0]} · ${word.pos}`, options: [] };
   const choices = [word.meaning];
   // 优先取同单元干扰项；去除重复释义，以免两项都正确。
   const group=word.bank?packIndex.get(word.packId).wordIds.map(findWord):unitWords.get(word.unitId);
-  const candidates=[...group,...course.curriculumWords].filter(w=>w.meaning!==word.meaning);
+  const candidates=group.filter(w=>w.meaning!==word.meaning);
+  // Tiny final packs need same-level words to offer four choices and a fresh retry.
+  if(new Set(candidates.map(w=>w.meaning)).size<4) candidates.push(...course.curriculumWords.filter(w=>w.level===word.level&&w.meaning!==word.meaning));
+  for (let i=candidates.length-1;i>0;i--) { const j=Math.floor(random()*(i+1)); [candidates[i],candidates[j]]=[candidates[j],candidates[i]]; }
+  const fresh=candidates.find(w=>!previousOptions.includes(w.meaning));
+  if(fresh)choices.push(fresh.meaning);
   for (const candidate of candidates) { if (!choices.includes(candidate.meaning)) choices.push(candidate.meaning); if (choices.length === 4) break; }
   for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
   return { wordId, mode, prompt: word.spanish, options: choices };
@@ -181,17 +187,23 @@ function practiceWord(state, wordId, answer, mode, today = dateKey()) {
   return { correct, accentHint, answer: mode === 'meaning' ? word.meaning : word.spanish, explanation: word.example?`${word.example} — ${word.translation}`:`英文原义：${word.definition}。中文为待复核辅助释义。` };
 }
 function wrongWords(state) { return course.words.filter(w => state.wordMistakes[w.id]).map(w => ({ ...w, ...state.wordMistakes[w.id] })); }
-function gradeLesson(state, lessonId, answers, today = dateKey()) {
+function lessonQuestions(id, form = 0) {
+  const lesson = course.lessons.find(l => l.id === id);
+  if (!lesson) throw new Error('未知课程');
+  return parallelQuestions(lesson.questions, form);
+}
+function gradeLesson(state, lessonId, answers, today = dateKey(), form = 0) {
   const lesson = course.lessons.find(l => l.id === lessonId);
-  if (!lesson || !isUnlocked(state, lesson.unitId) || !Array.isArray(answers) || answers.length !== lesson.questions.length || answers.some((a, i) => !Number.isInteger(a) || a < 0 || a >= lesson.questions[i].options.length)) throw new Error('请完整作答已解锁课程');
-  const correct = lesson.questions.filter((q, i) => q.answer === answers[i]).length;
+  if (!lesson || !isUnlocked(state, lesson.unitId) || !Array.isArray(answers) || answers.length !== lesson.questions.length || Array.from(answers).some((a, i) => !Number.isInteger(a) || a < 0 || a >= lesson.questions[i].options.length)) throw new Error('请完整作答已解锁课程');
+  const questions = lessonQuestions(lessonId, form);
+  const correct = questions.filter((q, i) => q.answer === answers[i]).length;
   const score = Math.round(100 * correct / lesson.questions.length);
   const previous = state.lessons[lessonId] || { bestScore: 0, attempts: 0 };
   const day = dayRecord(state, today);
   state.lessons[lessonId] = { bestScore: Math.max(previous.bestScore, score), attempts: previous.attempts + 1 };
-  lesson.questions.forEach((q, i) => {
+  questions.forEach((q, i) => {
     if (q.answer === answers[i]) delete state.mistakes[q.id];
-    else state.mistakes[q.id] = { lessonId, selected: answers[i], date: today };
+    else state.mistakes[q.id] = { lessonId, selected: answers[i], date: today, ...(form ? {form} : {}) };
   });
   if (score >= PASS_SCORE) {
     if (!day.grammar.includes(lessonId)) day.grammar.push(lessonId);
@@ -258,9 +270,9 @@ function setGoal(state, goal) {
   return state;
 }
 function mistakes(state) {
-  return course.lessons.flatMap(l => l.questions.filter(q => state.mistakes[q.id]).map(q => ({ ...q, lessonId: l.id, lessonTitle: l.title, selected: state.mistakes[q.id].selected })));
+  return course.lessons.flatMap(l => l.questions.filter(q => state.mistakes[q.id]).map(q => ({ ...lessonQuestions(l.id, state.mistakes[q.id].form === 1 ? 1 : 0).find(item => item.id === q.id), lessonId: l.id, lessonTitle: l.title, selected: state.mistakes[q.id].selected })));
 }
-module.exports = { course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression, bankProgress, isWordUnlocked, packQueue, setTrack, findWord };
+module.exports = { lessonQuestions, practiceForm, course, PASS_SCORE, emptyState, restore, dateKey, addDays, unitProgress, isUnlocked, currentUnit, queue, review, gradeLesson, summary, streak, setGoal, mistakes, isCheckedIn, wordQuestion, practiceWord, wrongWords, acceptedSpellings, levelProgress, expressionUnlocked, evaluateExpression, saveExpression, bankProgress, isWordUnlocked, packQueue, setTrack, findWord };
 
 Object.assign(module.exports,journey);
 Object.assign(module.exports,nouns);

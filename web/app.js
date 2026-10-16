@@ -16,6 +16,8 @@
   try { state = readStored(); }
   catch { state = L.emptyState(); storageFailed = true; }
   let levelFilter = '', grammarLevel = 'A1', expressionEditor = null;
+  const wordOptions = new Map();
+  function nextWordQuestion(id,mode){const q=L.wordQuestion(id,mode,Math.random,wordOptions.get(id)||[]);if(mode==='meaning')wordOptions.set(id,q.options);return q;}
   let query = '', unitFilter = '', sourceFilter = '', session = null, quiz = null, wordQuiz = null;
   let bankLevel='A1', bankQuery='', bankPageIndex=0, packPageIndex=0;
   let foundationQuiz=null, yearWeek=0;
@@ -69,15 +71,12 @@
     const s = L.summary(state);
     return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc((items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><span class="avatar" aria-label="本地学习者">学</span></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本地保存 · A1–B2 分级练习 · 浏览器体验版</span></footer></div></main></div>`;
   }
-  function art() {
-    return `<svg class="hero-art" viewBox="0 0 220 230" aria-hidden="true"><circle cx="126" cy="99" r="77" fill="#46a302"/><circle cx="180" cy="26" r="17" fill="#ffdc62"/><path d="M24 69h15m-7-7v15M188 167h17m-8-8v16" stroke="#e4ffc4" stroke-width="2"/><g transform="rotate(-9 112 115)"><rect x="49" y="53" width="119" height="149" rx="10" fill="#329000"/><rect x="42" y="45" width="119" height="149" rx="8" fill="#ffffff"/><path d="M58 72h77M58 79h48" stroke="#d8edfc" stroke-width="2"/><text x="101" y="123" text-anchor="middle" font-family="sans-serif" font-size="35" font-weight="800" fill="#286600">¡Hola!</text><text x="101" y="146" text-anchor="middle" font-family="sans-serif" font-size="9" letter-spacing="3" fill="#075b86">UN NUEVO MUNDO</text><path d="M59 170h77" stroke="#d8edfc" stroke-width="2"/><circle cx="131" cy="173" r="11" fill="#ddffb9"/><path d="m126 173 3 3 6-7" stroke="#286600" stroke-width="2" fill="none"/></g><g transform="rotate(12 176 116)"><rect x="169" y="73" width="10" height="100" rx="4" fill="#ff9600"/><path d="m169 172 5 12 5-12" fill="#fff4c9"/><path d="m172 180 2 4 2-4" fill="#303b45"/></g><path d="M177 199c-1-24 8-39 21-41-1 18-7 26-21 41Z" fill="#c3f68e"/><path d="M177 199c-13-10-20-12-29-10 6 11 16 15 29 10Z" fill="#ddffb9"/></svg>`;
-  }
   function stat(value, label, i, unit = '') { return `<div class="stat"><div class="stat-icon">${icon(i)}</div><div><div class="stat-value">${value}<small>${esc(unit)}</small></div><div class="stat-label">${esc(label)}</div></div></div>`; }
   function todayPage() {
     const s = L.summary(state); const foundationPassed=L.foundationProgress(state).filter(f=>f.passed).length; const lesson = C.lessons.find(l => l.unitId === s.unit.id);
     const date = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
     return heading('BUEN DÍA, ESTUDIANTE', '把西语，变成日常。', '每天约 15 分钟，向更大的世界说 Hola。', `<div class="date-chip">${icon('calendar')}${esc(date)}</div>`) +
-      `<section class="card beginner-start"><h2>${foundationPassed<4?'零基础？从这里开始。':'把基础练熟，再走远一点。'}</h2><p class="tiny">发音 → 重音 → 名词阴阳性 → 性数配合，每次一个 5–6 分钟小步骤。</p><div class="actions">${btn(`四步入门 · ${foundationPassed} / 4 达标`,'foundations')}${btn('一年 A1 → B1 计划','year','','secondary')}${btn('前四周每日小任务 →','month','','secondary')}${btn('A1 名词三步练习 →','nouns','','secondary')}</div></section><div class="dashboard-grid"><section class="hero"><div class="hero-grid"><div><div class="hero-tag">${icon('sun').replace('viewBox=', 'width="12" height="12" viewBox=')} UNIDAD ${s.unit.number} · ${esc(s.unit.topic)}</div><h2>${esc(s.unit.title)}</h2><p>${esc(s.unit.goal)}<br>从一个词开始，慢慢说出你的故事。</p>${btn(`${s.checkedIn ? '再巩固一轮' : '开始今日学习'} ${icon('arrow')}`, 'study', '', 'lime')}</div>${art()}</div></section><section class="card task-list"><div class="task-header"><h2>今天的小目标</h2>${pill(s.checkedIn ? '已打卡 ✓' : '待完成', !s.checkedIn)}</div><div class="task"><div class="task-icon">${icon('book')}</div><div class="task-label">词汇学习<div class="task-meta">新词 + 间隔复习</div></div><div class="task-count">${s.day.words.length} <span class="tiny">/ ${s.day.goal}</span></div></div>${meter(s.wordPercent)}<div class="task"><div class="task-icon">${icon('layers')}</div><div class="task-label">语法练习<div class="task-meta">4 道题，达标线 75%</div></div><div class="task-count">${s.day.grammar.length ? '✓' : '0'} <span class="tiny">/ 1</span></div></div><div class="checkin-note">${icon('check')}<span>${s.checkedIn ? '今日目标完成啦，学习记录已保存。' : '完成两个目标后，自动为今天打卡。'}</span></div></section></div>` +
+      `<section class="card daily-checkin" aria-label="今日打卡"><div class="task-header"><h2>今日打卡</h2>${pill(s.checkedIn ? '两项完成 ✓' : '完成下面两项', !s.checkedIn)}</div><div class="daily-goals"><section><h3>1 · 词汇打卡</h3><p>已完成 ${s.day.words.length} / ${s.day.goal} 个不同词汇</p>${meter(s.wordPercent)}<p class="tiny">新词 + 到期复习，学完后自动记录。</p>${btn(s.wordPercent>=100?'词汇已完成 · 再复习':'开始今日词汇','study','','lime')}</section><section><h3>2 · 语法打卡</h3><p>${s.day.grammar.length?'✓ 今天已有达标练习':'尚未达标 · 4 题答对至少 3 题'}</p>${meter(s.day.grammar.length?100:0)}<p class="tiny">${esc(lesson.title)}</p>${btn(s.day.grammar.length?'语法已完成 · 再巩固':'开始今日语法','lesson',`data-id="${lesson.id}"`,'lime')}</section></div><p class="checkin-note" role="status">${s.checkedIn?'✓ 今日已自动打卡，记录已保存。':'词汇和语法都完成后自动打卡；只打开页面不会计入。'}</p></section><section class="card beginner-start"><h2>${foundationPassed<4?'零基础？从这里开始。':'把基础练熟，再走远一点。'}</h2><p class="tiny">发音 → 重音 → 名词阴阳性 → 性数配合，每次一个 5–6 分钟小步骤。</p><div class="actions">${btn(`四步入门 · ${foundationPassed} / 4 达标`,'foundations')}${btn('一年 A1 → B1 计划','year','','secondary')}${btn('前四周每日小任务 →','month','','secondary')}${btn('A1 名词三步练习 →','nouns','','secondary')}</div></section>` +
       `${practiceAdvice()}<div class="card beginner-start"><h2>A1 → B2 递进练习</h2><p>辨析 → 填空 → 纠错 → 短阅读 → 自己表达。每次完成一小包。</p>${btn('进入分级练习 →','drills')}</div><div class="card"><h2>词汇路线 · 累计 6500 个条目</h2><p class="tiny">A1 800 → A2 2300 → B1 4300 → B2 6500 · 当前每日范围：${state.track==='bank'?'扩展词库':'课内词汇'}</p>${btn('进入 6500 词库 →','bank','','secondary')}</div><section class="stats" aria-label="学习统计">${stat(s.streak,'连续打卡','flame','天')}${stat(s.learned,'已学习词汇','book','词')}${stat(s.due,'到期复习','refresh','词')}${stat(s.grammarPassed,'语法已达标','layers','课')}</section><div class="two-column"><section><div class="section-head"><h2>学一点，练一点</h2><a class="text-link" href="#grammar">全部课程 →</a></div><div class="card lesson-teaser"><div class="lesson-cover">${s.unit.number}</div><div>${pill('今日语法')}<h3>${esc(lesson.title)}</h3><p>讲解 + 例句 + 4 道练习</p></div>${btn('去练习 →','lesson',`data-id="${lesson.id}"`,'secondary')}</div></section><section><div class="section-head"><h2>把词串起来</h2><span class="tiny">UN CONSEJO</span></div><div class="tip"><h3>${esc(s.unit.levelCode)} · 今天的表达挑战</h3><p>把本单元词汇放进句子，同时复用前面学过的词。</p>${btn('开始词汇串联 →','expression',`data-id="${C.tasks.find(t=>t.unitId===s.unit.id).id}"`,'secondary')}</div></section></div><div class="section-head"><h2>你的 A1 → B2 学习路线</h2><a class="text-link" href="#grammar">查看 32 个单元 →</a></div><div class="roadmap">${C.units.filter(u=>u.levelCode===s.unit.levelCode).slice(0,4).map(u => { const unlocked = L.isUnlocked(state,u.id); const p = L.unitProgress(state,u.id); const current = s.unit.id === u.id; return `<div class="card unit-mini ${current ? 'current' : ''} ${unlocked ? '' : 'locked'}"><div class="unit-number">UNIDAD ${u.number}<span class="unit-state">${p.complete ? '✓ 完成' : current ? '正在学习' : unlocked ? '可学习' : '待解锁'}</span></div><h3>${esc(u.title)}</h3><span class="tiny">${esc(u.topic)} · 10 个词</span><button aria-label="学习${esc(u.title)}" data-action="lesson" data-id="${C.lessons.find(l=>l.unitId===u.id).id}"></button></div>`; }).join('')}</div>`;
   }
   function practiceAdvice() {
@@ -115,7 +114,7 @@
     const head=`${btn(`${icon('back')} 返回名词列表`,'nouns','','back')}${heading('PALABRAS EN ACCIÓN · A1',n.singular,n.meaning+' · '+n.gender)}`;
     if(!nounQuiz||nounQuiz.id!==id)return `<section class="reading">${head}<div class="card"><h2>把冠词一起记</h2><p class="example" lang="es">${esc(n.singular)} → ${esc(n.plural)}</p><p class="example" lang="es">${esc(n.phrase)}</p><p>${esc(n.phraseTranslation)}</p><p>${esc(n.rule)}</p><div class="notice">${esc(n.note)}</div><p class="example" lang="es">${esc(n.sentence)}</p><p>${esc(n.translation)}</p></div><p class="tiny">${esc(n.reviewScope)}</p><div class="card"><h2>本组参考</h2><p><a href="${esc(L.findWord(n.id).dictionaryUrl)}" target="_blank" rel="noopener noreferrer">查原词典义项 ↗</a></p>${n.references.map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}</div>${btn('开始三步练习 →','noun-begin',`data-id="${id}"`)}</section>`;
     if(nounQuiz.result){const r=nounQuiz.result;return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>三步练习已保存</h2><p>答对 ${r.correct} / ${r.total} 题。错项保留在名词列表，下次答对即可移除。</p><p class="tiny">仅检查本题指定答案，不判断自由表达能力；不计每日打卡或词汇掌握。</p><div class="actions">${btn('再练这三步','noun-begin',`data-id="${id}"`)}${btn('换一个名词 →','nouns','','secondary')}</div></div></section>`;}
-    const q=n.questions[nounQuiz.index],f=nounQuiz.feedback;
+    const q=nounQuiz.questions[nounQuiz.index],f=nounQuiz.feedback;
     return `<section class="reading">${head}${pill(`${nounQuiz.index+1} / 3`)}<h2 class="question-title">${esc(q.title)}</h2><p>${esc(q.prompt)}</p>${UI.hint(q,nounQuiz,'noun')}${UI.controls({question:q,session:nounQuiz,prefix:'noun',limit:200,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'noun-next',label:nounQuiz.index+1===nounQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
   }
   function drillsPage() {
@@ -142,9 +141,9 @@
     if(typeof answer!=='string'||!answer.trim())return notify('请先填写答案。');
     const q=drillReview.items[drillReview.index];
     if(!L.drillUnlocked(state,q.packId))return notify('练习进度已变化，请重新开始。');
-    const result=commit(s=>L.reviewDrillMistake(s,q.id,answer));if(!result)return;
+    const result=commit(s=>L.reviewDrillMistake(s,q.id,answer,q.form||0));if(!result)return;
     if(!drillReview.answered.has(q.id)){drillReview.answered.add(q.id);if(result.correct)drillReview.firstCorrect++;}
-    if(!result.correct&&!drillReview.retries.has(q.id)){drillReview.items.push(q);drillReview.retries.add(q.id);}
+    if(!result.correct&&!drillReview.retries.has(q.id)){drillReview.items.push(L.nextDrillReviewQuestion(q));drillReview.retries.add(q.id);}
     drillReview.input=answer;drillReview.feedback=result;render();
   }
   function drillSteps() {
@@ -159,12 +158,12 @@
   }
   function drillReading(p) {
     const e=drillEditor;
-    return `<div class="card study-section" id="drill-read" tabindex="-1"><h2>2 · 先读一小段</h2><p class="reading-task"><strong>带着问题读：</strong>${esc(p.readingGuide[0])}</p><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">词语提示：${esc(p.glossary)}</p><div class="reading-support">${drillWords(p)}<p class="tiny">先找原文，再看词组；仍读不懂时展开大意，最后收起重读。</p>${btn(e.showMeaning?'收起中文大意':'看中文大意','drill-meaning',`aria-expanded="${!!e.showMeaning}"`,'secondary')}${e.showMeaning?`<p class="reading-meaning">${esc(p.meaning)}</p>`:''}${btn(e.showEvidence?'收起原文依据':'我想好了，看原文依据','drill-evidence',`aria-expanded="${!!e.showEvidence}"`,'secondary')}${e.showEvidence?`<div class="reading-evidence">${readingEvidence(p.readingGuide)}</div>`:''}</div></div>`;
+    return `<div class="card study-section" id="drill-read" tabindex="-1"><h2>2 · 先读一小段</h2><p class="reading-task"><strong>带着问题读：</strong>${esc(p.readingGuide[0])}</p><p class="example" lang="es">${esc(p.reading)}</p>${audioButtons(p.reading)}<p class="tiny">词语提示：${esc(p.glossary)}</p><div class="reading-support">${drillWords(p)}<p class="tiny">先找原文，再看词组；仍读不懂时展开大意，最后收起重读。</p>${btn(e.showMeaning?'收起中文大意':'看中文大意','drill-meaning',`aria-expanded="${!!e.showMeaning}"`,'secondary')}${e.showMeaning?`<p class="reading-meaning">${esc(p.meaning)}</p>`:''}${btn(e.showEvidence?'收起原文依据':'我想好了，看原文依据','drill-evidence',`aria-expanded="${!!e.showEvidence}"`,'secondary')}${e.showEvidence?`<div class="reading-evidence">${readingEvidence(p.readingGuide)}</div>`:''}</div></div>`;
   }
   function drillArticle(p) {
     if(!p.article)return '';
     const a=p.article,e=drillEditor;
-    return `<div class="card article-bridge"><h2>从短文再往前一步</h2><p>${esc(a.goal)}</p>${btn(e.showArticle?'收起本级文章':'试读本级长一点的文章','drill-article',`aria-expanded="${!!e.showArticle}"`,'secondary')}${e.showArticle?`<div class="bridge-reading"><h3>${esc(a.title)}</h3><p class="tiny">先通读抓主题，再逐段找依据，最后合上文章复述。不必一次读完。</p>${a.paragraphs.map(t=>`<p class="example" lang="es">${esc(t)}</p>`).join('')}<dl class="article-words">${a.words.map(([es,zh])=>`<dt lang="es">${esc(es)}</dt><dd>${esc(zh)}</dd>`).join('')}</dl><h3>读懂了吗？先自己回答</h3><ol class="rules">${a.checks.map(c=>`<li>${esc(c[0])}</li>`).join('')}</ol>${btn(e.showArticleEvidence?'收起文章参考':'看文章依据与解释','drill-article-evidence',`aria-expanded="${!!e.showArticleEvidence}"`,'secondary')}${e.showArticleEvidence?`<div class="article-evidence">${a.checks.map((c,i)=>`<h3>${i+1}. ${esc(c[0])}</h3>${readingEvidence(c)}`).join('')}</div>`:''}<h3>合上文章，换成自己的表达</h3><p>${esc(a.response)}</p><p class="tiny">这是阅读与表达自练，不计入四题成绩；可写在本包草稿中，原写作自查仍只对应原任务。</p>${btn('去写自己的回答','drill-section','data-section="express"','secondary')}</div>`:''}</div>`;
+    return `<div class="card article-bridge"><h2>从短文再往前一步</h2><p>${esc(a.goal)}</p>${btn(e.showArticle?'收起本级文章':'试读本级长一点的文章','drill-article',`aria-expanded="${!!e.showArticle}"`,'secondary')}${e.showArticle?`<div class="bridge-reading"><h3>${esc(a.title)}</h3><p class="tiny">先通读抓主题，再逐段找依据，最后合上文章复述。不必一次读完。</p>${a.paragraphs.map(t=>`<div><p class="example" lang="es">${esc(t)}</p>${audioButtons(t)}</div>`).join('')}<dl class="article-words">${a.words.map(([es,zh])=>`<dt lang="es">${esc(es)}</dt><dd>${esc(zh)}</dd>`).join('')}</dl><h3>读懂了吗？先自己回答</h3><ol class="rules">${a.checks.map(c=>`<li>${esc(c[0])}</li>`).join('')}</ol>${btn(e.showArticleEvidence?'收起文章参考':'看文章依据与解释','drill-article-evidence',`aria-expanded="${!!e.showArticleEvidence}"`,'secondary')}${e.showArticleEvidence?`<div class="article-evidence">${a.checks.map((c,i)=>`<h3>${i+1}. ${esc(c[0])}</h3>${readingEvidence(c)}`).join('')}</div>`:''}<h3>合上文章，换成自己的表达</h3><p>${esc(a.response)}</p><p class="tiny">这是阅读与表达自练，不计入四题成绩；可写在本包草稿中，原写作自查仍只对应原任务。</p>${btn('去写自己的回答','drill-section','data-section="express"','secondary')}</div>`:''}</div>`;
   }
   function drillDialogue(p) {
     const shown = !!drillEditor.showDialogue;
@@ -180,10 +179,10 @@
     if(!drillEditor||drillEditor.id!==id){const d=state.drillDrafts[id];drillEditor={id,text:d?d.text:'',saved:!!d,revisions:d?d.revisions:0,checks:d?d.checks:[],hasPrevious:!!d&&typeof d.previousText==='string',dirty:false,showModel:false,showMeaning:false};}
     const unlocked=L.drillUnlocked(state,id),previous=L.drillPacks.find(d=>d.id===p.previousId);
     const head=`${btn(`${icon('back')} 返回分级练习`,'drills','','back')}${heading(`${p.level} · ${p.branch==='core'?'核心练习':'巩固练习'}`,p.title,p.goal)}`;
-    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${drillSteps()}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card study-section" id="drill-prepare" tabindex="-1"><h2>1 · 先想清楚要表达什么</h2><p>${esc(p.approach)}</p><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p></div>`).join('')}${drillReading(p)}<div class="card study-section practice-entry" id="drill-practice" tabindex="-1"><h2>3 · 用四题检查理解</h2><p>辨析 → 填空 → 纠错 → 阅读。每题先回答再看解析，最后保存整包结果。</p>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}</div>${drillOutput(p,unlocked)}${drillArticle(p)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
-    if(drillQuiz.result){const r=drillQuiz.result,next=L.nextDrillPack(state,id);return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>${r.passed?'基础练习已达标':'再巩固一次'}</h2><p>答对 ${r.correct} / ${r.total} 题；错项保留在列表，重新练习答对后移除。</p><p class="tiny">75% 是本包继续练习的门槛，不能证明语言等级；个人表达需自行检查与反馈。</p><div class="actions">${btn('写自己的表达 →','drill-output')}${btn('重练四步练习','drill-begin',`data-id="${id}"`,'secondary')}${r.passed&&next?btn('继续下一包 →','drill',`data-id="${next.id}"`,'secondary'):''}</div></div></section>`;}
-    const q=p.questions[drillQuiz.index],f=drillQuiz.feedback;
-    return `<section class="reading">${head}${pill(`${drillQuiz.index+1} / 4`)}<h2 class="question-title">${esc(q.title)}</h2>${drillQuiz.index===3?`<div class="card"><p class="example" lang="es">${esc(p.reading)}</p><p class="tiny">${esc(p.glossary)}</p></div>`:''}<p>${esc(q.prompt)}</p>${UI.hint(q,drillQuiz,'drill')}${UI.controls({question:q,session:drillQuiz,prefix:'drill',limit:500,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'drill-next',label:drillQuiz.index+1===drillQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
+    if(!unlocked||!drillQuiz||drillQuiz.id!==id)return `<section class="reading">${head}${drillSteps()}${unlocked?'':`<div class="notice">按前置关系练习，前一包“${esc(previous.title)}”最佳正确率至少 75%。${btn('查看前一包','drill',`data-id="${p.previousId}"`,'secondary')}</div>`}<div class="card study-section" id="drill-prepare" tabindex="-1"><h2>1 · 先想清楚要表达什么</h2><p>${esc(p.approach)}</p><ol class="rules">${p.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol><p class="tiny">复用旧词：${esc(p.recycled.join(' · '))}</p></div>${p.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p>${audioButtons(es)}</div>`).join('')}${drillReading(p)}<div class="card study-section practice-entry" id="drill-practice" tabindex="-1"><h2>3 · 用四题检查理解</h2><p>辨析 → 填空 → 纠错 → 阅读。每题先回答再看解析，最后保存整包结果。</p>${btn('开始四步练习 →','drill-begin',`data-id="${id}" ${unlocked?'':'disabled'}`)}</div>${drillOutput(p,unlocked)}${drillArticle(p)}<div class="card"><h2>课程与依据</h2>${p.lessonIds.map(id=>`<p><a href="#lesson/${id}">${esc(C.lessons.find(l=>l.id===id).title)} ↗</a></p>`).join('')}${[...new Map(p.references.map(r=>[r.sourceId+r.section,r])).values()].map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}<p class="tiny">新增短文、题目与范文为原创，待教师审稿；等级是本站练习顺序。</p></div></section>`;
+    if(drillQuiz.result){const r=drillQuiz.result,next=L.nextDrillPack(state,id);return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>${r.passed?'基础练习已达标':'再巩固一次'}</h2><p>答对 ${r.correct} / ${r.total} 题；错项保留在列表，重新练习答对后移除。</p><p class="tiny">75% 是本包继续练习的门槛，不能证明语言等级；个人表达需自行检查与反馈。</p><div class="actions">${btn('写自己的表达 →','drill-output')}${btn('换题重练四步','drill-begin',`data-id="${id}"`,'secondary')}${r.passed&&next?btn('继续下一包 →','drill',`data-id="${next.id}"`,'secondary'):''}</div></div></section>`;}
+    const q=drillQuiz.questions[drillQuiz.index],f=drillQuiz.feedback;
+    return `<section class="reading">${head}${pill(`${drillQuiz.index+1} / 4`)}<h2 class="question-title">${esc(q.title)}</h2>${drillQuiz.index===3?`<div class="card"><p class="example" lang="es">${esc(q.reading)}</p><p class="tiny">${esc(q.glossary)}</p></div>`:''}<p>${esc(q.prompt)}</p>${UI.hint(q,drillQuiz,'drill')}${UI.controls({question:q,session:drillQuiz,prefix:'drill',limit:500,note:'重音和 ñ 也是拼写的一部分。可以用重音按钮输入。'})}${UI.feedback(f,{action:'drill-next',label:drillQuiz.index+1===drillQuiz.total?'保存并查看结果':'下一步 →'})}</section>`;
   }
   function submitDrillAnswer(answer) {
     if(!drillQuiz||drillQuiz.feedback||drillQuiz.result)return;
@@ -195,9 +194,9 @@
     const f=L.foundations.find(f=>f.id===id);
     if(!f)return '<div class="card empty">没有找到基础课。</div>';
     const head=`${btn(`${icon('back')} 返回四步入门`,'foundations','','back')}${heading('PRIMEROS PASOS',f.title,f.goal)}`;
-    if(!foundationQuiz||foundationQuiz.id!==id)return `<section class="reading">${head}<div class="card"><ol class="rules">${f.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol></div>${f.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p>${'speechSynthesis' in window?btn('听设备合成语音','foundation-speak',`data-text="${esc(es.split(' → ')[0])}"`,'small secondary'):''}</div>`).join('')}<div class="card"><h2>现在开口试一试</h2><p>${esc(f.practice)}</p><p class="tiny">合成语音取决于设备的西语音色，不是教材录音；本地练习不判断发音。</p></div><div class="card"><h2>本课参考</h2>${f.references.map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}</div>${btn('做 4 道小练习 →','foundation-begin',`data-id="${id}"`)}</section>`;
+    if(!foundationQuiz||foundationQuiz.id!==id)return `<section class="reading">${head}<div class="card"><ol class="rules">${f.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol></div>${f.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><p>${esc(zh)}</p>${audioButtons(es.split(' → ')[0])}</div>`).join('')}<div class="card"><h2>现在开口试一试</h2><p>${esc(f.practice)}</p><p class="tiny">内置西班牙西语合成音，可正常或慢速听；跟读不自动评分。</p></div><div class="card"><h2>本课参考</h2>${f.references.map(r=>{const s=C.sources.find(s=>s.id===r.sourceId);return `<p class="tiny"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} ↗</a><br>${esc(r.section)}</p>`;}).join('')}</div>${btn('做 4 道小练习 →','foundation-begin',`data-id="${id}"`)}</section>`;
     if(foundationQuiz.result){const r=foundationQuiz.result;return `<section class="reading">${head}<div class="card result-card"><div class="result-score">${r.score}%</div><h2>${r.passed?'这一步的规则练习已达标':'慢慢来，再练一次'}</h2><p>答对 ${r.correct} / ${r.total} 题。选择题检查规则知识，口头发音仍需要模仿和反馈。</p><p class="tiny">基础课进度单独保存，不计每日词汇或语法打卡。</p><div class="actions">${btn('继续下一微课 →','foundations')}${btn('重新练习','foundation-begin',`data-id="${id}"`,'secondary')}${btn('开始今天的词汇','study','','secondary')}</div></div></section>`;}
-    const q=f.questions[foundationQuiz.index],selected=foundationQuiz.answers[foundationQuiz.index];
+    const q=foundationQuiz.questions[foundationQuiz.index],selected=foundationQuiz.answers[foundationQuiz.index];
     return `<section class="reading">${head}<div class="pill">${foundationQuiz.index+1} / ${f.questions.length}</div><h2 class="question-title">${esc(q.prompt)}</h2>${q.options.map((option,i)=>`<button class="choice ${selected!==undefined&&i===q.answer?'correct':selected===i?'wrong':''}" data-action="foundation-answer" data-index="${i}" ${selected!==undefined?'disabled':''}><span class="letter">${String.fromCharCode(65+i)}</span>${esc(option)}</button>`).join('')}${selected!==undefined?`<div class="feedback"><strong>${selected===q.answer?'✓ 答对了':'再看一遍这个规则'}</strong><p>${esc(q.explanation)}</p></div>${btn(foundationQuiz.index+1===f.questions.length?'查看结果':'下一题 →','foundation-next')}`:''}</section>`;
   }
   function yearPage() {
@@ -245,7 +244,7 @@
     if (!wordQuiz) wordQuiz = { mode: 'meaning', wrongOnly: false };
     const items = wordQuiz.wrongOnly ? L.wrongWords(state).filter(w => L.isWordUnlocked(state, w.id)) : wordQuiz.packId ? L.packQueue(state,wordQuiz.packId) : L.queue(state);
     Object.assign(wordQuiz, { phase: items.length ? 'quiz' : 'empty', items, originalCount: items.length, index: 0, firstCorrect: 0, retries: new Set(), answered: new Set(), input: '', selected:null, result: null, day: L.dateKey() });
-    if (items.length) wordQuiz.question = L.wordQuestion(items[0].id, wordQuiz.mode);
+    if (items.length) wordQuiz.question = nextWordQuestion(items[0].id, wordQuiz.mode);
     render();
   }
   function submitWordAnswer(answer) {
@@ -273,17 +272,17 @@
     if (!session) startSession();
     const w=session.items[session.index];
     if (!w) { const s=L.summary(state); return `<section class="session card result-card"><div class="success-icon">${icon('check')}</div><div class="result-score">¡Muy bien!</div><h2>这一轮结束了。</h2><p>${!session.items.length?'当前词包不存在或尚未解锁。':s.checkedIn ? '今天的目标已完成，已自动打卡。' : '继续完成语法练习，让今天的词汇用起来。'}</p><div class="actions">${btn('去练语法 →','current-lesson')}${btn('再学一轮','study',`data-pack="${esc(session.packId)}"`,'secondary')}${btn('回到今日','home','','ghost')}</div></section>`; }
-    return `<section class="session">${btn(`${icon('back')} 回到今日`,'home','','back')}<div class="session-head"><span class="eyebrow">UN POCO CADA DÍA</span>${pill(`词卡 ${session.index+1} / ${session.items.length}`)}</div>${meter(percent(session.index,session.items.length))}<article class="card flashcard"><div class="tiny">先回忆意思，再查看答案。</div><div class="word-top"><div class="flash-word" lang="es">${esc(w.spanish)}</div>${'speechSynthesis' in window ? `<button class="speech" data-action="speak" aria-label="用浏览器语音朗读${esc(w.spanish)}">${icon('volume')}</button>` : ''}</div><div class="word-pos">${esc(w.pos)}</div>${session.revealed ? `<div class="flash-answer"><div class="meaning">${esc(w.meaning)}</div>${nounInfo(w.id)}<p class="example" lang="${w.bank?'en':'es'}">${esc(w.bank?w.definition:w.example)}</p><div class="translation">${w.bank?'英文原义 · 中文为辅助释义，待人工校对':esc(w.translation)}</div>${w.note!=='通用'?`<div class="regional">${esc(w.note)}</div>`:''}</div>` : btn('查看释义与例句','reveal','','secondary reveal')}</article>${session.revealed ? `<div class="ratings">${btn('忘记了','rate','data-rating="again"','danger')}${btn('想起来了','rate','data-rating="remember"','secondary')}${btn('很熟悉','rate','data-rating="easy"','lime')}</div>` : ''}<p class="helper">忘记的词会在本轮再出现一次，并保留为今日待复习。<br>语音使用设备合成音，非真人录音；是否有西语语音取决于浏览器。</p></section>`;
+    return `<section class="session">${btn(`${icon('back')} 回到今日`,'home','','back')}<div class="session-head"><span class="eyebrow">UN POCO CADA DÍA</span>${pill(`词卡 ${session.index+1} / ${session.items.length}`)}</div>${meter(percent(session.index,session.items.length))}<article class="card flashcard"><div class="tiny">先回忆意思，再查看答案。</div><div class="word-top"><div class="flash-word" lang="es">${esc(w.spanish)}</div>${audioButtons(w.spanish)}</div><div class="word-pos">${esc(w.pos)}</div>${session.revealed ? `<div class="flash-answer"><div class="meaning">${esc(w.meaning)}</div>${nounInfo(w.id)}<p class="example" lang="${w.bank?'en':'es'}">${esc(w.bank?w.definition:w.example)}</p><div class="translation">${w.bank?'英文原义 · 中文为辅助释义，待人工校对':esc(w.translation)}</div>${w.note!=='通用'?`<div class="regional">${esc(w.note)}</div>`:''}</div>` : btn('查看释义与例句','reveal','','secondary reveal')}</article>${session.revealed ? `<div class="ratings">${btn('忘记了','rate','data-rating="again"','danger')}${btn('想起来了','rate','data-rating="remember"','secondary')}${btn('很熟悉','rate','data-rating="easy"','lime')}</div>` : ''}<p class="helper">忘记的词会在本轮再出现一次，并保留为今日待复习。<br>课内词卡使用内置西语合成音；尚未收录的扩展词尝试设备朗读。跟读不自动评分。</p></section>`;
   }
   function lessonPage(id) {
     const lesson=C.lessons.find(l=>l.id===id);
     if (!lesson || !L.isUnlocked(state,lesson.unitId)) return `<div class="card empty">课程不存在或尚未解锁。先学习前一单元至少 6 个词并通过语法练习。<p><a href="#grammar">返回课程路线 →</a></p></div>`;
     const unit=C.units.find(u=>u.id===lesson.unitId);
     const title=`${btn(`${icon('back')} 返回语法路线`,'roadmap','','back')}<div class="eyebrow">UNIDAD ${unit.number} · ${esc(unit.topic)}</div><h1>${esc(lesson.title)}</h1><p class="subtitle">${esc(lesson.summary)}</p>${lesson.extension ? `<div class="notice" style="margin-top:20px">${esc(lesson.extension)}</div>` : ''}`;
-    if (!quiz || quiz.id!==id) return `<section class="reading">${title}<div class="section-head"><h2>先理解</h2>${pill('中文讲解')}</div><div class="card"><ol class="rules">${lesson.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol></div><div class="section-head"><h2>在句子里练习</h2></div>${lesson.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><div class="translation">${esc(zh)}</div></div>`).join('')}<div class="card"><h3>本课参考依据</h3>${lesson.references.map(r => { const source=C.sources.find(s=>s.id===r.sourceId); return `<p class="tiny"><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)} ↗</a><br>${esc(r.section)}</p>`; }).join('')}</div><p class="tiny">原创讲解与例句 · 主要语法依据已核对 · 非官方教材</p><div class="actions">${btn('开始 4 道练习 →','begin-quiz',`data-id="${id}"`)}</div></section>`;
-    if (quiz.result) return `<section class="reading">${title}<div class="card result-card"><div class="success-icon">${icon(quiz.result.passed?'check':'refresh')}</div><div class="result-score">${quiz.result.score}%</div><h2>${quiz.result.passed?'¡Muy bien! 本课已达标':'再练一次，会更清楚'}</h2><p>答对 ${quiz.result.correct} / ${quiz.result.total} 题。${quiz.result.passed?'已计入今天的语法目标。':'本次未计入打卡，错题已收进错题本。'}</p>${L.summary(state).checkedIn ? '<p>✓ 今日目标完成，已自动打卡。</p>' : ''}<div class="actions">${btn('回到今日','home')}${btn('重新练习','begin-quiz',`data-id="${id}"`,'secondary')}</div></div></section>`;
-    const q=lesson.questions[quiz.index]; const selected=quiz.answers[quiz.index];
-    return `<section class="reading">${title}<div class="section-head"><h2>练习 ${quiz.index+1} / ${lesson.questions.length}</h2>${pill('达标线 75%')}</div>${meter(percent(quiz.index,lesson.questions.length))}<h2 class="question-title">${esc(q.prompt)}</h2>${q.options.map((o,i)=>`<button class="choice ${selected!==undefined&&i===q.answer?'correct':selected===i?'wrong':''}" data-action="answer" data-index="${i}" ${selected!==undefined?'disabled':''}><span class="letter">${String.fromCharCode(65+i)}</span><span>${esc(o)}</span></button>`).join('')}${selected!==undefined?`<div class="feedback"><strong>${selected===q.answer?'✓ 答对了':'再看一下这里'}</strong><p>${esc(q.explanation)}</p></div><div class="actions">${btn(quiz.index+1===lesson.questions.length?'查看结果':'下一题 →','next-question')}</div>`:''}</section>`;
+    if (!quiz || quiz.id!==id) return `<section class="reading">${title}<div class="section-head"><h2>先理解</h2>${pill('中文讲解')}</div><div class="card"><ol class="rules">${lesson.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol></div><div class="section-head"><h2>在句子里练习</h2></div>${lesson.examples.map(([es,zh])=>`<div class="card"><p class="example" lang="es">${esc(es)}</p><div class="translation">${esc(zh)}</div>${audioButtons(es)}</div>`).join('')}<div class="card"><h3>本课参考依据</h3>${lesson.references.map(r => { const source=C.sources.find(s=>s.id===r.sourceId); return `<p class="tiny"><a href="${esc(source.url)}" target="_blank" rel="noopener noreferrer">${esc(source.title)} ↗</a><br>${esc(r.section)}</p>`; }).join('')}</div><p class="tiny">原创讲解与例句 · 主要语法依据已核对 · 非官方教材</p><div class="actions">${btn('开始 4 道练习 →','begin-quiz',`data-id="${id}"`)}</div></section>`;
+    if (quiz.result) return `<section class="reading">${title}<div class="card result-card"><div class="success-icon">${icon(quiz.result.passed?'check':'refresh')}</div><div class="result-score">${quiz.result.score}%</div><h2>${quiz.result.passed?'¡Muy bien! 本课已达标':'再练一次，会更清楚'}</h2><p>答对 ${quiz.result.correct} / ${quiz.result.total} 题。${quiz.result.passed?'已计入今天的语法目标。':'本次未计入打卡，错题已收进错题本。'}</p>${L.summary(state).checkedIn ? '<p>✓ 今日目标完成，已自动打卡。</p>' : ''}<div class="actions">${btn('回到今日','home')}${btn('换一组同类题','begin-quiz',`data-id="${id}"`,'secondary')}</div></div></section>`;
+    const q=quiz.questions[quiz.index]; const selected=quiz.answers[quiz.index];
+    return `<section class="reading">${title}<div class="section-head"><h2>练习 ${quiz.index+1} / ${lesson.questions.length}</h2>${pill('达标线 75%')}</div><p class="tiny">${quiz.form?'同知识点换题练习 · 先理解句意，再选择。':'每次重练轮换题组，考查相同知识点。'}</p>${meter(percent(quiz.index,lesson.questions.length))}<h2 class="question-title">${esc(q.prompt)}</h2>${q.options.map((o,i)=>`<button class="choice ${selected!==undefined&&i===q.answer?'correct':selected===i?'wrong':''}" data-action="answer" data-index="${i}" ${selected!==undefined?'disabled':''}><span class="letter">${String.fromCharCode(65+i)}</span><span>${esc(o)}</span></button>`).join('')}${selected!==undefined?`<div class="feedback"><strong>${selected===q.answer?'✓ 答对了':'再看一下这里'}</strong><p>${esc(q.explanation)}</p></div><div class="actions">${btn(quiz.index+1===lesson.questions.length?'查看结果':'下一题 →','next-question')}</div>`:''}</section>`;
   }
   function render() {
     const page=route(); let content;
@@ -311,17 +310,10 @@
     else if(kind==='review'){drillReview={phase:'setup',level:''};navigate('drill-review');}
     else if(kind==='expression'){expressionEditor=null;navigate(`expression/${id}`);}
   }
-  function startQuiz(id) { const lesson=C.lessons.find(l=>l.id===id); if(!lesson||!L.isUnlocked(state,lesson.unitId))return; quiz={id,index:0,answers:[],day:L.dateKey(),result:null}; render(); }
-  function speakText(text) {
-    if(!('speechSynthesis' in window))return;const voice=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('es'));if(!voice)return notify('设备暂无西班牙语音色，可在系统设置中安装西语语音包。');
-    window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.voice=voice;utterance.lang=voice.lang;utterance.rate=.8;window.speechSynthesis.speak(utterance);
-  }
-  function speak() {
-    if(!session || !session.items[session.index] || !('speechSynthesis' in window))return;
-    const voices=window.speechSynthesis.getVoices().filter(v=>v.lang.startsWith('es'));
-    if(!voices.length)return notify('设备暂无西班牙语合成语音，可在系统设置中安装西语语音包。');
-    window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(session.items[session.index].spanish); utterance.lang=voices[0].lang; utterance.voice=voices[0]; utterance.rate=.8; window.speechSynthesis.speak(utterance);
-  }
+  function startQuiz(id) { const lesson=C.lessons.find(l=>l.id===id); if(!lesson||!L.isUnlocked(state,lesson.unitId))return; const form=L.practiceForm(state.lessons[id]?.attempts); quiz={id,form,questions:L.lessonQuestions(id,form),index:0,answers:[],day:L.dateKey(),result:null}; render(); }
+  function audioButtons(text){return `<div class="actions audio-controls">${btn('听发音','audio-play',`data-text="${esc(text)}"`,'small secondary')}${btn('慢速听','audio-play',`data-text="${esc(text)}" data-rate="0.75"`,'small secondary')}</div>`;}
+  function speakText(text,rate=1){window.HolaAudio.play(text,rate);}
+  function speak(){if(session?.items[session.index])speakText(session.items[session.index].spanish);}
   function exportBackup() {
     if (storageFailed) return notify('记录暂未读取，暂不导出空备份。');
     const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
@@ -344,6 +336,7 @@
   root.addEventListener('click',event=> {
     const element=event.target.closest('[data-action]'); if(!element||element.disabled)return;
     const action=element.dataset.action;
+    if(['begin-quiz','foundation-begin','drill-begin','noun-begin','begin-word-quiz'].includes(action))window.HolaAudio.stop();
     if(action==='study'){startSession(element.dataset.pack||'');navigate('study');}
     else if(action==='practice-continue'){const p=L.practiceSummary(state);if(p.wrong){drillReview={phase:'setup',level:''};navigate('drill-review');}else{drillQuiz=null;drillEditor=null;navigate(p.next?`drill/${p.next.id}`:'drills');}}
     else if(action==='practice-level'){drillLevel=element.dataset.level;drillQuiz=null;drillEditor=null;navigate('drills');}
@@ -364,7 +357,7 @@
     else if(action==='drill'){drillQuiz=null;drillEditor=null;navigate(`drill/${element.dataset.id}`);}
     else if(action==='drill-begin'){
       const id=element.dataset.id;if(!L.drillUnlocked(state,id))return notify('先完成前一包，正确率至少 75%。');
-      drillQuiz=L.createExerciseSession(id,L.drillPacks.find(p=>p.id===id).questions);render();window.scrollTo(0,0);
+      const form=L.practiceForm(state.drills[id]?.attempts);drillQuiz=L.createExerciseSession(id,L.drillQuestions(id,form),form);render();window.scrollTo(0,0);
     }
     else if(action==='drill-answer')submitDrillAnswer(element.dataset.answer);
     else if(action==='drill-submit')submitDrillAnswer(drillQuiz&&drillQuiz.input);
@@ -385,7 +378,7 @@
     else if(action==='drill-next'){
       if(!drillQuiz||!drillQuiz.feedback||drillQuiz.result)return;
       if(!L.drillUnlocked(state,drillQuiz.id))return notify('请先完成前面的练习包。');
-      if(L.advanceExercise(drillQuiz,(id,answers)=>commit(s=>L.gradeDrill(s,id,answers))))render();
+      if(L.advanceExercise(drillQuiz,(id,answers)=>commit(s=>L.gradeDrill(s,id,answers,drillQuiz.form))))render();
     }
     else if(action==='drill-output'){drillQuiz=null;render();document.getElementById('drill-draft').focus();}
     else if(action==='drill-save'){
@@ -405,7 +398,7 @@
     else if(action==='drill-model'){if(!drillEditor||drillEditor.dirty||!drillEditor.saved||!drillEditor.text.trim()||!L.drillUnlocked(state,drillEditor.id))return;drillEditor.showModel=!drillEditor.showModel;render();}
     else if(action==='nouns'){nounQuiz=null;navigate('nouns');}
     else if(action==='noun'){nounQuiz=null;navigate(`noun/${element.dataset.id}`);}
-    else if(action==='noun-begin'){if(!L.nounLessons.some(n=>n.id===element.dataset.id))return;nounQuiz=L.createExerciseSession(element.dataset.id,L.nounLessons.find(n=>n.id===element.dataset.id).questions);render();}
+    else if(action==='noun-begin'){if(!L.nounLessons.some(n=>n.id===element.dataset.id))return;const id=element.dataset.id,form=L.practiceForm(state.nounPractice[id]?.attempts);nounQuiz=L.createExerciseSession(id,L.nounQuestions(id,form),form);render();}
     else if(action==='noun-answer')submitNounAnswer(element.dataset.answer);
     else if(action==='noun-submit')submitNounAnswer(nounQuiz&&nounQuiz.input);
     else if(action==='noun-accent'){
@@ -415,14 +408,14 @@
       const updated=document.getElementById('noun-answer');updated.focus();updated.setSelectionRange(start+1,start+1);
     }
     else if(action==='noun-next'){
-      if(L.advanceExercise(nounQuiz,(id,answers)=>commit(s=>L.gradeNoun(s,id,answers))))render();
+      if(L.advanceExercise(nounQuiz,(id,answers)=>commit(s=>L.gradeNoun(s,id,answers,nounQuiz.form))))render();
     }
     else if(action==='foundations'){foundationQuiz=null;navigate('foundations');}
     else if(action==='foundation'){foundationQuiz=null;navigate(`foundation/${element.dataset.id}`);}
-    else if(action==='foundation-begin'){foundationQuiz={id:element.dataset.id,index:0,answers:[],result:null};render();}
+    else if(action==='foundation-begin'){const id=element.dataset.id,form=L.practiceForm(state.foundations[id]?.attempts);foundationQuiz={id,form,questions:L.foundationQuestions(id,form),index:0,answers:[],result:null};render();}
     else if(action==='foundation-answer'){if(!foundationQuiz||foundationQuiz.answers[foundationQuiz.index]!==undefined)return;foundationQuiz.answers[foundationQuiz.index]=Number(element.dataset.index);render();}
-    else if(action==='foundation-next'){if(!foundationQuiz||foundationQuiz.answers[foundationQuiz.index]===undefined)return;const f=L.foundations.find(f=>f.id===foundationQuiz.id);if(foundationQuiz.index+1===f.questions.length){const r=commit(s=>L.gradeFoundation(s,f.id,foundationQuiz.answers));if(!r)return;foundationQuiz.result=r;}else foundationQuiz.index++;render();}
-    else if(action==='foundation-speak')speakText(element.dataset.text);
+    else if(action==='foundation-next'){if(!foundationQuiz||foundationQuiz.answers[foundationQuiz.index]===undefined)return;const f=L.foundations.find(f=>f.id===foundationQuiz.id);if(foundationQuiz.index+1===f.questions.length){const r=commit(s=>L.gradeFoundation(s,f.id,foundationQuiz.answers,foundationQuiz.form));if(!r)return;foundationQuiz.result=r;}else foundationQuiz.index++;render();}
+    else if(action==='foundation-speak'||action==='audio-play')speakText(element.dataset.text,Number(element.dataset.rate)||1);
     else if(action==='year'){yearWeek=0;navigate('year');}
     else if(action==='year-start'){if(commit(s=>L.startJourney(s,L.dateKey())))render();}
     else if(action==='year-current'){yearWeek=0;render();}
@@ -449,7 +442,7 @@
       if(!wordQuiz||!wordQuiz.result)return;
       wordQuiz.index++;wordQuiz.result=null;wordQuiz.selected=null;wordQuiz.input='';
       if(wordQuiz.index>=wordQuiz.items.length)wordQuiz.phase='result';
-      else wordQuiz.question=L.wordQuestion(wordQuiz.items[wordQuiz.index].id,wordQuiz.mode);
+      else wordQuiz.question=nextWordQuestion(wordQuiz.items[wordQuiz.index].id,wordQuiz.mode);
       render();
     }
     else if(action==='home')navigate('today');
@@ -482,7 +475,7 @@
       const w=session.items[session.index]; const rating=element.dataset.rating;
       if(!commit(draft=>L.review(draft,w.id,rating,session.day)))return;
       if(rating==='again'&&!session.retries.has(w.id)){session.items.push(w);session.retries.add(w.id);}
-      session.index++;session.revealed=false;render();
+      window.HolaAudio.stop();session.index++;session.revealed=false;render();
     }
     else if(action==='begin-quiz')startQuiz(element.dataset.id);
     else if(action==='answer'){if(!quiz||quiz.answers[quiz.index]!==undefined)return;quiz.answers[quiz.index]=Number(element.dataset.index);render();}
@@ -490,7 +483,7 @@
       if(!quiz||quiz.answers[quiz.index]===undefined)return;
       if(quiz.day!==L.dateKey()){startQuiz(quiz.id);return notify('跨日练习，请重新开始本课。');}
       const lesson=C.lessons.find(l=>l.id===quiz.id);
-      if(quiz.index+1===lesson.questions.length){const result=commit(draft=>L.gradeLesson(draft,quiz.id,quiz.answers,quiz.day));if(!result)return;quiz.result=result;}
+      if(quiz.index+1===lesson.questions.length){const result=commit(draft=>L.gradeLesson(draft,quiz.id,quiz.answers,quiz.day,quiz.form));if(!result)return;quiz.result=result;}
       else quiz.index++;
       render();
     }

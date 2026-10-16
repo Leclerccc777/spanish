@@ -21,10 +21,10 @@ Page({
     if (typeof answer !== 'string' || !answer.trim()) return wx.showToast({ title: '请先填写答案', icon: 'none' });
     const q = this.items[this.index];
     if (!L.drillUnlocked(S.load(), q.packId)) return wx.showToast({ title: '练习进度已变化，请重新开始', icon: 'none' });
-    const result = S.commit(s => L.reviewDrillMistake(s, q.id, answer));
+    const result = S.commit(s => L.reviewDrillMistake(s, q.id, answer, q.form || 0));
     if (!result) return;
     if (!this.answered.has(q.id)) { this.answered.add(q.id); if (result.correct) this.firstCorrect++; }
-    if (!result.correct && !this.retries.has(q.id)) { this.items.push(q); this.retries.add(q.id); }
+    if (!result.correct && !this.retries.has(q.id)) { this.items.push(L.nextDrillReviewQuestion(q)); this.retries.add(q.id); }
     this.setData({ input: answer, feedback: result, total: this.items.length });
   },
   next() {

@@ -13,6 +13,7 @@ function walk(folder) {
 }
 for(const folder of ['miniprogram','web','scripts','tests'])walk(path.join(root,folder));
 const app=JSON.parse(fs.readFileSync(path.join(root,'miniprogram/app.json'),'utf8'));
-for(const page of app.pages)for(const suffix of ['.js','.wxml'])if(!fs.existsSync(path.join(root,'miniprogram',page+suffix)))throw new Error(`Missing page ${page+suffix}`);
+const pages=[...app.pages,...(app.subPackages||[]).flatMap(pack=>pack.pages.map(page=>pack.root+'/'+page))];
+for(const page of pages)for(const suffix of ['.js','.wxml'])if(!fs.existsSync(path.join(root,'miniprogram',page+suffix)))throw new Error(`Missing page ${page+suffix}`);
 for(const tab of app.tabBar.list)if(!app.pages.includes(tab.pagePath))throw new Error(`Missing tab ${tab.pagePath}`);
-console.log(`Checked ${count} JS/JSON files and ${app.pages.length} mini program page registrations. WeChat compilation must be checked in developer tools.`);
+console.log(`Checked ${count} JS/JSON files and ${pages.length} mini program page registrations. WeChat compilation must be checked in developer tools.`);

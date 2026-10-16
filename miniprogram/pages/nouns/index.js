@@ -4,7 +4,7 @@ const exercisePage = require('../../lib/exercise-page');
 Page({
   ...exercisePage({
     storage: S, platform: wx, itemKey: 'lesson', maxLength: 200,
-    evaluate: L.evaluateNounAnswer, grade: L.gradeNoun
+    evaluate: L.evaluateNounAnswer, grade: L.gradeNoun, questions: L.nounQuestions, progressKey: 'nounPractice'
   }),
   data: { phase: 'menu', input: '', feedback: null },
   onLoad(options = {}) { this.refresh(); if (options.id) this.open({ currentTarget: { dataset: { id: options.id } } }); },

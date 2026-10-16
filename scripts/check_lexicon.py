@@ -19,7 +19,13 @@ summary=json.loads(subprocess.check_output(['node','-e',"const c=require('./mini
 assert summary['entries']==summary['unique']==report['uniqueEntries']==6500
 assert summary['single']==report['singleWordEntries']>=6000
 assert summary['covered']==report['imported']==6183
-size=sum(p.stat().st_size for p in (ROOT/'miniprogram').rglob('*') if p.is_file())
+app=json.loads((ROOT/'miniprogram/app.json').read_text())
+subroots=[ROOT/'miniprogram'/p['root'] for p in app.get('subPackages',[])]
+files=[p for p in (ROOT/'miniprogram').rglob('*') if p.is_file()]
+size=sum(p.stat().st_size for p in files if not any(p.is_relative_to(r) for r in subroots))
+subsizes={r.name:sum(p.stat().st_size for p in files if p.is_relative_to(r)) for r in subroots}
 assert size<2*1024*1024, f'Main package source exceeds 2 MiB: {size}'
-print(json.dumps({**summary,'miniProgramSourceBytes':size,'limitBytes':2*1024*1024},ensure_ascii=False))
+assert all(s<2*1024*1024 for s in subsizes.values()), f'Audio subpackage exceeds 2 MiB: {subsizes}'
+assert size+sum(subsizes.values())<20*1024*1024, 'Combined source packages exceed 20 MiB'
+print(json.dumps({**summary,'miniProgramSourceBytes':size,'audioSubpackageBytes':subsizes,'limitBytes':2*1024*1024},ensure_ascii=False))
 print('Source bytes are a preflight estimate; official WeChat compiler output is not measured here.')

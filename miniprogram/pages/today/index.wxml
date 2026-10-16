@@ -1,17 +1,14 @@
 <view class="page">
   <view class="row"><view class="eyebrow">HOLA · 每天一点西语</view><view class="pill warm">{{unit.levelCode}} · 分级学习</view></view>
   <view class="title">把西语，变成日常。</view><view class="subtitle">每天约 15 分钟，向更大的世界说 Hola。</view>
+<view class="card daily-checkin"><view class="row"><view class="list-title">今日打卡</view><view class="pill">{{checkedIn ? '两项完成 ✓' : '完成下面两项'}}</view></view>
+<view class="daily-goal"><view class="section-title">1 · 词汇打卡</view><view>已完成 {{day.words.length}} / {{day.goal}} 个不同词汇</view><view class="progress-track"><view class="progress-fill" style="width:{{wordPercent}}%"></view></view><button hover-class="button-press" class="primary" bindtap="study">{{wordPercent >= 100 ? '词汇已完成 · 再复习' : '开始今日词汇'}}</button></view>
+<view class="daily-goal"><view class="section-title">2 · 语法打卡</view><view>{{day.grammar.length ? '✓ 今天已有达标练习' : '尚未达标 · 4 题答对至少 3 题'}}</view><view class="small body">{{unit.topic}}</view><button hover-class="button-press" class="primary" bindtap="grammar">{{day.grammar.length ? '语法已完成 · 再巩固' : '开始今日语法'}}</button></view>
+<view class="small body">{{checkedIn ? '✓ 今日已自动打卡，记录已保存。' : '词汇和语法都完成后自动打卡；只打开页面不会计入。'}}</view></view>
 <view class="card body beginner-start"><view class="list-title">{{foundationPassed !== 4 ? '零基础？从这里开始。' : '把基础练熟，再走远一点。'}}</view><view class="body muted">发音 → 重音 → 名词阴阳性 → 性数配合。每次一个小步骤。</view><button hover-class="button-press" class="primary" bindtap="foundations">四步入门 · {{foundationPassed}} / 4 达标</button><button hover-class="button-press" class="secondary" bindtap="year">一年 A1 → B1 计划</button></view>
   <view class="card beginner-start"><view class="list-title">让名词连着用</view><view class="body muted">选冠词 → 改形容词 → 补完整句，先练 8 个常用名词。</view><button hover-class="button-press" class="primary" bindtap="nouns">A1 名词三步练习 →</button></view>
   <view class="card beginner-start"><view class="list-title">补充练习 · 下一小步</view><view class="body">{{practice.wrong ? '先订正 ' + practice.wrong + ' 个错项' : practice.next ? practice.next.level + ' · ' + practice.next.title : '回顾已经练过的内容'}}</view><view class="small body">规则题达标 {{practice.passed}} / {{practice.total}} 包 · 表达草稿 {{practice.drafts}} 份，独立记录。</view><button hover-class="button-press" class="primary" bindtap="continuePractice">{{practice.wrong ? '去集中订正' : practice.next ? '继续建议练习' : '回顾练习'}} →</button></view><view class="card"><view class="list-title">A1 → B2 递进练习</view><view class="body muted">辨析 → 填空 → 纠错 → 短阅读 → 自己表达，每次完成一小包。</view><button hover-class="button-press" class="primary" bindtap="drills">进入分级练习 →</button></view>
-  <button hover-class="button-press" class="secondary" bindtap="month">前四周每日小任务 →</button><view class="section-title">今天的小目标</view>
-  <view class="card hero">
-    <view class="row"><view>每日学习计划</view><view>{{checkedIn ? '✓ 已完成打卡' : '慢慢来，也会到达'}}</view></view>
-    <view class="title">{{unit.title}}</view><view class="subtitle">{{unit.goal}}</view>
-    <view class="progress-track"><view class="progress-fill" style="width:{{wordPercent}}%"></view></view>
-    <view class="row"><view>词汇 {{day.words.length}} / {{day.goal}}</view><view>语法 {{day.grammar.length ? '✓ 已达标' : '待练习'}}</view></view>
-    <button hover-class="button-press" class="primary" bindtap="study">{{checkedIn ? '再巩固一轮 →' : '开始今日词汇 →'}}</button>
-  </view>
+  <button hover-class="button-press" class="secondary" bindtap="month">前四周每日小任务 →</button>
   <view class="stats"><view class="stat"><view class="number">{{streak}}</view><view class="label">连续打卡天</view></view><view class="stat"><view class="number">{{learned}}</view><view class="label">已学习词汇</view></view><view class="stat"><view class="number">{{due}}</view><view class="label">到期复习</view></view></view>
   <view class="section-title">学一点，练一点</view>
   <view class="card" bindtap="grammar"><view class="row"><view class="list-title">今日语法练习</view><view>→</view></view><view class="body muted">阅读讲解与例句，再完成 4 道题。正确率达 75% 即计入今日目标。</view><view class="pill body">单元 {{unit.number}} · {{unit.topic}}</view></view>

@@ -1,13 +1,13 @@
 // 临时作答状态。只有最后一步的 save 成功，才进入结果页。
-function createExerciseSession(id, questions) {
+function createExerciseSession(id, questions, form = 0) {
   if (!Array.isArray(questions) || !questions.length) throw new Error('没有可练习的题目');
-  return { id, total: questions.length, index: 0, answers: [], input: '', feedback: null, result: null, showHint: false };
+  return { id, questions, form, total: questions.length, index: 0, answers: [], input: '', feedback: null, result: null, showHint: false };
 }
 
 function answerExercise(session, answer, evaluate) {
   if (!session || session.feedback || session.result) return false;
   // 先检查，再记录，避免检查失败后留下半份答案。
-  const feedback = evaluate(session.id, session.index, answer);
+  const feedback = evaluate(session.id, session.index, answer, session.form);
   session.answers[session.index] = answer;
   session.input = answer;
   session.feedback = feedback;

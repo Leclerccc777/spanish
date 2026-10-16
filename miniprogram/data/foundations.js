@@ -3,7 +3,7 @@ module.exports = [
  {id:'sounds',title:'先把五个元音读清楚',minutes:5,goal:'认识 a e i o u，以及 h、ñ、b/v 的基础读法。',
  rules:['西语 a、e、i、o、u 的基本读法分别接近 /a e i o u/。先保持元音清楚，不套用英语单词的读法。','h 在一般本族词中不发音：hola 开头直接读元音。ñ 是一个字母，发 /ɲ/，不是普通 n。','b 和 v 通常表示同一个音位；具体发音随位置变化，不按英语 v 来读。先模仿整词，不必急着掌握颤音 r。'],
  examples:[['hola','你好 · h 不发音'],['casa','家 · 注意两个清楚的 a'],['mañana','明天 · 注意 ñ'],['vivir','生活 · v 不按英语 /v/ 来读']],
- practice:'慢读 hola、casa、mañana 各三遍，再说：Hola, me llamo Ana. 浏览器可用设备合成语音辅助；本练习不自动判断发音。',
+ practice:'慢读 hola、casa、mañana 各三遍，再说：Hola, me llamo Ana. 可先听内置合成语音再跟读；本练习不自动判断发音。',
  references:[{sourceId:'pcic-pronunciation',section:'A1–A2：音素、元音与辅音的感知及产出'}],
  questions:[{id:'fs1',prompt:'hola 中的 h 通常怎么读？',options:['读英语 h','不发音','读成 j'],answer:1,explanation:'一般西语本族词中的 h 不发音，hola 从 o 的元音开始。'},{id:'fs2',prompt:'mañana 中 ñ 的基本发音是？',options:['普通 n /n/','英语 ng /ŋ/','/ɲ/'],answer:2,explanation:'ñ 是独立字母，表示 /ɲ/；不要省掉上方符号。'},{id:'fs3',prompt:'西语 b 和 v 的基础关系是？',options:['通常表示同一个音位','v 必须读英语 /v/','b 总是不发音'],answer:0,explanation:'b 与 v 通常表示同一个音位，具体实现随语音环境变化。'},{id:'fs4',prompt:'初学五个元音时，哪种做法更合适？',options:['完全套用英语拼读','保持元音清楚并模仿整词','所有元音都读成 a'],answer:1,explanation:'先练清楚的 /a e i o u/，再结合整词和短句模仿。'}]},
  {id:'stress',title:'重音在哪一拍？',minutes:5,goal:'区分口头重音与书写重音符号 á é í ó ú。',

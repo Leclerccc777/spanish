@@ -64,3 +64,5 @@ picker{padding:12rpx 0}
 .expression-model{white-space:pre-wrap;line-height:1.8}
 .beginner-start{background:#e9f7ff;border-color:#aadffa;box-shadow:0 6rpx 0 #aadffa}
 .beginner-start .list-title{color:#075b86}
+
+.audio-controls{display:flex;flex-wrap:wrap;gap:20rpx;margin-top:24rpx}.audio-controls button{margin:0;font-size:26rpx}

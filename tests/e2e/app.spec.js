@@ -18,11 +18,12 @@ test('名词三步练习：错误反馈、订正、备份往返与手机布局',
   expect(backup.nounPractice.w24.bestScore).toBe(33);expect(Object.keys(backup.nounMistakes)).toHaveLength(2);expect(Object.keys(backup.days)).toHaveLength(0);
   await page.reload();await page.getByRole('button',{name:'返回名词列表'}).click();
   await expect(agua).toContainText('待订正 2 项');await agua.getByRole('button').click();
-  await page.getByRole('button',{name:'开始三步练习'}).click();await page.getByRole('button',{name:'el',exact:true}).click();await page.getByRole('button',{name:'下一步'}).click();
-  await page.fill('#noun-answer','fr');await page.getByRole('button',{name:'添加 í',exact:true}).click();
-  await expect(page.locator('#noun-answer')).toHaveValue('frí');await page.locator('#noun-answer').press('End');await page.locator('#noun-answer').press('a');
-  await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'下一步'}).click();
-  await page.fill('#noun-answer','El agua está fría.');await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'保存并查看结果'}).click();
+  await page.getByRole('button',{name:'开始三步练习'}).click();await page.getByRole('button',{name:'el agua',exact:true}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await expect(page.locator('.reading')).toContainText('limpio');
+  await page.fill('#noun-answer','limpia');await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'下一步'}).click();
+  await page.fill('#noun-answer','El agua est');await page.getByRole('button',{name:'添加 á',exact:true}).click();
+  await expect(page.locator('#noun-answer')).toHaveValue('El agua está');await page.locator('#noun-answer').press('End');await page.locator('#noun-answer').pressSequentially(' limpia.');
+  await page.getByRole('button',{name:'检查答案'}).click();await page.getByRole('button',{name:'保存并查看结果'}).click();
   await expect(page.locator('.result-score')).toHaveText('100%');
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('hola-learning-v1')).nounMistakes)).toEqual({});
   await page.goto('/#progress');page.once('dialog',d=>d.accept());
@@ -52,7 +53,7 @@ test('完整日学习、自动打卡、刷新保存及资料筛选', async ({ pa
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'把西语，变成日常。'})).toBeVisible();
   await expect(page.locator('.stat-value').first()).toContainText('0');
-  await page.getByRole('button',{name:'开始今日学习'}).click();
+  await page.getByRole('button',{name:'开始今日词汇'}).click();
   for(let i=0;i<5;i++){
     await expect(page.locator('.flash-word')).toBeVisible();
     await page.getByRole('button',{name:'查看释义与例句'}).click();
@@ -229,7 +230,7 @@ test('新手四步入门从首页到全部规则练习，75% 保存与旧进度�
  for(const f of L.foundations){
   await page.locator(`[data-action="foundation"][data-id="${f.id}"]`).click();
   if(f.id==='gender'){await expect(page.locator('.rules')).toContainText('el día');await expect(page.locator('.rules')).toContainText('la mano');await expect(page.locator('.rules')).toContainText('el agua fría');}
-  if(f.id==='sounds'){await page.evaluate(()=>{speechSynthesis.getVoices=()=>[];});await page.getByRole('button',{name:'听设备合成语音'}).first().click();await expect(page.locator('#toast')).toContainText('暂无西班牙语音色');}
+  if(f.id==='sounds'){await expect(page.getByRole('button',{name:'听发音',exact:true}).first()).toBeVisible();await expect(page.getByRole('button',{name:'慢速听',exact:true}).first()).toBeVisible();}
   await page.getByRole('button',{name:'做 4 道小练习'}).click();
   for(let i=0;i<f.questions.length;i++){
    const q=f.questions[i],wrong=f.id==='gender'&&i===0;await page.locator('.choice').nth(wrong?(q.answer+1)%3:q.answer).click();await expect(page.locator('.feedback')).toContainText(q.explanation);

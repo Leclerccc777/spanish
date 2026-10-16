@@ -13,7 +13,7 @@ const server = http.createServer((req, res) => {
   if (!file.startsWith(`${root}${path.sep}`)) { res.writeHead(403); res.end('Forbidden'); return; }
   fs.readFile(file, (error, data) => {
     if (error) { res.writeHead(404); res.end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
+    res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; media-src 'self' data: blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
     res.end(req.method === 'HEAD' ? undefined : data);
   });
 });

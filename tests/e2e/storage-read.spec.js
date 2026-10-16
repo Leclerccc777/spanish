@@ -2,7 +2,7 @@ const {test,expect}=require('@playwright/test');const L=require('../../miniprogr
 test('读取失败不覆盖旧数据，重新读取恢复进度，再确认操作才保存',async({page})=>{
   const s=L.emptyState();L.review(s,'w1','remember');
   await page.addInitScript(({key,saved})=>{localStorage.setItem(key,JSON.stringify(saved));window.readOriginal=Storage.prototype.getItem;Storage.prototype.getItem=function(){throw new Error('read failed');};},{key:KEY,saved:s});
-  await page.goto('/');await page.getByRole('button',{name:'开始今日学习'}).click();await page.getByRole('button',{name:'查看释义与例句'}).click();await page.getByRole('button',{name:'想起来了',exact:true}).click();
+  await page.goto('/');await page.getByRole('button',{name:'开始今日词汇'}).click();await page.getByRole('button',{name:'查看释义与例句'}).click();await page.getByRole('button',{name:'想起来了',exact:true}).click();
   await expect(page.locator('#toast')).toContainText('旧记录不会被覆盖');expect(await page.evaluate(key=>JSON.parse(window.readOriginal.call(localStorage,key)),KEY)).toEqual(s);
   await page.evaluate(()=>{Storage.prototype.getItem=window.readOriginal;});await page.goto('/#progress');await page.getByRole('button',{name:'重新读取记录'}).click();
   await expect(page.locator('.stat-value').nth(2)).toContainText('1');expect(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY)).toEqual(s);

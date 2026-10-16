@@ -26,7 +26,7 @@ test('原生名词选冠词、输入配合、完整句、错项重练与刷新�
   assert.equal(p.data.result.score,33); assert.equal(L.nounProgress(r.state).find(n=>n.id==='w24').mistakes.length,2);
   const reload=r.loadPage('nouns'); reload.onLoad(); assert.equal(reload.data.lessons.find(n=>n.id==='w24').bestScore,33);
   reload.open({currentTarget:{dataset:{id:'w24'}}});reload.begin();
-  for (const q of reload.lesson.questions) {reload.answer(q.answer); reload.next();}
+  for (const q of reload.exercise.questions) {reload.answer(q.answer); reload.next();}
   assert.equal(reload.data.result.score,100); assert.deepEqual(r.state.nounMistakes,{}); assert.deepEqual(r.state.days,{});
   assert.equal(L.summary(r.state).learned,0);
   const today=r.loadPage('today'); today.nouns();assert.equal(r.routes.at(-1),'/pages/nouns/index');
@@ -100,7 +100,7 @@ test('原生 A1–B2 递进包真实作答至 B2，保存草稿和错项，不�
   }
   assert.equal(Object.keys(r.state.drills).length,24);assert.equal(Object.keys(r.state.drillMistakes).length,24);assert.deepEqual(r.state.days,{});assert.deepEqual(r.state.lessons,{});
   const reload=r.loadPage('drills');reload.onLoad({id:'b2-report'});assert.equal(reload.data.text,L.drillPacks[11].output.model);assert.equal(reload.data.saved,true);
-  reload.begin();for(const q of reload.pack.questions){reload.answer(q.answers[0]);reload.next();}
+  reload.begin();for(const q of reload.exercise.questions){reload.answer(q.answers[0]);reload.next();}
   assert.equal(r.state.drillMistakes['b2-report-q2'],undefined);assert.equal(r.state.drills['b2-report'].bestScore,100);
 });
 test('原生递进包保存失败保留最终提交和未保存草稿，恢复后重试', () => {
@@ -281,4 +281,22 @@ test('原生阅读分步定位、文章预览与依据不改草稿或开放状�
   for (const key of ['showArticle', 'showArticleEvidence']) p.support({ currentTarget: { dataset: { key } } });
   assert.equal(p.data.showArticleEvidence, true); assert.equal(p.data.unlocked, false);
   p.begin(); p.save(); assert.equal(p.data.phase, 'read'); assert.deepEqual(r.state, L.emptyState());
+});
+
+test('原生主课与基础课重练固定新题组，刷新后按次数继续，保存失败不切题',()=>{
+ for(const [name,id,key] of [['lesson','g1','lessons'],['foundations','gender','foundations']]){
+  const r=runtime(),p=r.loadPage(name);
+  p.onLoad({id});if(name==='foundations')p.open({currentTarget:{dataset:{id}}});
+  p.begin();const original=p.questions.map(q=>q.prompt);
+  for(const q of p.questions){p.choose({currentTarget:{dataset:{index:(q.answer+1)%3}}});p.next();}
+  assert.equal(p.data.result.score,0);
+  const reload=r.loadPage(name);reload.onLoad({id});reload.begin();assert.equal(reload.form,1);assert.notDeepEqual(reload.questions.map(q=>q.prompt),original);
+  const write=r.wx.setStorageSync;
+  for(const [i,q] of reload.questions.entries()){
+   reload.choose({currentTarget:{dataset:{index:q.answer}}});assert.equal(reload.data.correct,true);
+   if(i===3){r.wx.setStorageSync=()=>{throw Error('quota');};reload.next();assert.equal(reload.data.phase,'quiz');assert.equal(reload.form,1);assert.equal(r.state[key][id].attempts,1);r.wx.setStorageSync=write;}
+   reload.next();
+  }
+  assert.equal(reload.data.result.score,100);assert.equal(r.state[key][id].attempts,2);assert.equal(L.summary(r.state).checkedIn,false);
+ }
 });

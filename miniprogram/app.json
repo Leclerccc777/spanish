@@ -51,5 +51,35 @@
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "subPackages": [
+    {
+      "name": "voice1",
+      "root": "voice1",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice2",
+      "root": "voice2",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice3",
+      "root": "voice3",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice4",
+      "root": "voice4",
+      "pages": [
+        "index"
+      ]
+    }
+  ]
 }

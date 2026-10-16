@@ -2,9 +2,10 @@ const L = require('../../lib/learning');
 const S = require('../../lib/storage');
 const exercisePage = require('../../lib/exercise-page');
 Page({
+ ...require('../../lib/audio').audioPage(wx),
   ...exercisePage({
     storage: S, platform: wx, itemKey: 'pack', maxLength: 500,
-    evaluate: L.evaluateDrillAnswer, grade: L.gradeDrill,
+    evaluate: L.evaluateDrillAnswer, grade: L.gradeDrill, questions: L.drillQuestions, progressKey: 'drills',
     canPractice(id) {
       if (L.drillUnlocked(S.load(), id)) return true;
       wx.showToast({ title: '先完成前一包，正确率至少 75%', icon: 'none' });
@@ -18,7 +19,7 @@ Page({
   refresh() { const state = S.load(); this.setData({ packs: L.drillProgress(state).filter(p => p.level === this.data.level), levelGuide: L.drillPacks.find(p => p.level === this.data.level).levelGuide, wrongCount: L.drillWrongQuestions(state).length }); },
   review() { wx.navigateTo({ url: '/pages/drillreview/index' }); },
   select(e) { if (!['A1','A2','B1','B2'].includes(e.currentTarget.dataset.level)) return; this.setData({ level: e.currentTarget.dataset.level }); this.refresh(); },
-  open(e) {
+  open(e) { this.stopAudio();
     const pack = L.drillPacks.find(p => p.id === e.currentTarget.dataset.id);
     if (!pack) return wx.showToast({ title: '没有找到练习包', icon: 'none' });
     const state = S.load(), draft = state.drillDrafts[pack.id];
@@ -64,7 +65,7 @@ Page({
     this.setData({ showModel: !this.data.showModel });
   },
   output() { this.setData({ phase: 'read' }, () => wx.pageScrollTo({ selector: '#drill-express', duration: 0 })); },
-  menu() { this.setData({ phase: 'menu' }); this.refresh(); },
+  menu() { this.stopAudio(); this.setData({ phase: 'menu' }); this.refresh(); },
   continuePack() { const next = L.nextDrillPack(S.load(), this.pack.id); if (next) this.open({ currentTarget: { dataset: { id: next.id } } }); },
   previous() { if (this.pack.previousId) this.open({ currentTarget: { dataset: { id: this.pack.previousId } } }); },
   copy(e) { wx.setClipboardData({ data: e.currentTarget.dataset.url }); },
