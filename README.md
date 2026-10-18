@@ -4,7 +4,7 @@
 
 ## 电脑上直接打开
 
-下载 [hola-spanish.html](releases/hola-spanish.html)（GitHub 文件页点击 **Download raw file**），用 Chrome / Edge / Firefox 打开。只需要这一个 HTML；6500 词库、四步入门、年度计划和分级练习均已包含，不用安装 Node、启动服务器或连接外网。查官方资料链接需要网络，内置 493 段西语合成音频；未收录的扩展词朗读取决于本机西语音色。
+下载 [hola-spanish.html](releases/hola-spanish.html)（GitHub 文件页点击 **Download raw file**），用 Chrome / Edge / Firefox 打开。只需要这一个 HTML；6500 词库、四步入门、年度计划和分级练习均已包含，不用安装 Node、启动服务器或连接外网。查官方资料链接需要网络，内置 6788 段西语合成音频，覆盖全部 6500 个词条及课程例句、阅读与词组；无需安装系统西语音色。
 
 学习记录保存在当前浏览器。服务器体验版、不同浏览器与 HTML 文件之间不会自动同步；首次换用 HTML 请先从原体验版“我的 / 学习进度”导出 JSON，再在 HTML 中导入。保持 HTML 的位置和文件名，更新或移动前导出备份；浏览器对本地文件存储的处理可能不同。微信打包、官方编译和真机验收留待浏览器验收后。
 
@@ -12,7 +12,7 @@
 
 ## GitHub Pages 在线版
 
-发布地址为 **https://leclerccc777.github.io/spanish/**。首次使用需在 [仓库 Pages 设置](https://github.com/Leclerccc777/spanish/settings/pages) 将 **Build and deployment → Source** 选择为 **GitHub Actions**。开启后到 [发布记录](https://github.com/Leclerccc777/spanish/actions/workflows/pages.yml) 运行或重跑最新工作流，部署成功后网址才可访问。
+在线体验：[打开 Hola 西语学习](https://leclerccc777.github.io/spanish/)。本仓库已启用 GitHub Pages，更新状态可查看 [发布记录](https://github.com/Leclerccc777/spanish/actions/workflows/pages.yml)。如果部署自己的副本，先在仓库 Settings → Pages 将 Source 设为 GitHub Actions。
 
 main 每次推送自动构建和发布，不需要安装前端依赖或配置密钥。`npm run build` 生成 `dist/pages/index.html` 与 `.nojekyll`；首页为完整单文件，包含词库、样式和脚本，支持 `/spanish/` 项目路径。工作流仅上传此目录。
 
@@ -23,7 +23,7 @@ main 每次推送自动构建和发布，不需要安装前端依赖或配置密
 ## 已实现
 
 - **首页双打卡**：词汇与语法位于首页顶部，独立显示今日完成状态和直接入口；两项真实完成后自动打卡。
-- **内置语音包**：493 段西班牙西语合成音，覆盖课内词卡、入门例词、语法例句、分级短文与文章，支持慢速及停止。浏览器离线 HTML 自带音频，微信按需加载四个分包；扩展词库尚未全覆盖。[音源与范围](docs/AUDIO.md)。
+- **内置语音包**：6788 段西班牙西语合成音，覆盖全部 6500 词条、入门例词、语法例句、分级短文、文章和阅读词组，支持慢速及停止。浏览器离线 HTML 自带音频，微信按需加载本地分包；词库预览、阅读词组与名词搭配均可试听。[音源与范围](docs/AUDIO.md)。
 - **同知识点换题重练**：128 道主课程题、96 道分级题、16 道基础题和 24 道名词题各增加一套平行题，共 264 道新增题。重练交替使用两套题，题干或选项内容改变；分级阅读还替换短文。集中订正也换题，词义重试替换同组干扰项；原题 ID、历史最佳分与旧备份保持兼容。
 
 - **明亮学习界面**：微信与浏览器采用亮绿、白色和浅蓝配色，圆润卡片、按压按钮与清晰的正确/错误反馈，适配手机和桌面。
@@ -93,7 +93,7 @@ python3 scripts/build_lexicon.py --download
 python3 scripts/check_lexicon.py
 ```
 
-来源文件固定提交和 SHA-256，见 [来源清单](docs/lexicon-sources.json)；构建统计见 [lexicon-build.json](docs/lexicon-build.json)。已缓存数据可运行不带 `--download` 的命令重建，运行应用不需要下载源词典。主包源码预检约 1.32 MiB，官方编译后的大小仍需微信开发者工具确认。
+来源文件固定提交和 SHA-256，见 [来源清单](docs/lexicon-sources.json)；构建统计见 [lexicon-build.json](docs/lexicon-build.json)。已缓存数据可运行不带 `--download` 的命令重建，运行应用不需要下载源词典。主包与语音分包大小见 [最新验证记录](docs/VALIDATION.md)，官方编译后的大小仍需微信开发者工具确认。
 
 ## 在微信开发者工具中运行
 
@@ -102,7 +102,7 @@ python3 scripts/check_lexicon.py
 3. 点击“编译”。页面、课程与学习记录均在本地运行，**不需要配置云开发、服务器、API Key 或请求域名**。
 4. 按下面的验收流程检查，再用自己的账号进行真机预览。
 
-原生音频随微信分包加载，浏览器音频直接包含在 HTML 中，两端都不调用在线语音 API。未收录的扩展词在浏览器尝试设备西语音色。音频是合成音而非真人录音；资料链接仍通过“复制链接”供用户在浏览器中查阅。
+原生音频随微信分包加载，浏览器音频直接包含在 HTML 中，两端都不调用在线语音 API。全部词库词条均使用内置音频，不依赖设备西语音色。音频是合成音而非真人录音；资料链接仍通过“复制链接”供用户在浏览器中查阅。
 
 **验证范围**：云环境已验证共享学习逻辑、原生页面控制逻辑和浏览器交互；未在微信开发者工具中编译，也未做微信真机测试或上传发布。
 

@@ -26,7 +26,7 @@ const reading = {
   'a2-help': ['Luis 打电话想办什么事？接电话的人先问什么？', 'Llama al centro de salud para pedir una cita. Dice que necesita hablar con una médica. La persona que atiende le pregunta su nombre.', 'para 表示打电话的目的；询问姓名是安排预约的一步，不是已经看完医生。'],
   'a2-travel': ['出发前还有什么没准备好？', 'Todavía no han preparado las maletas. Van a salir mañana.', 'todavía no 表示还没有；明天出发是计划。不要把订房、买票都误当作未完成。'],
   'b1-story': ['电话响起时，Ana 正在做什么？', 'La primera noche estudiaba cuando sonó el teléfono: era su amiga.', 'estudiaba 是当时的背景，sonó 是发生的事件；最后说明打来电话的是朋友。'],
-  'b1-advice': ['Ana 的建议和她自己采取的帮助有什么不同？', 'Ana le aconseja que lea en voz alta cada día. También habla despacio para que Luis la entienda.', '大声读是让 Luis 做的；慢慢说是 Ana 自己做的，目的是让 Luis 听懂她。'],
+  'b1-advice': ['Ana 的建议和她自己采取的帮助有什么不同？', 'Ana le aconseja que lea en voz alta cada día. También habla despacio para que Luis la entienda.', '出声朗读是让 Luis 做的；慢慢说是 Ana 自己做的，目的是让 Luis 听懂她。'],
   'b1-opinion': ['Ana 否定阅读的作用了吗？', 'Ana cree que es útil, pero no cree que sea suficiente.', '她认为阅读有用，却不认为只阅读就足够。转折限制的是充分性，并没有否定用处。'],
   'b1-relative': ['哪一个地方提供下午的课程，哪一个地方有大图书馆？', 'Marta estudia en una escuela que ofrece cursos por la tarde. La profesora que la ayuda prepara ejercicios claros. La ciudad donde vive Marta tiene una biblioteca grande.', 'que ofrece 补充学校的信息；donde vive 补充城市的信息。看清修饰对象，不能混成同一地点。'],
   'b1-wishes': ['一起学习与五点到达，分别是谁的愿望？', 'Espero que podamos estudiar juntas. Yo espero llegar a la biblioteca a las cinco', 'podamos 包含说话者和朋友；llegar 的主语沿用 yo。愿望不等于已经实现。'],

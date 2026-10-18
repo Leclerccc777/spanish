@@ -36,7 +36,7 @@ module.exports = {
     newScene: { prompt: '换到一次上课经历：先交代教室和日常习惯，再说某天突然发生的事情与结果。', check: '听者能分出“通常怎样”“当时正在做什么”和“那一次发生什么”吗？' }
   },
   'b1-advice': {
-    words: [['en voz alta', '大声地', 'leer en voz alta 是朗读；把方式和动作一起理解。'], ['la entienda', '听懂她的话', 'la 指 Ana；entienda 配合 Luis，接在 para que 引出的目的里。'], ['para recordar palabras', '为了记住词语', '复习和记词的是同一个 Luis，所以 para 后直接接原形。']],
+    words: [['en voz alta', '出声地', 'leer en voz alta 是把文字读出声音，不要求喊得很响；与默读相对。'], ['la entienda', '听懂她的话', 'la 指 Ana；entienda 配合 Luis，接在 para que 引出的目的里。'], ['para recordar palabras', '为了记住词语', '复习和记词的是同一个 Luis，所以 para 后直接接原形。']],
     dialogue: { scene: '同学总是记不住词，向你求助。', turns: ['同学：Me cuesta recordar palabras.（我记词有困难。）', '你：Te aconsejo que…', '同学：¿Para qué sirve?（这样做有什么用？）'], personalize: '给一个自己用过的办法，再解释目的。先想清谁做动作、谁得到帮助。' },
     newScene: { prompt: '换成同学读文章遇到困难：给一条阅读建议，再说你会怎么帮助他理解。分别试用 para 和 para que。', check: '建议回应了阅读困难吗？两种目的表达里，行动者是否交代清楚？' }
   },
@@ -56,7 +56,7 @@ module.exports = {
     newScene: { prompt: '换成组织免费读书会：假设场地更多会怎样，再按现有场地安排一个小组，说明如何复盘。', check: '假设结果与当前能做的事分开了吗？si 后没有误用条件式吧？' }
   },
   'b2-report': {
-    words: [['había anunciado', '此前已经宣布过', '先以周三的转述为参照，再向前看周一的宣布。'], ['al día siguiente', '次日', '这里相对于周一的原话，指周二；不是相对于周三。'], ['lo había presentado', '她是否已经提交了它', 'lo 指报告；前面的 no sabía si 表明 Luis 并不知道结果。']],
+    words: [['había anunciado', '此前已经宣布过', '先以周三的转述为参照，再向前看周一的宣布。'], ['al día siguiente', '次日', '这里相对于周一的原话，指周二；不是相对于周三。'], ['lo había presentado', '她此前已经提交了它', 'lo 指报告；“是否”来自前面的 si。整句 no sabía si… 表明 Luis 并不知道结果，不能据此认定已提交。']],
     dialogue: { scene: '周一伙伴说明计划；周三另一位伙伴向你核实。', turns: ['周一，伙伴：Enviaré el documento mañana.', '周三，同伴：¿Qué había anunciado?', '你：Había anunciado que…'], personalize: '标明原话中的“明天”是哪一天，再说提交是否得到确认，不确定就保留未知。' },
     newScene: { prompt: '换成周五宣布、下周一转述的活动计划。写出日期关系，区分原计划与自己后来核实到的结果。', check: '“次日”仍指周六吗？有没有把宣布计划直接当作已经完成？' }
   },
@@ -66,7 +66,7 @@ module.exports = {
     newScene: { prompt: '换成晚上买一本书：先问候，用 Un libro, por favor 提请求，再演出道谢与回应。', check: '问候改成晚上的说法了吗？两个人是在接着对方的话说吗？' }
   },
   'a1-agreement': {
-    words: [['una mesa pequeña', '一张小桌子', 'mesa 是阴性单数；una 和 pequeña 一起配合。'], ['cerca de la mesa', '在桌子附近', 'cerca de 是一组地点表达，不用拆成逐字翻译。'], ['las sillas', '这些椅子', 'silla 是阴性；多把椅子用 las sillas。']],
+    words: [['una mesa pequeña', '一张小桌子', 'mesa 是阴性单数；una 和 pequeña 一起配合。'], ['cerca de la mesa', '在桌子附近', 'cerca de 是一组地点表达，不用拆成逐字翻译。'], ['las sillas', '前面提到的那些椅子', 'silla 是阴性；las 回指已提到的多把椅子。明确说“这些椅子”可以用 estas sillas。']],
     dialogue: { scene: '朋友请你介绍房间里的物品。', turns: ['朋友：¿Qué hay en tu habitación?', '你：Hay…（说一种真实物品）', '朋友：¿Los libros son grandes o pequeños?'], personalize: '描述自己书的大小，再说一种阴性复数物品；没有这些物品可设一个房间。' },
     newScene: { prompt: '换到教室：描述一张桌子和几把椅子，再把单数桌子改说成多张桌子。', check: '从一件换成多件时，冠词、名词和形容词是否一起变化？' }
   },
@@ -91,7 +91,7 @@ module.exports = {
     newScene: { prompt: '换成读书会准备：用 haber + 分词说已买书、已写信和尚未完成的一件事；说明是谁做的。', check: 'haber 跟人称变化了吗？分词保持原样了吗？这里专练复合过去时，实际选择还受地区与语境影响。' }
   },
   'b1-relative': {
-    words: [['que la ayuda', '帮助她的', 'que 接回 la profesora；la 指 Marta，不是学校。'], ['ofrece cursos', '提供课程', 'ofrece 指学校开课；cursos 是课程。'], ['donde vive Marta', '玛尔塔居住的地方', 'donde 把居住信息接到前面的城市，不再重复城市名称。']],
+    words: [['que la ayuda', '帮助她的', 'que 接回 la profesora；la 指 Marta，不是学校。'], ['ofrece cursos', '提供课程', 'ofrece 指学校开课；cursos 是课程。'], ['donde vive Marta', '玛尔塔居住的（城市）', 'donde 把居住信息接到前面的城市，不再重复城市名称。']],
     dialogue: { scene: '新同学请你介绍熟悉的老师与学习地点。', turns: ['同学：¿Cómo es la profesora que te ayuda?', '你：La profesora que…', '同学：¿Cómo es el lugar donde estudias?'], personalize: '用一个老师的具体做法和一个地方的特点回答；也可设虚构人物。' },
     newScene: { prompt: '换成介绍朋友与常去的图书馆。先各写两句，再用 que / donde 合并，避免重复名词。', check: '合并后仍然指同一个人或地点吗？关系词后有没有重复写一遍相同主语？' }
   },

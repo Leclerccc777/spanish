@@ -146,9 +146,9 @@ const packs = [
       "同一个人说自己的目的，用 para 加动词原形：Estudio para aprender. 若目的涉及另一个人，用 para que：Hablo despacio para que me entiendas.（我慢慢说，好让你听懂。）",
       "先练“你”的几个形式：estudies、leas、entiendas。用它们分别说学习、阅读和听懂的建议或目的。"
     ],
-    examples: [['Te aconsejo que leas en voz alta.', '我建议你大声读。'], ['Hablo despacio para que me entiendas.', '我慢慢说，好让你听懂我。']],
+    examples: [['Te aconsejo que leas en voz alta.', '我建议你出声朗读。'], ['Hablo despacio para que me entiendas.', '我慢慢说，好让你听懂我。']],
     reading: 'Luis quiere mejorar su pronunciación. Ana le aconseja que lea en voz alta cada día. También habla despacio para que Luis la entienda. Luis repasa para recordar palabras.',
-    glossary: 'en voz alta：大声；despacio：慢慢地；repasa：复习；la entienda：听懂她。',
+    glossary: 'en voz alta：出声地；despacio：慢慢地；repasa：复习；la entienda：听懂她。',
     questions: [
       choice('向你提出建议：Te aconsejo que ___ cada día.', ['estudias', 'estudies', 'estudiar'], 1, '另一主语的建议从句，本题用现在虚拟式 estudies。'),
       text('只填 entender 的形式：Hablo despacio para que tú me ___.', 'entiendas', 'para que 引出另一主语的目的，本题使用 entiendas。'),

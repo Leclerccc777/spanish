@@ -49,11 +49,43 @@ test('没有系统西语音色仍可真实播放内置词卡、短文和文章�
  expect(await page.evaluate(()=>localStorage.getItem('hola-learning-v1'))).toBeNull();
 });
 
-test('Pages 子路径的单文件离线播放，493 段音频都能解码且无需外部音源',async({page,context})=>{
- test.setTimeout(180000);await instrumentAudio(page);const html=fs.readFileSync(path.join(__dirname,'../../dist/pages/index.html'),'utf8');
+test('Pages 子路径的单文件离线播放，6788 段音频都能解码且无需外部音源',async({page,context})=>{
+ test.setTimeout(300000);await instrumentAudio(page);const html=fs.readFileSync(path.join(__dirname,'../../dist/pages/index.html'),'utf8');
  const url='http://127.0.0.1:4173/spanish/';const requests=[];page.on('request',r=>{if(!r.url().startsWith('data:'))requests.push(r.url());});
  await context.route(url,route=>route.fulfill({status:200,contentType:'text/html',body:html}));await context.setOffline(true);await page.goto(url+'#foundation/sounds');
  await playAndCheck(page,page.getByRole('button',{name:'听发音',exact:true}).first(),1);
- const decoded=await page.evaluate(async()=>{const audio=new AudioContext(),durations=[];try{for(const src of Object.values(window.HolaAudioClips)){const bytes=Uint8Array.from(atob(src.split(',')[1]),c=>c.charCodeAt(0));const result=await audio.decodeAudioData(bytes.buffer);if(result.duration<=0||!result.getChannelData(0).some(n=>Math.abs(n)>.001))throw Error('Empty audio');durations.push(result.duration);}return {count:durations.length,min:Math.min(...durations),max:Math.max(...durations)};}finally{await audio.close();}});
- expect(decoded.count).toBe(493);expect(decoded.min).toBeGreaterThan(.1);expect(decoded.max).toBeGreaterThan(20);expect(requests).toEqual([url]);
+ const decoded=await page.evaluate(async()=>{const audio=new AudioContext(),durations=[];try{for(const [text,src] of Object.entries(window.HolaAudioClips)){const bytes=Uint8Array.from(atob(src.split(',')[1]),c=>c.charCodeAt(0));const result=await audio.decodeAudioData(bytes.buffer);if(result.duration<=.1||!result.getChannelData(0).some(n=>Math.abs(n)>.001))throw Error('Too short or silent: '+text+' ('+result.duration+' s)');durations.push(result.duration);}return {count:durations.length,min:Math.min(...durations),max:Math.max(...durations)};}finally{await audio.close();}});
+ expect(decoded.count).toBe(6788);expect(decoded.min).toBeGreaterThan(.1);expect(decoded.max).toBeGreaterThan(20);expect(requests).toEqual([url]);
+});
+
+
+test('完整词库与词组可试听，锁定预览、慢速和名词搭配不改旧进度',async({page})=>{
+ test.setTimeout(180000);await instrumentAudio(page);await page.goto('/#bank');
+ const before=await page.evaluate(()=>localStorage.getItem('hola-learning-v1'));
+ await page.getByRole('button',{name:'全部',exact:true}).click();
+ for(const level of ['A1','A2','B1','B2']){
+  const word=L.course.words.find(w=>w.bank&&w.level===level);
+  await page.fill('#bank-search',word.spanish);
+  const card=page.locator('.word-card').filter({has:page.locator('.word-title').filter({hasText:new RegExp('^'+word.spanish+'$')})}).first();
+  await card.locator('summary').click();await playAndCheck(page,card.getByRole('button',{name:'听发音',exact:true}),1);
+ }
+ await page.goto('/#drill/b2-report');await page.getByRole('button',{name:'看词组解释',exact:true}).click();
+ const phrase=page.locator('.phrase-item').filter({hasText:'lo había presentado'});
+ await expect(phrase).toContainText('“是否”来自前面的 si');await playAndCheck(page,phrase.getByRole('button',{name:'慢速听',exact:true}),.75);
+ await page.goto('/#drill/b1-anterior');await page.getByRole('button',{name:'试读本级长一点的文章'}).click();
+ await playAndCheck(page,page.locator('.article-words dd').filter({hasText:'各自独立地'}).getByRole('button',{name:'听发音',exact:true}),1);
+ await page.goto('/#noun/w24');await playAndCheck(page,page.locator('[data-action="audio-play"][data-text="el agua fría"]').first(),1);
+ await playAndCheck(page,page.getByRole('button',{name:'听复数',exact:true}),1);
+ expect(await page.evaluate(()=>localStorage.getItem('hola-learning-v1'))).toBe(before);
+ for(const width of [320,768,1440]){
+  await page.setViewportSize({width,height:900});
+  for(const route of ['drill/a1-place','noun/w24','bank']){
+   await page.goto('/#'+route);
+   if(route.startsWith('drill/'))await page.getByRole('button',{name:'看词组解释',exact:true}).click();
+   if(route==='bank')await page.locator('.word-card summary').first().click();
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),route+' at '+width).toBe(true);
+   const boxes=await page.locator('.audio-controls:visible').first().locator('.btn').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};}));
+   expect(boxes[1].x-boxes[0].right>=14||boxes[1].y-boxes[0].bottom>=14).toBe(true);
+  }
+ }
 });

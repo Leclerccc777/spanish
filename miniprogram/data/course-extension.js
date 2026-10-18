@@ -128,7 +128,7 @@ pronunciación|发音|阴性名词|Practico la pronunciación cada día.|我每�
 vocabulario|词汇|阳性名词|Uso el vocabulario en frases.|我把词汇用在句子里。
 repasar|复习|动词|Conviene repasar antes del examen.|考试前宜复习。
 superar|克服；超过|动词|Quiero superar esta dificultad.|我想克服这个困难。
-aconsejar|建议|动词|Te aconsejo que leas en voz alta.|我建议你大声读。
+aconsejar|建议|动词|Te aconsejo que leas en voz alta.|我建议你出声朗读。
 confianza|信心；信任|阴性名词|Tengo más confianza al hablar.|我说话时更有信心。`,
 ['建议与现在虚拟式','表达建议时练习 que 从句。',['Te aconsejo que + subjuntivo 表建议；Te aconsejo estudiar 使用不定式也可表达建议。','规则现在虚拟式：hablar→hable，comer→coma，vivir→viva；入门常见不规则：ser→sea、ir→vaya。','当建议面向另一主语时，本课练习 que + 变位虚拟式。'],[
 ['Te aconsejo que ___ más.（estudiar）',['estudias','estudies','estudiar'],1,'建议从句用 estudies。'],['Conviene ___ cada día.',['repasar','repasas','repasado'],0,'此结构用不定式。'],['Quiero que Ana ___ conmigo.（hablar）',['habla','habló','hable'],2,'不同主语的愿望从句用 hable。'],['Espero que ___ bien.（estar, tú）',['estás','estés','estar'],1,'希望从句用 estés。']]]);

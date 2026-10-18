@@ -30,9 +30,10 @@ Page({
     this.showChecks(draft ? draft.checks : []);
   },
   meaning() { if (this.data.phase === 'read') this.setData({ showMeaning: !this.data.showMeaning }); },
-  words() { if (this.data.phase === 'read') this.setData({ showWords: !this.data.showWords }); },
+  words() { this.stopAudio(); if (this.data.phase === 'read') this.setData({ showWords: !this.data.showWords }); },
   dialogue() { if (this.data.phase === 'read') this.setData({ showDialogue: !this.data.showDialogue }); },
   support(e) {
+    this.stopAudio();
     const key = e.currentTarget.dataset.key;
     if (this.data.phase === 'read' && ['showEvidence', 'showArticle', 'showArticleEvidence'].includes(key)) this.setData({ [key]: !this.data[key] });
   },

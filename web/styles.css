@@ -1717,3 +1717,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .daily-checkin{border:2px solid #58cc02;margin-bottom:28px}.daily-goals{display:grid;grid-template-columns:1fr 1fr;gap:28px}.daily-goals>section{padding:20px;background:#f4ffe9;border-radius:16px;min-width:0}.daily-goals .btn{margin-top:12px}.daily-checkin .checkin-note{margin-bottom:0}@media(max-width:600px){.daily-goals{grid-template-columns:1fr;gap:20px}.daily-goals>section{padding:16px}}
 
 .audio-status-bar{position:fixed;z-index:30;bottom:90px;right:24px;max-width:min(460px,calc(100vw - 32px));background:white;border-radius:16px;box-shadow:0 3px 16px #173d0020;padding:12px;display:flex;align-items:center;gap:16px}.audio-status-bar:has(#audio-status:empty){display:none}.audio-controls{flex-wrap:wrap}.audio-status-bar [hidden]{display:none}@media(max-width:600px){.word-top{flex-wrap:wrap}.audio-status-bar{right:16px}}
+
+.phrase-item{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}

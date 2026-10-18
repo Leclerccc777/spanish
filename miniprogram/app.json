@@ -80,6 +80,62 @@
       "pages": [
         "index"
       ]
+    },
+    {
+      "name": "voice5",
+      "root": "voice5",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice6",
+      "root": "voice6",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice7",
+      "root": "voice7",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice8",
+      "root": "voice8",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice9",
+      "root": "voice9",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice10",
+      "root": "voice10",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice11",
+      "root": "voice11",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "name": "voice12",
+      "root": "voice12",
+      "pages": [
+        "index"
+      ]
     }
   ]
 }

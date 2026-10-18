@@ -300,3 +300,19 @@ test('原生主课与基础课重练固定新题组，刷新后按次数继续�
   assert.equal(reload.data.result.score,100);assert.equal(r.state[key][id].attempts,2);assert.equal(L.summary(r.state).checkedIn,false);
  }
 });
+
+
+test('原生词库和词组试听可预览，停止与换页不写旧进度',()=>{
+ const r=runtime(),state=L.emptyState();L.review(state,'w1','remember');r.wx.setStorageSync('',state);
+ const players=[],loads=[];
+ r.wx.loadSubpackage=o=>{loads.push(o.name);o.success();};
+ r.wx.createInnerAudioContext=()=>{const p={play(){p.played=true;},destroy(){p.destroyed=true;},onError(){},onEnded(){}};players.push(p);return p;};
+ const event=(text)=>({currentTarget:{dataset:{text,rate:.75}}});
+ const word=L.course.words.find(w=>w.bank&&w.level==='B2');
+ const bank=r.loadPage('bank');bank.onShow();bank.playAudio(event(word.spanish));assert(players.at(-1).played);assert.equal(players.at(-1).playbackRate,.75);assert(loads.at(-1).startsWith('voice'));
+ bank.search({detail:{value:'hola'}});assert(players.at(-1).destroyed);
+ const nouns=r.loadPage('nouns');nouns.onLoad({id:'w24'});nouns.playAudio(event(nouns.data.lesson.phrase));assert(players.at(-1).played);nouns.begin();assert(players.at(-1).destroyed);
+ const drills=r.loadPage('drills');drills.onLoad({id:'b2-report'});drills.words();drills.playAudio(event(drills.data.pack.words[2][0]));assert(players.at(-1).played);drills.words();assert(players.at(-1).destroyed);
+ const vocab=r.loadPage('vocabulary');vocab.onShow();vocab.playAudio(event('por favor'));assert(players.at(-1).played);vocab.onHide();assert(players.at(-1).destroyed);
+ assert.deepEqual(r.state,state);
+});

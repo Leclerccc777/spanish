@@ -1,0 +1,1 @@
+<view class="page"><view class="title">语音包已准备好</view><view class="body">返回课程，点击“听发音”即可使用。内置音频为西班牙西语合成音，不自动评价发音。</view><button class="primary" bindtap="back">返回课程</button></view>
