@@ -5,11 +5,31 @@
   const C = L.course;
   const UI = window.HolaExerciseUI;
   const KEY = 'hola-learning-v1';
+  const account = window.HolaAccount.createAccountClient({
+    api: location.protocol === 'file:' ? '' : window.HolaAccountApi,
+    get: key => JSON.parse(localStorage.getItem(key) || 'null'),
+    set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+    remove: key => localStorage.removeItem(key),
+    changed: status => { const el = document.getElementById('account-status'); if (el) el.textContent = status.message; },
+    request: async (url, method, body, token) => {
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body), signal: controller.signal, credentials: 'omit' });
+        const result = await response.json();
+        if (!response.ok) throw Object.assign(new Error(result.error || '账号请求失败'), { status: response.status });
+        return result;
+      } catch (error) { if (error.status) throw error; throw new Error('网络暂不可用，本机记录仍保留，可稍后同步'); }
+      finally { clearTimeout(timer); }
+    }
+  });
+  let syncTimer;
+  function queueSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => account.sync().catch(() => {}), 800); }
+
   const root = document.getElementById('app');
   let storageFailed = false;
   let state;
-  function readStored(text = localStorage.getItem(KEY)) {
-    const raw = JSON.parse(text || 'null');
+  function readStored(text) {
+    const raw = text === undefined ? account.read() : JSON.parse(text || 'null');
     if (raw !== null && raw.version !== L.emptyState().version) throw new Error('Unsupported record version');
     return L.restore(raw);
   }
@@ -51,11 +71,13 @@
   function notify(message) { const element = document.getElementById('toast'); element.textContent = message; element.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => element.classList.remove('show'), 4000); }
   function commit(action) {
     if (storageFailed) { reloadRecords(); return null; }
-    const draft = L.restore(JSON.parse(JSON.stringify(state)));
+    let draft;
+    try { draft = readStored(); } catch { storageFailed = true; notify('记录暂未读取，旧记录不会被覆盖。'); return null; }
     const result = action(draft);
-    try { localStorage.setItem(KEY, JSON.stringify(draft)); }
+    try { account.write(draft); }
     catch { notify('学习记录未保存，请检查浏览器存储权限或空间后重试。'); return null; }
     state = draft;
+    queueSync();
     return result;
   }
   function reloadRecords() {
@@ -69,7 +91,7 @@
     const items = [['today','home','今日学习'],['words','book','词汇练习'],['grammar','layers','语法路线'],['library','library','资料库'],['progress','chart','学习进度']];
     const current = ['study', 'word-quiz', 'bank', 'nouns'].includes(active) || active.startsWith('noun/') ? 'words' : (active.startsWith('lesson/') || active.startsWith('expression/') || active.startsWith('foundation/') || active==='foundations' || active==='year' || active==='first-month' || active==='drills' || active==='drill-review' || active.startsWith('drill/')) ? 'grammar' : active;
     const s = L.summary(state);
-    return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc((items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><span class="avatar" aria-label="本地学习者">学</span></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本地保存 · A1–B2 分级练习 · 浏览器体验版</span></footer></div></main></div>`;
+    return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc((items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><span class="avatar" aria-label="本地学习者">学</span></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本机保存 · 可选账号同步 · 浏览器体验版</span></footer></div></main></div>`;
   }
   function stat(value, label, i, unit = '') { return `<div class="stat"><div class="stat-icon">${icon(i)}</div><div><div class="stat-value">${value}<small>${esc(unit)}</small></div><div class="stat-label">${esc(label)}</div></div></div>`; }
   function todayPage() {
@@ -230,10 +252,26 @@
   function libraryPage() {
     return heading('BIBLIOTECA','学习，有据可循。','能力框架、课程规划与权威词典，构成持续完善的资料库。') + `<div class="notice">已核对官方参考正文与主要语法章节。讲解、释义和例题为本站原创，不代表官方教材或认证；原有 80 词已核对基础词义与词性；课内新增 240 词待逐条复核。扩展 6,183 个词元来自开源词典，中文为英语中转辅助释义，尚待西中人工校对。例句尚未经专业教师审稿。</div><div class="toolbar"><label for="source-filter" class="tiny">按资料类型</label><select id="source-filter"><option value="">全部资料</option>${['课程体系','能力框架','语法参考','词典','用法参考','开源词库'].map(k => `<option ${sourceFilter===k?'selected':''}>${k}</option>`).join('')}</select><span class="tiny">${C.sources.length} 个参考入口</span></div><div class="sources-grid">${C.sources.filter(s=>!sourceFilter||s.kind===sourceFilter).map(s => `<article class="card source-card"><div class="card-head">${pill(s.kind)}<span class="tiny">${s.status==='dataset'?'来源文件校验':'官方页面核验'} ${esc(s.verifiedAt)}</span></div><h2>${esc(s.title)}</h2><div class="institution muted">${esc(s.institution)}</div><p>${esc(s.scope)}</p><p class="tiny">${esc(s.verification)}</p><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${s.status==='dataset'?'访问数据来源':'访问官方资料'} ↗</a></article>`).join('')}</div><div class="section-head"><h2>资料如何变成课程？</h2></div><section class="card"><ol class="rules"><li>以 CEFR 的交际能力方向组织学习：问候、介绍、提问、喜好与计划。</li><li>以 Cervantes PCIC 作为课程范围的参考方向，各课附有具体参考章节。</li><li>以 RAE / ASALE 词典与 DPD 复核词义、性数配合及地区差异。</li><li>写原创例句和练习，保留来源 ID，使每个课程单元都能回溯参考入口。</li></ol><p class="tiny">当前 32 单元提供 A1–B2 分级练习的起点；扩展词库已收录 6,500 个去重条目；听力、口语评估与词条人工校对仍待完善。<a href="https://github.com/Leclerccc777/spanish/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">词库署名与许可 ↗</a></p></section>`;
   }
+  function accountPanel() {
+    const a = account.status();
+    return `<section class="card account-panel"><h2>学习账号${a.user ? ' · ' + esc(a.user.username) : ''}</h2><p id="account-status" role="status">${esc(a.message)}</p><p class="tiny">每个账号单独保存词汇、课程、错题和表达草稿。同步成功后，换设备登录同一账号可继续学习；离线先保存在本机。</p>${a.user ? `<div class="actions">${btn('立即同步','account-sync','','secondary')}${btn('退出账号','account-logout','','ghost')}</div><details><summary>两台设备的进度不一致？</summary><p>先导出本机备份，再选择保留哪份。不会自动合并或提高成绩。</p><div class="actions">${btn('使用云端进度','account-cloud','','secondary')}${btn('使用本机进度','account-local','','secondary')}${btn('导出替换前记录','account-previous','','ghost')}</div></details>` : a.broken ? btn('退出账号','account-logout','','secondary') : a.enabled ? `<form id="account-form"><label for="account-username">账号（4–32 位字母、数字或下划线）</label><input id="account-username" name="username" autocomplete="username" minlength="4" maxlength="32" pattern="[A-Za-z0-9_]{4,32}" required><label for="account-password">密码（10–128 个字符，请妥善保管）</label><input id="account-password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><p class="tiny">注册会把当前本机进度复制到新账号，原记录与 JSON 备份仍保留。目前暂不支持忘记密码找回。</p><div class="actions"><button type="submit" name="mode" value="login" class="btn secondary">登录，继续学习</button><button type="submit" name="mode" value="register" class="btn">注册并保存当前进度</button></div></form>` : '<p class="tiny">账号开放前，请继续导出 JSON 备份。离线 HTML 可照常学习。</p>'}</section>`;
+  }
+  function resetAccountView() { state = readStored(); storageFailed = false; session = quiz = wordQuiz = foundationQuiz = nounQuiz = drillQuiz = drillEditor = drillReview = expressionEditor = null; render(); }
+  async function accountAction(action) {
+    try {
+      if (action === 'account-logout') { clearTimeout(syncTimer); const exiting = account.logout(); resetAccountView(); await exiting; return; }
+      if (action === 'account-previous') { const old = account.previous(); if (!old) return notify('没有替换前记录。'); downloadBackup(old, 'before-replace'); return; }
+      const choice = action === 'account-cloud' ? 'cloud' : action === 'account-local' ? 'local' : undefined;
+      if (choice && !window.confirm(choice === 'cloud' ? '使用云端进度替换本机显示？建议先导出备份，替换前的记录也会在本机保留。' : '使用本机进度替换云端进度？请先确认已导出需要保留的备份。')) return;
+      const result = await account.sync(choice);
+      if (result?.downloaded) resetAccountView();
+      render(); notify(account.status().message);
+    } catch (error) { render(); notify(account.status().message || error.message); }
+  }
   function progressPage() {
     const s=L.summary(state); const errors=L.mistakes(state); const wrong=L.wrongWords(state);
     const calendar=Array.from({length:14},(_,i)=> { const key=L.addDays(s.today,i-13); return `<div class="calendar-day ${L.isCheckedIn(state.days[key])?'done':''} ${key===s.today?'today':''}" aria-label="${key} ${L.isCheckedIn(state.days[key])?'已打卡':'未打卡'}">${key.slice(5)}</div>`; }).join('');
-    return heading('MI CAMINO','每一步，都算数。','真正的进步，是今天比昨天多懂一点。') + `${storageFailed?`<div class="notice">原记录暂未读取，旧数据不会被覆盖。可重读或导入兼容备份。${btn('重新读取记录','reload-records','','secondary')}</div>`:''}<div class="stats">${stat(s.streak,'连续打卡','flame','天')}${stat(s.checkins,'累计打卡','calendar','天')}${stat(s.learned,'已学习词汇','book',`/ ${C.lexicon.catalogue.length}`)}${stat(s.grammarPassed,'语法已达标','layers',`/ ${C.lessons.length}`)}</div>${practiceProgressPanel()}<div class="progress-columns"><section><div class="card"><div class="card-head"><h2>最近 14 天</h2>${pill('学习日历')}</div><div class="calendar">${calendar}</div><p class="tiny">深绿色：当日完成词汇目标 + 至少一次达标语法练习。按设备本地日期记录。</p></div><div class="card"><div class="card-head"><h2>词汇积累</h2><span>${s.learned} / ${C.lexicon.catalogue.length}</span></div>${meter(percent(s.learned,C.lexicon.catalogue.length))}<p class="tiny">有复习记录即“已学习”，不等于长期掌握。到期词会优先安排复习。</p></div></section><section><div class="card"><h2>每天，给自己一点时间</h2><p class="tiny">设置每天词汇量，再加 1 次达标语法练习。</p><div class="goal-options">${[3,5,10].map(g=>btn(`${g} 个词`,'goal',`data-goal="${g}"`,state.goal===g?'':'secondary')).join('')}</div><p class="tiny">当天首次学习时固定目标。今天开始学习后，调整目标对下一天生效。</p></div><div class="card"><h2>留住你的学习记录</h2><p class="tiny">数据只存在当前浏览器中，不与微信自动同步。清理浏览器或换设备前，请导出备份。</p><div class="backup-actions">${btn('导出备份','export','','small secondary')}${btn('导入备份','import','','small ghost')}</div></div></section></div><div class="section-head"><h2>词汇错词本</h2><span class="tiny">${wrong.length} 个待订正</span></div><div class="card">${wrong.length?wrong.map(w=>`<p><strong lang="es">${esc(w.spanish)}</strong> · ${esc(w.meaning)}<br><span class="tiny">你的答案：${esc(w.answer)}</span></p>`).join('')+btn('集中重练错词 →','word-quiz','data-wrong="1"','secondary'):'<p class="tiny">词汇测验中答错的词会保存在这里。</p>'}</div><div class="section-head"><h2>错题回顾</h2><span class="tiny">${errors.length} 题待订正</span></div>${errors.length ? errors.map(q=>`<article class="card mistake"><h3>${esc(q.prompt)}</h3><p>你的答案：${esc(q.options[q.selected])}</p><p>正确答案：${esc(q.options[q.answer])}</p><p>${esc(q.explanation)}</p>${btn('重练本课 →','lesson',`data-id="${q.lessonId}"`,'small secondary')}</article>`).join('') : '<div class="card empty">暂无待订正错题。练习中的错题会自动出现在这里。</div>'}`;
+    return heading('MI CAMINO','每一步，都算数。','真正的进步，是今天比昨天多懂一点。') + accountPanel() + `${storageFailed?`<div class="notice">原记录暂未读取，旧数据不会被覆盖。可重读或导入兼容备份。${btn('重新读取记录','reload-records','','secondary')}</div>`:''}<div class="stats">${stat(s.streak,'连续打卡','flame','天')}${stat(s.checkins,'累计打卡','calendar','天')}${stat(s.learned,'已学习词汇','book',`/ ${C.lexicon.catalogue.length}`)}${stat(s.grammarPassed,'语法已达标','layers',`/ ${C.lessons.length}`)}</div>${practiceProgressPanel()}<div class="progress-columns"><section><div class="card"><div class="card-head"><h2>最近 14 天</h2>${pill('学习日历')}</div><div class="calendar">${calendar}</div><p class="tiny">深绿色：当日完成词汇目标 + 至少一次达标语法练习。按设备本地日期记录。</p></div><div class="card"><div class="card-head"><h2>词汇积累</h2><span>${s.learned} / ${C.lexicon.catalogue.length}</span></div>${meter(percent(s.learned,C.lexicon.catalogue.length))}<p class="tiny">有复习记录即“已学习”，不等于长期掌握。到期词会优先安排复习。</p></div></section><section><div class="card"><h2>每天，给自己一点时间</h2><p class="tiny">设置每天词汇量，再加 1 次达标语法练习。</p><div class="goal-options">${[3,5,10].map(g=>btn(`${g} 个词`,'goal',`data-goal="${g}"`,state.goal===g?'':'secondary')).join('')}</div><p class="tiny">当天首次学习时固定目标。今天开始学习后，调整目标对下一天生效。</p></div><div class="card"><h2>留住你的学习记录</h2><p class="tiny">未登录时保存在当前浏览器；登录后请确认同步成功。清理缓存或换设备前，仍建议导出备份。</p><div class="backup-actions">${btn('导出备份','export','','small secondary')}${btn('导入备份','import','','small ghost')}</div></div></section></div><div class="section-head"><h2>词汇错词本</h2><span class="tiny">${wrong.length} 个待订正</span></div><div class="card">${wrong.length?wrong.map(w=>`<p><strong lang="es">${esc(w.spanish)}</strong> · ${esc(w.meaning)}<br><span class="tiny">你的答案：${esc(w.answer)}</span></p>`).join('')+btn('集中重练错词 →','word-quiz','data-wrong="1"','secondary'):'<p class="tiny">词汇测验中答错的词会保存在这里。</p>'}</div><div class="section-head"><h2>错题回顾</h2><span class="tiny">${errors.length} 题待订正</span></div>${errors.length ? errors.map(q=>`<article class="card mistake"><h3>${esc(q.prompt)}</h3><p>你的答案：${esc(q.options[q.selected])}</p><p>正确答案：${esc(q.options[q.answer])}</p><p>${esc(q.explanation)}</p>${btn('重练本课 →','lesson',`data-id="${q.lessonId}"`,'small secondary')}</article>`).join('') : '<div class="card empty">暂无待订正错题。练习中的错题会自动出现在这里。</div>'}`;
   }
   function startSession(packId = '') { session={packId,items:packId?L.packQueue(state,packId):L.queue(state),index:0,revealed:false,retries:new Set(),day:L.dateKey()}; }
   function openWordQuiz(wrongOnly = false, packId = '') {
@@ -316,8 +354,11 @@
   function speak(){if(session?.items[session.index])speakText(session.items[session.index].spanish);}
   function exportBackup() {
     if (storageFailed) return notify('记录暂未读取，暂不导出空备份。');
-    const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
-    const link=document.createElement('a'); link.href=url; link.download=`hola-${L.dateKey()}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+    downloadBackup(state);
+  }
+  function downloadBackup(value, suffix = '') {
+    const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));
+    const link=document.createElement('a'); link.href=url; link.download=`hola-${L.dateKey()}${suffix ? "-" + suffix : ""}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   function importBackup() {
     const input=document.createElement('input'); input.type='file'; input.accept='.json,application/json';
@@ -329,14 +370,29 @@
         if(raw.version!==1||!raw.reviews||!raw.days||!raw.lessons)throw new Error('不是受支持的 Hola 备份');
         const imported=L.restore(raw);
         if(!window.confirm(`导入 ${Object.keys(imported.reviews).length} 个词汇的记录将替换当前浏览器进度。建议先导出当前备份。继续导入？`))return;
-        localStorage.setItem(KEY,JSON.stringify(imported)); state=imported; storageFailed=false; session=null; quiz=null; render(); notify('学习记录已导入。');
+        account.write(imported, true); queueSync(); state=imported; storageFailed=false; session=null; quiz=null; render(); notify('学习记录已导入。');
       }catch(error){notify(`导入失败：${error.message}`);}
     }; input.click();
   }
+  root.addEventListener('submit', async event => {
+    if (event.target.id !== 'account-form') return;
+    event.preventDefault();
+    const form = event.target, username = form.elements.username.value, password = form.elements.password.value;
+    const mode = event.submitter?.value || 'login';
+    form.elements.password.value = '';
+    for (const button of form.querySelectorAll('button')) button.disabled = true;
+    try {
+      const progress = mode === 'register' ? readStored() : undefined;
+      await account.authenticate(mode, username, password, progress); resetAccountView();
+      await account.sync(); render();
+    } catch (error) { notify(error.message); }
+    finally { for (const button of form.querySelectorAll('button')) button.disabled = false; }
+  });
   root.addEventListener('click',event=> {
     const element=event.target.closest('[data-action]'); if(!element||element.disabled)return;
     const action=element.dataset.action;
     if(['begin-quiz','foundation-begin','drill-begin','noun-begin','begin-word-quiz','drill-words','drill-article','bank-level','bank-page'].includes(action))window.HolaAudio.stop();
+    if(action.startsWith('account-')){accountAction(action);return;}
     if(action==='study'){startSession(element.dataset.pack||'');navigate('study');}
     else if(action==='practice-continue'){const p=L.practiceSummary(state);if(p.wrong){drillReview={phase:'setup',level:''};navigate('drill-review');}else{drillQuiz=null;drillEditor=null;navigate(p.next?`drill/${p.next.id}`:'drills');}}
     else if(action==='practice-level'){drillLevel=element.dataset.level;drillQuiz=null;drillEditor=null;navigate('drills');}
@@ -505,7 +561,9 @@
     if(event.target.dataset.drillCheck!==undefined&&drillEditor){if(drillEditor.dirty)return;const checks=new Set(drillEditor.checks),i=Number(event.target.dataset.drillCheck);if(event.target.checked)checks.add(i);else checks.delete(i);const d=commit(s=>L.setDrillChecks(s,drillEditor.id,[...checks]));if(d){drillEditor.checks=d.checks;render();}else event.target.checked=!event.target.checked;}
  if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){window.HolaAudio.stop();levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){window.HolaAudio.stop();unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
   window.addEventListener('hashchange',()=>{if(route()!=='drill-review')drillReview=null;if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();window.scrollTo(0,0);});
-  window.addEventListener('storage',event=>{if(event.key===KEY){try{state=readStored(event.newValue);storageFailed=false;render();}catch{storageFailed=true;render();notify('另一个窗口的记录未能读取，旧记录不会被覆盖。');}}});
+  window.addEventListener('storage',event=>{try{if(event.key===window.HolaAccount.SESSION){location.reload();return;}if(event.key===account.key()){state=event.key===KEY?readStored(event.newValue):readStored();storageFailed=false;render();}}catch{storageFailed=true;render();notify('另一个窗口的记录未能读取，旧记录不会被覆盖。');}});
+  window.addEventListener('online', () => account.sync().then(result => { if (result?.downloaded) resetAccountView(); }).catch(() => {}));
   render();
+  if (!storageFailed) account.sync().then(result => { if (result?.downloaded) resetAccountView(); }).catch(() => {});
   if(storageFailed)notify('原学习记录未能读取。旧记录尚未覆盖，请先检查浏览器存储。');
 })();

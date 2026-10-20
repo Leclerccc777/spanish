@@ -5,3 +5,5 @@ project.private.config.json
 .DS_Store
 test-results/
 .audio-cache/
+
+.account-data/

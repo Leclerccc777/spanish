@@ -15,7 +15,8 @@
     "pages/nouns/index",
     "pages/drills/index",
     "pages/drillreview/index",
-    "pages/firstmonth/index"
+    "pages/firstmonth/index",
+    "pages/account/index"
   ],
   "window": {
     "navigationBarTitleText": "Hola · 每天一点西语",

@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="eyebrow">MI CUENTA</view><view class="title">让进度跟着你走。</view>
+  <view class="card"><view class="list-title">{{account.user ? account.user.username : '学习账号'}}</view><view class="body">{{account.message}}</view><view class="small body">账号单独保存词汇、课程、错题和表达草稿。同步成功后，换设备登录同一账号可继续学习；离线先保存在本机。</view></view>
+  <view wx:if="{{account.user}}" class="card">
+    <button class="primary" hover-class="button-press" disabled="{{busy}}" bindtap="sync">立即同步</button>
+    <button class="secondary" hover-class="button-press" disabled="{{busy}}" bindtap="logout">退出账号</button>
+    <view class="section-title">两台设备的进度不一致？</view><view class="small">先复制本机备份，再选择使用哪份。不会自动合并或提高成绩。</view>
+    <button class="secondary" hover-class="button-press" bindtap="exportData">复制本机备份</button>
+    <button class="secondary" hover-class="button-press" disabled="{{busy}}" data-choice="cloud" bindtap="resolve">使用云端进度</button>
+    <button class="secondary" hover-class="button-press" disabled="{{busy}}" data-choice="local" bindtap="resolve">使用本机进度</button>
+    <button class="secondary" hover-class="button-press" data-previous="1" bindtap="exportData">复制替换前记录</button>
+  </view>
+  <view wx:elif="{{account.broken}}" class="card"><button class="secondary" disabled="{{busy}}" bindtap="logout">退出账号</button></view>
+  <view wx:elif="{{account.enabled}}" class="card">
+    <view class="list-title">账号</view><view class="small">4–32 位字母、数字或下划线，不区分大小写</view>
+    <input class="search" value="{{username}}" maxlength="32" placeholder="设置或输入账号" bindinput="username" />
+    <view class="list-title">密码</view><view class="small">10–128 个字符，请妥善保管</view>
+    <input class="search" value="{{password}}" password="{{true}}" maxlength="128" placeholder="设置或输入密码" bindinput="password" />
+    <view class="small body">注册会把当前本机进度复制到新账号，原记录和 JSON 备份仍保留。目前暂不支持忘记密码找回。</view>
+    <button class="primary" hover-class="button-press" disabled="{{busy}}" data-mode="login" bindtap="authenticate">登录，继续学习</button>
+    <button class="secondary" hover-class="button-press" disabled="{{busy}}" data-mode="register" bindtap="authenticate">注册并保存当前进度</button>
+  </view>
+  <view wx:else class="card">账号开放前，请继续复制 JSON 备份。课程与离线学习可照常使用。</view>
+</view>

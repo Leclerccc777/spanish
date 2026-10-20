@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: '22'
       - name: Build the self-contained website
+        env:
+          HOLA_ACCOUNT_API: ${{ vars.HOLA_ACCOUNT_API }}
         run: npm run build
       - name: Upload the website
         uses: actions/upload-pages-artifact@v3

@@ -1719,3 +1719,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .audio-status-bar{position:fixed;z-index:30;bottom:90px;right:24px;max-width:min(460px,calc(100vw - 32px));background:white;border-radius:16px;box-shadow:0 3px 16px #173d0020;padding:12px;display:flex;align-items:center;gap:16px}.audio-status-bar:has(#audio-status:empty){display:none}.audio-controls{flex-wrap:wrap}.audio-status-bar [hidden]{display:none}@media(max-width:600px){.word-top{flex-wrap:wrap}.audio-status-bar{right:16px}}
 
 .phrase-item{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}
+
+.account-panel label { display:block; margin:16px 0 6px; font-weight:700; }
+.account-panel input { display:block; width:100%; max-width:420px; min-height:44px; padding:10px 12px; border:2px solid #ccdce5; border-radius:12px; background:white; color:#173d00; font:inherit; }
+.account-panel details { margin-top:20px; }
+.account-panel summary { cursor:pointer; }

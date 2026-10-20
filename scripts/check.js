@@ -11,7 +11,7 @@ function walk(folder) {
     else if(file.endsWith('.json')){JSON.parse(fs.readFileSync(file,'utf8'));count++;}
   }
 }
-for(const folder of ['miniprogram','web','scripts','tests'])walk(path.join(root,folder));
+for(const folder of ['miniprogram','web','scripts','server','tests'])walk(path.join(root,folder));
 const app=JSON.parse(fs.readFileSync(path.join(root,'miniprogram/app.json'),'utf8'));
 const pages=[...app.pages,...(app.subPackages||[]).flatMap(pack=>pack.pages.map(page=>pack.root+'/'+page))];
 for(const page of pages)for(const suffix of ['.js','.wxml'])if(!fs.existsSync(path.join(root,'miniprogram',page+suffix)))throw new Error(`Missing page ${page+suffix}`);

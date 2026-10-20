@@ -9,10 +9,12 @@
     "dev": "node scripts/server.js",
     "test": "node --test tests/*.test.js",
     "test:e2e": "playwright test",
-    "check": "node scripts/check.js"
+    "check": "node scripts/check.js",
+    "dev:accounts": "HOLA_ACCOUNT_API=/api HOLA_ENABLE_ACCOUNTS=1 node scripts/server.js",
+    "start:accounts": "node server/start.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0"

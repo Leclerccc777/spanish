@@ -5,7 +5,9 @@ const build = require('./build-web');
 const root = build();
 const port = Number(process.env.PORT || 4173);
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
-const server = http.createServer((req, res) => {
+const accounts = process.env.HOLA_ENABLE_ACCOUNTS === '1' ? require('../server/accounts').createAccounts({ file: process.env.HOLA_ACCOUNT_DB || path.resolve('.account-data/accounts.sqlite'), origins: [`http://127.0.0.1:${port}`, `http://localhost:${port}`] }) : null;
+const server = http.createServer(async (req, res) => {
+  if (accounts && await accounts.handler(req, res)) return;
   if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); res.end(); return; }
   let file;
   try { const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); file = path.resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`); }
