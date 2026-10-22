@@ -8,6 +8,7 @@ const firstMonth = require('./first-month');
 const drillProgress = require('./drill-progress');
 const weekGuide = require('../data/week-guide');
 const exercise = require('./exercise');
+const profile = require('./profile');
 const SCHEMA = 1;
 const PASS_SCORE = 75;
 const RATINGS = ['again', 'remember', 'easy'];
@@ -72,6 +73,8 @@ function restore(raw) {
   clean.monthChecks=firstMonth.restoreMonthChecks(raw.monthChecks,clean.journey);
   Object.assign(clean, nouns.restoreNouns(raw));
   Object.assign(clean, drills.restoreDrills(raw));
+  const resume = profile.restorePosition(raw.resume);
+  if (resume) clean.resume = resume;
   return clean;
 }
 function dayRecord(state, today) {
@@ -282,3 +285,5 @@ Object.assign(module.exports,firstMonth);
 Object.assign(module.exports,drillProgress);
 Object.assign(module.exports,weekGuide);
 Object.assign(module.exports,exercise);
+
+Object.assign(module.exports, profile.createProfile(module.exports));

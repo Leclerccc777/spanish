@@ -10,7 +10,7 @@
     get: key => JSON.parse(localStorage.getItem(key) || 'null'),
     set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
     remove: key => localStorage.removeItem(key),
-    changed: status => { const el = document.getElementById('account-status'); if (el) el.textContent = status.message; },
+    changed: status => { document.querySelectorAll('[data-account-status]').forEach(el => { el.textContent = status.message; }); },
     request: async (url, method, body, token) => {
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 12000);
       try {
@@ -89,9 +89,9 @@
   const heading = (overline, title, subtitle, trailing = '') => `<div class="page-head"><div><div class="eyebrow">${esc(overline)}</div><h1>${esc(title)}</h1><p class="subtitle">${esc(subtitle)}</p></div>${trailing}</div>`;
   function shell(body, active) {
     const items = [['today','home','今日学习'],['words','book','词汇练习'],['grammar','layers','语法路线'],['library','library','资料库'],['progress','chart','学习进度']];
-    const current = ['study', 'word-quiz', 'bank', 'nouns'].includes(active) || active.startsWith('noun/') ? 'words' : (active.startsWith('lesson/') || active.startsWith('expression/') || active.startsWith('foundation/') || active==='foundations' || active==='year' || active==='first-month' || active==='drills' || active==='drill-review' || active.startsWith('drill/')) ? 'grammar' : active;
-    const s = L.summary(state);
-    return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc((items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><span class="avatar" aria-label="本地学习者">学</span></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本机保存 · 可选账号同步 · 浏览器体验版</span></footer></div></main></div>`;
+    const current = active === 'account' ? 'progress' : ['study', 'word-quiz', 'bank', 'nouns'].includes(active) || active.startsWith('noun/') ? 'words' : (active.startsWith('lesson/') || active.startsWith('expression/') || active.startsWith('foundation/') || active==='foundations' || active==='year' || active==='first-month' || active==='drills' || active==='drill-review' || active.startsWith('drill/')) ? 'grammar' : active;
+    const s = L.summary(state), a = account.status();
+    return `<div class="shell"><aside class="sidebar"><a href="#today" class="brand" aria-label="Hola 首页"><span class="brand-mark">h</span><span><span class="brand-word">hola<span style="color:#1cb0f6">.</span></span><span class="brand-sub">每天一点西语</span></span></a><nav class="nav" aria-label="主导航">${items.map(([key,i,title]) => `<a href="#${key}" class="${current === key ? 'active' : ''}" ${current === key ? 'aria-current="page"' : ''}>${icon(i)}<span>${title}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="mini-note"><strong>Un poco cada día.</strong>每天一点点，<br>让语言成为你的新日常。<div style="margin-top:13px">${pill('A1 → B2 · 通用西语')}</div></div><div class="side-footer">HECHO CON CALMA · 慢慢学</div></div></aside><main class="main"><header class="topbar"><span class="crumb">我的西语旅程 / ${esc(active === 'account' ? '账号详情' : (items.find(x => x[0] === current) || items[0])[2])}</span><div class="top-actions"><span class="level">${`${s.unit.levelCode} · ${s.checkedIn ? '✓ 今日已打卡' : '分级学习'}`}</span><div class="account-avatar-wrap"><button type="button" id="account-trigger" class="avatar account-trigger" data-action="account-toggle" aria-label="${a.user ? '账号菜单：' + esc(a.user.username) : a.broken ? '账号菜单' : '登录或注册账号'}" aria-haspopup="${a.user || a.broken ? 'menu' : 'dialog'}" aria-expanded="false" aria-controls="${a.user || a.broken ? 'account-menu' : 'account-dialog'}">${esc(a.user ? a.user.username.slice(0,1).toUpperCase() : '学')}</button><div id="account-menu" class="account-dropdown" role="menu" aria-labelledby="account-trigger" hidden><p class="account-menu-name">${esc(a.user?.username || '账号记录需要恢复')}</p><button type="button" role="menuitem" data-action="account-details">账号详情</button><button type="button" role="menuitem" data-action="account-logout">退出登录</button></div></div></div></header><div class="content">${body}<footer class="footer-note"><span>以 Cervantes / CEFR / RAE 为参考方向 · 参考页面已核验</span><span>本机保存 · 可选账号同步 · 浏览器体验版</span></footer></div></main></div>`;
   }
   function stat(value, label, i, unit = '') { return `<div class="stat"><div class="stat-icon">${icon(i)}</div><div><div class="stat-value">${value}<small>${esc(unit)}</small></div><div class="stat-label">${esc(label)}</div></div></div>`; }
   function todayPage() {
@@ -252,22 +252,118 @@
   function libraryPage() {
     return heading('BIBLIOTECA','学习，有据可循。','能力框架、课程规划与权威词典，构成持续完善的资料库。') + `<div class="notice">已核对官方参考正文与主要语法章节。讲解、释义和例题为本站原创，不代表官方教材或认证；原有 80 词已核对基础词义与词性；课内新增 240 词待逐条复核。扩展 6,183 个词元来自开源词典，中文为英语中转辅助释义，尚待西中人工校对。例句尚未经专业教师审稿。</div><div class="toolbar"><label for="source-filter" class="tiny">按资料类型</label><select id="source-filter"><option value="">全部资料</option>${['课程体系','能力框架','语法参考','词典','用法参考','开源词库'].map(k => `<option ${sourceFilter===k?'selected':''}>${k}</option>`).join('')}</select><span class="tiny">${C.sources.length} 个参考入口</span></div><div class="sources-grid">${C.sources.filter(s=>!sourceFilter||s.kind===sourceFilter).map(s => `<article class="card source-card"><div class="card-head">${pill(s.kind)}<span class="tiny">${s.status==='dataset'?'来源文件校验':'官方页面核验'} ${esc(s.verifiedAt)}</span></div><h2>${esc(s.title)}</h2><div class="institution muted">${esc(s.institution)}</div><p>${esc(s.scope)}</p><p class="tiny">${esc(s.verification)}</p><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${s.status==='dataset'?'访问数据来源':'访问官方资料'} ↗</a></article>`).join('')}</div><div class="section-head"><h2>资料如何变成课程？</h2></div><section class="card"><ol class="rules"><li>以 CEFR 的交际能力方向组织学习：问候、介绍、提问、喜好与计划。</li><li>以 Cervantes PCIC 作为课程范围的参考方向，各课附有具体参考章节。</li><li>以 RAE / ASALE 词典与 DPD 复核词义、性数配合及地区差异。</li><li>写原创例句和练习，保留来源 ID，使每个课程单元都能回溯参考入口。</li></ol><p class="tiny">当前 32 单元提供 A1–B2 分级练习的起点；扩展词库已收录 6,500 个去重条目；听力、口语评估与词条人工校对仍待完善。<a href="https://github.com/Leclerccc777/spanish/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener noreferrer">词库署名与许可 ↗</a></p></section>`;
   }
+  const authDialog = document.createElement('dialog');
+  authDialog.id = 'account-dialog'; authDialog.className = 'account-dialog';
+  authDialog.setAttribute('aria-labelledby', 'account-dialog-title');
+  document.body.append(authDialog);
+  let authBusy = false;
+  function closeAccountMenu(focus = false) {
+    const menu = document.getElementById('account-menu'), trigger = document.getElementById('account-trigger');
+    if (menu) menu.hidden = true;
+    trigger?.setAttribute('aria-expanded', 'false');
+    if (focus) trigger?.focus();
+  }
+  function closeLoginDialog() {
+    if (authBusy) return;
+    authDialog.close(); authDialog.innerHTML = '';
+    document.getElementById('account-trigger')?.focus();
+  }
+  function openLoginDialog() {
+    closeAccountMenu();
+    const a = account.status();
+    if (a.user || a.broken) { navigate('account'); return; }
+    authDialog.innerHTML = `<div class="account-dialog-head"><div><div class="eyebrow">MI CUENTA</div><h2 id="account-dialog-title">登录，继续你的西语学习</h2></div><button type="button" class="account-close" data-action="account-close" aria-label="关闭登录框">×</button></div><p>一个账号，一份自己的学习记录。换设备登录后，继续已同步的课程、错题和草稿。</p><p id="account-auth-status" data-account-status role="status">${esc(a.message)}</p><form id="account-form"><fieldset ${a.enabled ? '' : 'disabled'}><label for="account-username">账号</label><input id="account-username" name="username" autocomplete="username" minlength="4" maxlength="32" pattern="[A-Za-z0-9_]{4,32}" required autofocus><p class="tiny">4–32 位字母、数字或下划线，不区分大小写。</p><label for="account-password">密码</label><input id="account-password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><p class="tiny">10–128 个字符，请妥善保管。目前暂不支持忘记密码找回。</p><p id="account-auth-error" class="account-auth-error" role="alert"></p><div class="actions"><button type="submit" name="mode" value="login" class="btn">登录并继续学习</button><button type="submit" name="mode" value="register" class="btn secondary">注册新账号</button></div></fieldset><p class="tiny">注册会复制当前本机进度，原记录和 JSON 备份仍保留。</p></form>`;
+    authDialog.showModal();
+  }
   function accountPanel() {
     const a = account.status();
-    return `<section class="card account-panel"><h2>学习账号${a.user ? ' · ' + esc(a.user.username) : ''}</h2><p id="account-status" role="status">${esc(a.message)}</p><p class="tiny">每个账号单独保存词汇、课程、错题和表达草稿。同步成功后，换设备登录同一账号可继续学习；离线先保存在本机。</p>${a.user ? `<div class="actions">${btn('立即同步','account-sync','','secondary')}${btn('退出账号','account-logout','','ghost')}</div><details><summary>两台设备的进度不一致？</summary><p>先导出本机备份，再选择保留哪份。不会自动合并或提高成绩。</p><div class="actions">${btn('使用云端进度','account-cloud','','secondary')}${btn('使用本机进度','account-local','','secondary')}${btn('导出替换前记录','account-previous','','ghost')}</div></details>` : a.broken ? btn('退出账号','account-logout','','secondary') : a.enabled ? `<form id="account-form"><label for="account-username">账号（4–32 位字母、数字或下划线）</label><input id="account-username" name="username" autocomplete="username" minlength="4" maxlength="32" pattern="[A-Za-z0-9_]{4,32}" required><label for="account-password">密码（10–128 个字符，请妥善保管）</label><input id="account-password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><p class="tiny">注册会把当前本机进度复制到新账号，原记录与 JSON 备份仍保留。目前暂不支持忘记密码找回。</p><div class="actions"><button type="submit" name="mode" value="login" class="btn secondary">登录，继续学习</button><button type="submit" name="mode" value="register" class="btn">注册并保存当前进度</button></div></form>` : '<p class="tiny">账号开放前，请继续导出 JSON 备份。离线 HTML 可照常学习。</p>'}</section>`;
+    return `<section class="card account-panel"><h2>学习账号${a.user ? ' · ' + esc(a.user.username) : ''}</h2><p id="account-status" data-account-status role="status">${esc(a.message)}</p><div class="actions">${a.user ? btn('账号详情与学习状况','account-details','','secondary') : a.broken ? btn('退出登录','account-logout','','secondary') : btn('登录 / 注册','account-login','','secondary')}</div><p class="tiny">账号记录与本机记录分别保留。换设备前，请确认同步成功并保留备份。</p></section>`;
+  }
+  const scoreText = score => score === null ? '尚未练习' : `${score}%`;
+  function accountPage() {
+    const a = account.status();
+    const head = heading('MI CUENTA', '账号详情', '看清已经完成的内容，也知道下一步从哪里继续。');
+    if (storageFailed) return head + accountPanel() + `<div class="notice">原学习记录暂未读取，统计暂不可用，旧记录不会被覆盖。${btn('重新读取记录','reload-records','','secondary')}</div>`;
+    const p = L.profileSummary(state), completedPercent = percent(p.completed, C.units.length);
+    return head + `<section class="card account-identity"><div class="profile-avatar" aria-hidden="true">${esc(a.user ? a.user.username.slice(0, 1).toUpperCase() : '学')}</div><div><h2>${esc(a.user?.username || '本机学习者')}</h2><p>${a.user ? '固定用户编号' : '当前记录保存在这台设备上'}${a.user ? `<code class="account-user-id">${esc(a.user.id)}</code>` : ''}</p><p id="account-status" data-account-status role="status">${esc(a.message)}</p></div>${a.user ? btn('立即同步','account-sync','','secondary') : btn('登录 / 注册','account-login','','secondary')}</section><section class="card account-resume"><div class="eyebrow">继续学习</div><h2>${esc(p.resume.label)}</h2><p>已完成 ${p.completed} / ${C.units.length} 个课程单元，当前学习位置为 ${esc(p.unit.levelCode)}。关卡依据词汇确认和语法练习开放。</p>${meter(completedPercent)}<div class="actions">${btn('接着上次的位置学习 →','account-continue')}${btn('查看课程路线','roadmap','','secondary')}</div></section><section class="stats" aria-label="账号学习概览">${stat(p.learned,'有学习记录的词汇','book','词')}${stat(p.checkins,'累计真实打卡','calendar','天')}${stat(p.due,'到期词汇复习','refresh','词')}${stat(p.grammarPassed,'语法练习达标','layers','课')}</section><div class="two-column"><section class="card account-accuracy"><h2>正确率与练习表现</h2><dl><div><dt>词汇作答正确率</dt><dd>${scoreText(p.wordAccuracy)}</dd></div><div><dt>语法历史最佳均分</dt><dd>${scoreText(p.grammarBest)}</dd></div><div><dt>分级规则题历史最佳均分</dt><dd>${scoreText(p.drillBest)}</dd></div></dl><p class="tiny">词汇累计答对 ${p.wordCorrect} / ${p.wordAttempts} 次，包含订正与重练；历史最佳均分按已练课程或题包计算，不是全部作答正确率。尚未作答时不显示为 0%。</p><p class="tiny">这些记录帮助安排复习，不认定完整听说读写能力或 CEFR 等级。</p></section><section class="card"><h2>当前学习状况</h2><p>词汇或语法有实际记录 ${p.learningDays} 天 · 连续打卡 ${p.streak} 天</p><p>待订正：词汇 ${p.wordMistakes} 个 · 语法 ${p.grammarMistakes} 题 · 分级练习 ${p.practice.wrong} 项</p><p>已保存表达：课内 / 词库 ${p.expressionDrafts} 份 · 分级 ${p.practice.drafts} 份</p><p>四步入门达标 ${p.foundationPassed} / 4 · 前四周任务完整记录 ${p.practice.monthCompleted} / 28 天</p><p>${p.year.started ? `计划开始于 ${esc(p.year.startDate)}，按日历已进行 ${p.year.day} 天；这不是已学天数或等级。` : '还没有设置年度计划起点，可以按实际时间开始。'}</p><div class="actions">${btn('集中订正分级错项','drill-review','','small secondary')}${btn('查看年度计划','year','','small secondary')}</div></section></div><section class="account-levels" aria-label="各级课程完成情况"><div class="section-head"><h2>A1 → B2 · 课程进度</h2></div>${p.levels.map(level => `<details class="card" ${level.level === p.unit.levelCode ? 'open' : ''}><summary><strong>${level.level}</strong> · 完成 ${level.completed} / ${level.total} 关 · 已开放 ${level.available} 关</summary><p class="tiny">本级已练语法历史最佳均分：${scoreText(level.bestScore)}</p>${level.units.map((unit, index) => `<div class="account-unit"><div><strong>第 ${index + 1} 关 · ${esc(unit.title)}</strong><p class="tiny">${unit.complete ? '✓ 已完成' : unit.unlocked ? '可以继续学习' : '等待前一关达标'} · 已确认词汇 ${unit.ready} / ${unit.total} · 语法最佳 ${scoreText(unit.bestScore)}${unit.attempts ? ` · 完整练习 ${unit.attempts} 次` : ''}</p></div>${btn(unit.complete ? '回顾' : '继续','lesson',`data-id="${unit.lessonId}" ${unit.unlocked ? '' : 'disabled'}`,'small secondary')}</div>`).join('')}</details>`).join('')}</section>${practiceProgressPanel()}<section class="card"><h2>保留备份，安心继续</h2><p class="tiny">同步成功后可在另一台设备恢复同一账号的进度。离线先保存本机；多设备同时修改时，两份记录先保留，再由你选择。</p><div class="actions">${btn('导出备份','export','','small secondary')}${btn('导入备份','import','','small ghost')}</div>${a.user ? `<details class="account-conflict"><summary>两台设备的进度不一致？</summary><p>先导出本机备份，再选择使用哪份进度。</p><div class="actions">${btn('使用云端进度','account-cloud','','secondary')}${btn('使用本机进度','account-local','','secondary')}${btn('导出替换前记录','account-previous','','ghost')}</div></details>` : ''}</section>`;
   }
   function resetAccountView() { state = readStored(); storageFailed = false; session = quiz = wordQuiz = foundationQuiz = nounQuiz = drillQuiz = drillEditor = drillReview = expressionEditor = null; render(); }
+  function hasUnsavedWork() {
+    return !!(drillEditor?.dirty || (expressionEditor && expressionEditor.text !== (state.expressions[expressionEditor.id]?.text || '')) || (quiz && !quiz.result && quiz.answers.length) || (drillQuiz && !drillQuiz.result && drillQuiz.answers.length) || (nounQuiz && !nounQuiz.result && nounQuiz.answers.length));
+  }
+  function canSwitchAccount() { return !hasUnsavedWork() || window.confirm('当前有未保存的练习或草稿。切换账号前建议先保存，仍要继续吗？'); }
+  function continueLearning() {
+    const target = L.learningDestination(state);
+    if (target.kind === 'month') monthDay = target.day;
+    if (target.kind === 'year') yearWeek = target.week;
+    if (target.kind === 'study') startSession();
+    navigate(target.route);
+  }
   async function accountAction(action) {
     try {
-      if (action === 'account-logout') { clearTimeout(syncTimer); const exiting = account.logout(); resetAccountView(); await exiting; return; }
+      if (action === 'account-toggle') {
+        const a = account.status(); if (!a.user && !a.broken) return openLoginDialog();
+        const menu = document.getElementById('account-menu'), trigger = document.getElementById('account-trigger');
+        if (menu.hidden) { menu.hidden = false; trigger.setAttribute('aria-expanded', 'true'); menu.querySelector('[role="menuitem"]')?.focus(); }
+        else closeAccountMenu(true);
+        return;
+      }
+      if (action === 'account-close') return closeLoginDialog();
+      if (action === 'account-login') return openLoginDialog();
+      if (action === 'account-details') { closeAccountMenu(); navigate('account'); return; }
+      if (action === 'account-continue') return continueLearning();
+      if (action === 'account-logout') {
+        if (!canSwitchAccount()) return;
+        closeAccountMenu(); clearTimeout(syncTimer);
+        const exiting = account.logout(); resetAccountView(); navigate('today'); await exiting;
+        notify('已退出登录，账号记录仍保留；现在显示原来的本机进度。'); return;
+      }
       if (action === 'account-previous') { const old = account.previous(); if (!old) return notify('没有替换前记录。'); downloadBackup(old, 'before-replace'); return; }
       const choice = action === 'account-cloud' ? 'cloud' : action === 'account-local' ? 'local' : undefined;
       if (choice && !window.confirm(choice === 'cloud' ? '使用云端进度替换本机显示？建议先导出备份，替换前的记录也会在本机保留。' : '使用本机进度替换云端进度？请先确认已导出需要保留的备份。')) return;
       const result = await account.sync(choice);
       if (result?.downloaded) resetAccountView();
       render(); notify(account.status().message);
-    } catch (error) { render(); notify(account.status().message || error.message); }
+    } catch (error) { notify(error.message); }
   }
+  function rememberLearningPosition() {
+    if (!account.status().user || storageFailed) return;
+    const page = route(); let position;
+    for (const kind of ['lesson', 'drill', 'expression', 'foundation', 'noun']) if (page.startsWith(kind + '/')) position = { kind, id: page.slice(kind.length + 1) };
+    if (page === 'study') position = { kind: 'study' };
+    if (page === 'first-month') position = { kind: 'month', day: monthDay || L.firstMonthSummary(state, L.dateKey()).selectedDay };
+    if (page === 'year') position = { kind: 'year', week: yearWeek || L.yearSummary(state, L.dateKey()).weekNumber };
+    if (!position || JSON.stringify(state.resume) === JSON.stringify(position)) return;
+    try {
+      const draft = readStored();
+      if (!L.setLearningPosition(draft, position)) return;
+      account.write(draft); state = draft; queueSync();
+    } catch { notify('学习位置暂未保存，已有学习记录仍保留。'); }
+  }
+  authDialog.addEventListener('click', event => {
+    const button = event.target.closest('[data-action]');
+    if (button && !button.disabled) accountAction(button.dataset.action);
+    if (event.target === authDialog) { const bounds = authDialog.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) closeLoginDialog(); }
+  });
+  authDialog.addEventListener('cancel', event => { event.preventDefault(); closeLoginDialog(); });
+  authDialog.addEventListener('submit', async event => {
+    if (event.target.id !== 'account-form') return;
+    event.preventDefault(); if (authBusy || !canSwitchAccount()) return;
+    const form = event.target, username = form.elements.username.value, password = form.elements.password.value;
+    const mode = event.submitter?.value || 'login'; form.elements.password.value = '';
+    authBusy = true; form.querySelector('fieldset').disabled = true; authDialog.querySelector('.account-close').disabled = true;
+    const errorText = authDialog.querySelector('#account-auth-error'); errorText.textContent = '';
+    try {
+      await account.authenticate(mode, username, password, mode === 'register' ? readStored() : undefined);
+      resetAccountView();
+      let warning = '';
+      try { await account.sync(); state = readStored(); } catch { warning = account.status().message; }
+      authBusy = false; closeLoginDialog();
+      if (warning) navigate('account'); else continueLearning();
+      notify(warning || '已读取这个账号的学习记录，接着上次的位置继续。');
+    } catch (error) { errorText.textContent = error.message; }
+    finally { authBusy = false; if (authDialog.open) { form.querySelector('fieldset').disabled = !account.status().enabled; authDialog.querySelector('.account-close').disabled = false; } }
+  });
   function progressPage() {
     const s=L.summary(state); const errors=L.mistakes(state); const wrong=L.wrongWords(state);
     const calendar=Array.from({length:14},(_,i)=> { const key=L.addDays(s.today,i-13); return `<div class="calendar-day ${L.isCheckedIn(state.days[key])?'done':''} ${key===s.today?'today':''}" aria-label="${key} ${L.isCheckedIn(state.days[key])?'已打卡':'未打卡'}">${key.slice(5)}</div>`; }).join('');
@@ -331,7 +427,7 @@
     else if(page.startsWith('foundation/')) content=foundationPage(page.slice(11));
     else if(page.startsWith('expression/')) content=expressionPage(page.slice(11));
     else if(page.startsWith('lesson/')) content=lessonPage(page.slice(7));
-    else content=({today:todayPage,words:wordsPage,bank:bankPage,'first-month':firstMonthPage,drills:drillsPage,'drill-review':drillReviewPage,nouns:nounsPage,foundations:foundationsPage,year:yearPage,grammar:grammarPage,library:libraryPage,progress:progressPage}[page] || todayPage)();
+    else content=({today:todayPage,words:wordsPage,bank:bankPage,'first-month':firstMonthPage,drills:drillsPage,'drill-review':drillReviewPage,nouns:nounsPage,foundations:foundationsPage,year:yearPage,grammar:grammarPage,library:libraryPage,progress:progressPage,account:accountPage}[page] || todayPage)();
     root.innerHTML=shell(content,page);
   }
   function openLesson(id) {
@@ -374,20 +470,6 @@
       }catch(error){notify(`导入失败：${error.message}`);}
     }; input.click();
   }
-  root.addEventListener('submit', async event => {
-    if (event.target.id !== 'account-form') return;
-    event.preventDefault();
-    const form = event.target, username = form.elements.username.value, password = form.elements.password.value;
-    const mode = event.submitter?.value || 'login';
-    form.elements.password.value = '';
-    for (const button of form.querySelectorAll('button')) button.disabled = true;
-    try {
-      const progress = mode === 'register' ? readStored() : undefined;
-      await account.authenticate(mode, username, password, progress); resetAccountView();
-      await account.sync(); render();
-    } catch (error) { notify(error.message); }
-    finally { for (const button of form.querySelectorAll('button')) button.disabled = false; }
-  });
   root.addEventListener('click',event=> {
     const element=event.target.closest('[data-action]'); if(!element||element.disabled)return;
     const action=element.dataset.action;
@@ -555,12 +637,23 @@
  if(event.target.id==='noun-answer'&&nounQuiz&&!nounQuiz.feedback)nounQuiz.input=event.target.value; if(event.target.id==='expression-text'&&expressionEditor){expressionEditor.text=event.target.value;expressionEditor.result=null;expressionEditor.showModel=false;const feedback=document.querySelector('.expression-feedback');if(feedback)feedback.remove();document.getElementById('expression-status').textContent='修改尚未保存。';} if(event.target.id==='spelling-answer' && wordQuiz) wordQuiz.input=event.target.value; if(event.target.id==='bank-search'){window.HolaAudio.stop();const position=event.target.selectionStart;bankQuery=event.target.value;bankPageIndex=0;render();const input=document.getElementById('bank-search');input.focus();input.setSelectionRange(position,position);} if(event.target.id==='word-search'){window.HolaAudio.stop();const position=event.target.selectionStart;query=event.target.value;render();const input=document.getElementById('word-search');input.focus();input.setSelectionRange(position,position);} });
   root.addEventListener('keydown',event=>{if(event.target.id==='review-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitDrillReview(drillReview&&drillReview.input);}if(event.target.id==='drill-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitDrillAnswer(drillQuiz&&drillQuiz.input);}if(event.target.id==='noun-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitNounAnswer(nounQuiz&&nounQuiz.input);}if(event.target.id==='spelling-answer'&&event.key==='Enter'&&!event.isComposing){event.preventDefault();submitWordAnswer(wordQuiz.input);}});
   root.addEventListener('change',event=> {
-    if(event.target.id==='month-day'){monthDay=Number(event.target.value);render();}
+    if(event.target.id==='month-day'){monthDay=Number(event.target.value);render();rememberLearningPosition();}
     if(event.target.dataset.monthTask){const checked=event.target.checked;const s=L.firstMonthSummary(state,L.dateKey(),monthDay);if(!s.canCheck||!commit(d=>L.setMonthTask(d,monthDay,event.target.dataset.monthTask,checked,L.dateKey())))event.target.checked=!checked;else render();}
 
     if(event.target.dataset.drillCheck!==undefined&&drillEditor){if(drillEditor.dirty)return;const checks=new Set(drillEditor.checks),i=Number(event.target.dataset.drillCheck);if(event.target.checked)checks.add(i);else checks.delete(i);const d=commit(s=>L.setDrillChecks(s,drillEditor.id,[...checks]));if(d){drillEditor.checks=d.checks;render();}else event.target.checked=!event.target.checked;}
- if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){window.HolaAudio.stop();levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){window.HolaAudio.stop();unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
-  window.addEventListener('hashchange',()=>{if(route()!=='drill-review')drillReview=null;if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();window.scrollTo(0,0);});
+ if(event.target.id==='year-week'){yearWeek=Number(event.target.value);render();rememberLearningPosition();} if(event.target.dataset.skill){const checked=event.target.checked;if(!commit(s=>L.setWeekSkill(s,yearWeek,event.target.dataset.skill,checked,L.dateKey())))event.target.checked=!checked;else render();} if(event.target.id==='level-filter'){window.HolaAudio.stop();levelFilter=event.target.value;unitFilter='';render();} if(event.target.id==='unit-filter'){window.HolaAudio.stop();unitFilter=event.target.value;render();} if(event.target.id==='source-filter'){sourceFilter=event.target.value;render();} });
+  document.addEventListener('pointerdown', event => { if (!event.target.closest('.account-avatar-wrap')) closeAccountMenu(); });
+  document.addEventListener('focusin', event => { if (!event.target.closest('.account-avatar-wrap')) closeAccountMenu(); });
+  document.addEventListener('keydown', event => {
+    const menu = document.getElementById('account-menu');
+    if (!menu || menu.hidden) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeAccountMenu(true); }
+    if (['ArrowDown','ArrowUp','Home','End'].includes(event.key)) {
+      event.preventDefault(); const items = [...menu.querySelectorAll('[role="menuitem"]')], index = items.indexOf(document.activeElement);
+      items[event.key === 'Home' ? 0 : event.key === 'End' ? items.length-1 : (index + (event.key === 'ArrowUp' ? -1 : 1) + items.length) % items.length].focus();
+    }
+  });
+  window.addEventListener('hashchange',()=>{if(route()!=='drill-review')drillReview=null;if(!route().startsWith('drill/')){drillQuiz=null;drillEditor=null;}if(!route().startsWith('noun/'))nounQuiz=null;if(!route().startsWith('foundation/'))foundationQuiz=null;if(!route().startsWith('expression/'))expressionEditor=null;if(route()!=='study')session=null;if(route()!=='word-quiz')wordQuiz=null;if(!route().startsWith('lesson/'))quiz=null;render();rememberLearningPosition();window.scrollTo(0,0);});
   window.addEventListener('storage',event=>{try{if(event.key===window.HolaAccount.SESSION){location.reload();return;}if(event.key===account.key()){state=event.key===KEY?readStored(event.newValue):readStored();storageFailed=false;render();}}catch{storageFailed=true;render();notify('另一个窗口的记录未能读取，旧记录不会被覆盖。');}});
   window.addEventListener('online', () => account.sync().then(result => { if (result?.downloaded) resetAccountView(); }).catch(() => {}));
   render();
