@@ -1,0 +1,26 @@
+# Paid web service and persistent disk. Review Render's price before applying.
+services:
+  - type: web
+    name: hola-spanish-accounts
+    runtime: node
+    repo: https://github.com/Leclerccc777/spanish
+    branch: main
+    region: singapore
+    plan: starter
+    numInstances: 1
+    buildCommand: npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+    startCommand: npm run start:accounts
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: HOST
+        value: 0.0.0.0
+      - key: HOLA_ACCOUNT_DB
+        value: /var/data/hola/accounts.sqlite
+      - key: HOLA_ALLOWED_ORIGINS
+        value: https://leclerccc777.github.io
+    disk:
+      name: hola-progress
+      mountPath: /var/data
+      sizeGB: 1

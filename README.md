@@ -24,7 +24,7 @@ main 每次推送自动构建和发布，不需要安装前端依赖或配置密
 
 已实现账号密码注册、登录、每人独立学习数据和自动同步；注册复制旧进度，退出恢复原本机记录，断网先在本机保存，多设备冲突保留两份后再选择。账号覆盖词汇、课程、错题、表达草稿与学习计划，继续使用原有 JSON 备份。右上角头像可打开登录 / 注册弹窗，登录后可查看账号详情或退出；详情展示固定编号、各级关卡、词汇正确率、历史最佳均分和学习状况，登录会回到已同步的学习位置。
 
-**目前尚未部署线上账号服务**，默认 Pages / HTML 继续本地学习。开发者可用 Node.js 24 运行 `npm run dev:accounts` 实测；正式使用需部署持久化数据库和 HTTPS 服务，并配置网页地址与微信合法请求域名。账号不设到期日，长期保存仍依赖服务维护和备份；目前不支持忘记密码找回。详见 [账号与部署说明](docs/ACCOUNTS.md)。
+**目前尚未部署线上账号服务**，默认 Pages / HTML 继续本地学习。开发者可用 Node.js 24 运行 `npm run dev:accounts` 实测；正式使用需部署持久化数据库和 HTTPS 服务，并配置网页地址与微信合法请求域名。账号不设到期日，长期保存仍依赖服务维护和备份；目前不支持忘记密码找回。详见 [账号与部署说明](docs/ACCOUNTS.md)。仓库已提供 [Render 部署配置与操作步骤](docs/DEPLOY_RENDER.md)，需要在 Render 账号中确认并创建实际服务后才能开通。
 
 界面预览：[头像菜单](docs/screenshots/account-menu-desktop.png) · [登录弹窗](docs/screenshots/account-login-desktop.png) · [账号详情](docs/screenshots/account-details-desktop.png)。截图使用临时本地示例账号。
 

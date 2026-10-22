@@ -261,3 +261,13 @@
 新增实际界面截图：[头像菜单](screenshots/account-menu-desktop.png)、[登录弹窗](screenshots/account-login-desktop.png)、[桌面账号详情](screenshots/account-details-desktop.png)、[手机账号详情](screenshots/account-details-mobile.png)。截图使用临时本地账号 hola_demo，进度由引擎夹具构造；服务和账号均在截图后移除，未创建生产账号，不能作为生产服务已上线的证据。
 
 仍未部署生产账号 API、绑定域名或配置微信合法请求域名；未做微信官方编译或真机测试。正式网站的跨设备恢复依赖实际部署账号服务并配置公开 API 地址，部署步骤见 [账号说明](ACCOUNTS.md)。离线 HTML 保持本机学习与备份，默认不开放联网账号。
+
+## 2026-10-22 Node.js 云托管部署准备
+
+根据用户的部署请求，同步 main 后基于 f9ad0df 检查可用托管连接。现有代码使用 Node.js 内置 SQLite 与文件持久化；已连接的 Sites 为 Workers / D1 运行时，不直接运行这份服务。发现 Render 集成可用但尚未添加或授权，云环境也未配置 Render / Railway / 云账号凭据；没有创建外部服务或虚构 API 地址。
+
+新增 `render.yaml`，声明单实例 Node.js 24 服务、1 GB 持久化磁盘、`HOST=0.0.0.0`、平台 PORT、SQLite 持久化路径、Pages 精确来源与 `/healthz` 检查。该 Blueprint 使用付费实例及磁盘，资源费用需由平台确认。`server/start.js` 保留默认 127.0.0.1 的反向代理方式，另支持云托管公开监听；关闭服务器后关闭 SQLite，健康响应不暴露账号或数据库内容。
+
+验证：`npm test` **112 / 112 通过**，`npm run check` 检查 **126 个 JS / JSON 文件和 29 项页面注册**通过。新增真实 HTTP 测试确认 0.0.0.0 监听、GET / HEAD 健康检查、GitHub Pages 来源的 CORS 与预检、账号注册、重启后相同编号 / 草稿 / 设置恢复。另启动实际生产入口进程，确认 HOST / PORT / HOLA_ACCOUNT_DB 环境变量生效，SIGTERM 后正常退出。Render YAML 已用解析器读取并核对单实例、磁盘路径与来源；尚未经 Render 平台创建或平台部署验证。
+
+本轮没有改学习页面、课程、进度 schema、语音或下载 HTML；旧成绩、草稿与备份格式保持。实际部署仍阻塞于 Render 账号授权。不得将本地启动、代码推送或 Blueprint 准备完成称为已上线，也不在真实后台成功前设置前端账号地址。完成 Render 连接及资源确认后，应部署、验证真实 HTTPS /healthz 与持久化，接入 Pages，再做线上跨设备验收；操作步骤见 [Render 部署说明](DEPLOY_RENDER.md)。

@@ -198,3 +198,7 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 新增可选 `resume: {kind, id? , day? , week?}` 沿用 version 1：restore 只保留已知课程 / 题包 / 表达 / 名词 / 入门 ID 和合法范围的计划日周；不保留 route 或任意 URL。服务端与两端 restore 均复用同一模块。登录状态下进入开放内容时保存位置，已知成绩不会被位置替换；普通访客预览不新增存储写入。账户登录后 learningDestination 重新核对真实前置与日期，已完成课程转向当前未完成关；旧备份没有 resume 也能从成绩继续。词卡继续由间隔复习队列安排，练习中途尚未保存的题目答案不属于跨设备恢复范围。
 
 构建模块表需包含 lib/profile；更改后重建 Pages 和单文件，更新头像、弹窗及详情的桌面 / 手机验证。不要把尚未部署的账号 API 描述为线上已开通。
+
+## 云托管入口（2026-10-22）
+
+`server/start.js` 导出 startAccountServer 供真实 HTTP 测试，也可由 npm run start:accounts 启动。默认 HOST=127.0.0.1 保留自建服务器反向代理方案；云托管配置 HOST=0.0.0.0、使用平台 PORT，并将 HOLA_ACCOUNT_DB 指向持久化挂载路径。`/healthz` 只检查 SQLite 连接并返回 ready / unavailable，HEAD 不返回内容；服务器关闭后释放数据库连接。Render 配置和接入步骤见 DEPLOY_RENDER.md，不在获得真实服务 URL 前启用前端账号地址。
