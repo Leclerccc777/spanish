@@ -7,3 +7,17 @@ test-results/
 .audio-cache/
 
 .account-data/
+
+android/.gradle/
+android/**/build/
+android/local.properties
+android/app/src/main/assets/
+*.keystore
+*.jks
+*.apk
+
+# Explicit APK deliveries live only in the dedicated android-apk branch.
+!releases/android/*.apk
+
+releases/**/.*.apk.*
+releases/.hola-spanish.html.*

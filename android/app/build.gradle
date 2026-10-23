@@ -1,0 +1,33 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.leclerccc777.hola'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.leclerccc777.hola'
+        minSdk 26
+        targetSdk 35
+        versionCode 2
+        versionName '0.2.1'
+    }
+    // Supply a private release keystore outside the repository when distributing publicly.
+    if (System.getenv('HOLA_KEYSTORE')) {
+        signingConfigs {
+            release {
+                storeFile file(System.getenv('HOLA_KEYSTORE'))
+                storePassword System.getenv('HOLA_STORE_PASSWORD')
+                keyAlias System.getenv('HOLA_KEY_ALIAS')
+                keyPassword System.getenv('HOLA_KEY_PASSWORD')
+            }
+        }
+        buildTypes { release { signingConfig signingConfigs.release } }
+    }
+}
+
+dependencies { implementation 'androidx.webkit:webkit:1.12.1' }
+
+tasks.register('prepareWeb', Exec) {
+    workingDir '../..'
+    commandLine 'node', 'scripts/package-android.js'
+}
+tasks.named('preBuild').configure { dependsOn 'prepareWeb' }

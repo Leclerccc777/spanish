@@ -202,3 +202,13 @@ Node 测试中用模拟 `wx` 对象验证页面控制逻辑，不等同于微信
 ## 云托管入口（2026-10-22）
 
 `server/start.js` 导出 startAccountServer 供真实 HTTP 测试，也可由 npm run start:accounts 启动。默认 HOST=127.0.0.1 保留自建服务器反向代理方案；云托管配置 HOST=0.0.0.0、使用平台 PORT，并将 HOLA_ACCOUNT_DB 指向持久化挂载路径。`/healthz` 只检查 SQLite 连接并返回 ready / unavailable，HEAD 不返回内容；服务器关闭后释放数据库连接。Render 配置和接入步骤见 DEPLOY_RENDER.md，不在获得真实服务 URL 前启用前端账号地址。
+
+## Android 离线外壳（2026-10-23）
+
+实现与构建见 [ANDROID.md](ANDROID.md)。`android/` 使用 JDK 17 / AGP 8.9.2 / Gradle 8.11.1 / SDK 35，最小 API 26。`preBuild` 自动生成 assets，保留 `hola-learning-v1` 和 version 1；所有课程修改仍在共享数据和 web 目录完成，不手改内置 HTML。
+
+WebView 固定 origin 和路径，使用 WebViewAssetLoader，仅开放内置首页并施加 CSP；关闭任意文件访问、远程连接及 iframe。第一版无 INTERNET 权限，打包脚本强制清空账号 API。JSON 导出走系统 ACTION_CREATE_DOCUMENT，导入用 ACTION_OPEN_DOCUMENT 和已有前端校验；外部 HTTPS 链接进入系统浏览器。`HolaNativeBack` 返回 true 表示弹窗 / 未保存草稿已拦截，false 才由原生回退历史。原生后台生命周期停止音频，不清除 localStorage。
+
+签名密钥、密码、assets、local.properties 和构建目录不进入 Git。用户确认发布的 APK 单独保存在 `android-apk` 分支的 `releases/android/`，随附 SHA-256 和安装说明。发行包要用相同私钥并递增 versionCode；不要重建密钥后要求用户卸载升级。浏览器桥接自动化见 `tests/e2e/android.spec.js`；设备端文件选择、系统返回和真实音频仍需真机检查。
+
+安卓外链判断需比较目标 URL 的 origin 与 location.origin；单看 HTTPS 会误判所有内部锚点。0.2.1 已补充底部五个入口与内部课程链接回归用例。

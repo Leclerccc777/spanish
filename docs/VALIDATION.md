@@ -271,3 +271,26 @@
 验证：`npm test` **112 / 112 通过**，`npm run check` 检查 **126 个 JS / JSON 文件和 29 项页面注册**通过。新增真实 HTTP 测试确认 0.0.0.0 监听、GET / HEAD 健康检查、GitHub Pages 来源的 CORS 与预检、账号注册、重启后相同编号 / 草稿 / 设置恢复。另启动实际生产入口进程，确认 HOST / PORT / HOLA_ACCOUNT_DB 环境变量生效，SIGTERM 后正常退出。Render YAML 已用解析器读取并核对单实例、磁盘路径与来源；尚未经 Render 平台创建或平台部署验证。
 
 本轮没有改学习页面、课程、进度 schema、语音或下载 HTML；旧成绩、草稿与备份格式保持。实际部署仍阻塞于 Render 账号授权。不得将本地启动、代码推送或 Blueprint 准备完成称为已上线，也不在真实后台成功前设置前端账号地址。完成 Render 连接及资源确认后，应部署、验证真实 HTTPS /healthz 与持久化，接入 Pages，再做线上跨设备验收；操作步骤见 [Render 部署说明](DEPLOY_RENDER.md)。
+
+## 2026-10-23 安卓 APK 首包
+
+基于 main 的 `749d466` 新增 Android 离线外壳，包名 `com.leclerccc777.hola`、versionName `0.2.0`、versionCode `1`，最低 API 26，目标 / 编译 API 35。首包使用独立 RSA 3072 位私钥签名，签名密钥单独私有备份，未进入 Git。
+
+- `npm test`：**112 / 112 通过**；`npm run check`：127 个 JS / JSON 文件、29 个小程序页面注册通过；HTML 和 Android assets 构建通过。
+- JDK 17、Gradle 8.11.1、AGP 8.9.2 下 `assembleDebug`、`assembleRelease` 与 `lintRelease` 成功。Lint 为 **0 错误 / 3 提醒**：API 33 返回手势属性在旧系统忽略、内置学习页面需启用 JavaScript、Android 12 数据提取配置建议。未将这些提醒声称为真机验证。
+- `apksigner verify --verbose --print-certs` 通过（v2 签名），`zipalign -c -P 16 4` 通过。Manifest 核对应用名、包名、版本和最低系统；APK 无 INTERNET 权限。签名证书 SHA-256：`8ea490450208b44f1747c7a087b51101854572ebf7438efc6b3ee15f481d3224`。
+- 交付 APK **16,877,699 字节**，SHA-256：`562a5eabed1403f793ef9f3fc3b85fcc0de782fd4c406e53877725c047005bb2`。ZIP 检查确认内置首页与当次生成 assets 字节一致，包含 dex / manifest，账号 API 为空。
+- 对实际打入 APK 的 HTML 运行 jsdom 26 DOM 冒烟：页面启动、6500 词 / 6788 段音频清单、桥接 JSON 导出、导入恢复旧进度、未保存草稿取消返回、保存草稿、外链桥接和登录弹窗返回关闭均通过。接口和文件选择为模拟；没有据此声称原生文件保存、渲染或音频实播通过。
+- 已补充桌面 / 手机浏览器的安卓桥接用例（`tests/e2e/android.spec.js`）。本轮完整 Playwright 回归**未完成**：默认浏览器下载不可用；替代 Chromium 131 启动被当前环境的 Unix socket 权限限制阻止，未进入页面断言。不把启动失败归为产品断言失败，也不计为测试通过。
+
+**尚未验证**：安卓真机安装、系统文件选择 / 保存取消、实际播放、输入法、返回手势 / 键盘、横竖屏与异形屏、强杀重启、同签名覆盖升级。首包为可安装的离线体验交付，不代表已通过商店审核或所有手机兼容性验收。微信官方编译与真机状态保持原验证边界。
+
+## 2026-10-23 Android 0.2.1 导航修复
+
+修复内部锚点被解析为 HTTPS 地址后误调用原生 openReference；现在仅跨 origin 的 HTTPS 链接进入浏览器。新增 Playwright 五个导航与课程入口用例。
+
+共享测试 112 / 112 通过，静态检查通过。对实际打包 HTML 运行 jsdom 模拟点击，五个导航（含子元素点击）、内部课程入口均更新应用内 hash，原生外链调用次数不增加；真正外部资料链接仍进入桥接。原有草稿、JSON 备份、返回保护和登录弹窗检查通过。此为 DOM 模拟，尚未以设备执行新增场景。
+
+本次基于已编译的 0.2.0 更新 HTML 与 manifest 版本，未重新编译原生代码；ZIP 逐项对比确认只有 AndroidManifest.xml 和 assets/index.html 内容变化。zipalign 和 apksigner 验证通过，v2 / v3 签名证书 SHA-256 与旧版相同：8ea490450208b44f1747c7a087b51101854572ebf7438efc6b3ee15f481d3224。aapt 确认包名 com.leclerccc777.hola、versionCode 2、versionName 0.2.1、最低 API 26。
+
+APK 16,887,106 字节，SHA-256：693e567bdee75999dd9974c0e6f50469643392ba08b7f571db59dbf8131c775e。尚未完成手机安装与覆盖升级实测。

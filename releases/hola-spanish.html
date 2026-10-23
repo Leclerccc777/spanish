@@ -10890,6 +10890,19 @@ window.HolaAudioClips={"hola":"data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAA
     return !!(drillEditor?.dirty || (expressionEditor && expressionEditor.text !== (state.expressions[expressionEditor.id]?.text || '')) || (quiz && !quiz.result && quiz.answers.length) || (drillQuiz && !drillQuiz.result && drillQuiz.answers.length) || (nounQuiz && !nounQuiz.result && nounQuiz.answers.length));
   }
   function canSwitchAccount() { return !hasUnsavedWork() || window.confirm('当前有未保存的练习或草稿。切换账号前建议先保存，仍要继续吗？'); }
+  // Android handles history only after the current editor/dialog has had a chance to stay open.
+  window.HolaNativeBack = () => {
+    if (authDialog.open) { closeLoginDialog(); return true; }
+    const menu = document.getElementById('account-menu');
+    if (menu && !menu.hidden) { closeAccountMenu(true); return true; }
+    return hasUnsavedWork() && !window.confirm('当前有未保存的练习或草稿。先取消返回并保存，或继续返回放弃本次修改。继续返回？');
+  };
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href]');
+    if (window.HolaAndroid?.openReference && link?.href.startsWith('https://') && new URL(link.href).origin !== location.origin) {
+      event.preventDefault(); window.HolaAndroid.openReference(link.href);
+    }
+  });
   function continueLearning() {
     const target = L.learningDestination(state);
     if (target.kind === 'month') monthDay = target.day;
@@ -11051,6 +11064,12 @@ window.HolaAudioClips={"hola":"data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAA
     downloadBackup(state);
   }
   function downloadBackup(value, suffix = '') {
+    const filename = `hola-${L.dateKey()}${suffix ? '-' + suffix : ''}.json`;
+    if (window.HolaAndroid?.saveBackup) {
+      try { window.HolaAndroid.saveBackup(JSON.stringify(value, null, 2), filename); }
+      catch { notify('备份未能导出，请重试。'); }
+      return;
+    }
     const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));
     const link=document.createElement('a'); link.href=url; link.download=`hola-${L.dateKey()}${suffix ? "-" + suffix : ""}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -11063,7 +11082,7 @@ window.HolaAudioClips={"hola":"data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAA
         const raw=JSON.parse(await input.files[0].text());
         if(raw.version!==1||!raw.reviews||!raw.days||!raw.lessons)throw new Error('不是受支持的 Hola 备份');
         const imported=L.restore(raw);
-        if(!window.confirm(`导入 ${Object.keys(imported.reviews).length} 个词汇的记录将替换当前浏览器进度。建议先导出当前备份。继续导入？`))return;
+        if(!window.confirm(`导入 ${Object.keys(imported.reviews).length} 个词汇的记录将替换当前设备的进度。建议先导出当前备份。继续导入？`))return;
         account.write(imported, true); queueSync(); state=imported; storageFailed=false; session=null; quiz=null; render(); notify('学习记录已导入。');
       }catch(error){notify(`导入失败：${error.message}`);}
     }; input.click();
